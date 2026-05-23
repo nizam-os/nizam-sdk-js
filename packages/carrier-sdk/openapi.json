@@ -1,0 +1,1664 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Nizam API \u2014 Carrier",
+        "description": "The **Nizam Carrier Portal API** is the surface for Tier-2 carriers \u2014 independent fleet operators that accept delegated lanes from a primary Nizam Organization. Use this API to view delegated work, accept or decline lanes, see settlement, and read the fleet you operate against.\n\nThis is one of the [audience-scoped Nizam APIs](https://docs.nizam.ai/api/overview). It shares the wire-level conventions (RFC 9457 errors, cursor pagination, expand grammar) with every other Nizam audience \u2014 see the [API conventions reference](https://docs.nizam.ai/api/conventions) for the canonical description. This page covers what's specific to the Carrier Portal.\n\n## Audience\n\nThis API ships in the **Carrier SDK** (`@nizam-os/carrier-sdk` on npm). Consumers are administrators of independent carriers who hold a delegation relationship with a Nizam Organization (modeled as `organization_partnerships`). The carrier organization itself runs its own Nizam tenant; the Carrier Portal is the cross-tenant surface they use to interact with primary tenants.\n\nThe drivers and runtime-side software employed by the carrier authenticate as **operators** through the [Operator Runtime SDK](https://docs.nizam.ai/operator), not through this portal.\n\n## Authentication\n\nIssued by the **`nizam-carrier-portal`** Keycloak client. Authorization Code + PKCE flow.\n\nEvery JWT carries:\n\n| Claim | Meaning |\n|---|---|\n| `azp` | `nizam-carrier-portal` \u2014 identifies this Portal at the server. |\n| `sub` | The carrier admin's UUID. |\n| `organization` | The carrier's own Organization id. RLS narrows on this. |\n| `resource_access.nizam-carrier-portal.roles` | Always contains `admin`. |\n\n## Roles\n\nSingle role: `admin`. Worker-level access (driver portal, dispatch board) does not exist on this SDK \u2014 those use the Operator Runtime SDK. This separation is intentional: drivers may move between carriers; the operator identity is portable, the carrier admin identity is not.\n\n## Surface\n\n- `/v1/me` and `/v1/invites/accept` \u2014 identity and onboarding.\n- `/v1/lookups/*` \u2014 reference data.\n- Carrier-specific surface (delegated lanes, partnership management, settlement) lands as the multi-tenant delivery features come online.\n\n## Cross-tenant scoping\n\nCarrier operations span tenants by design \u2014 a carrier authenticated through `nizam-carrier-portal` reads work delegated to them BY the primary Organization. RLS handles this via the `organization_partnerships` table: the carrier sees only the lanes a primary tenant has shared with them, never the primary's full fleet or operations.\n\n## Status\n\nThis SDK is narrow today. The carrier surface grows as multi-tenant delegation features ship.\n",
+        "contact": {
+            "name": "Nizam Support",
+            "url": "https://nizam.ai",
+            "email": "api@nizam.ai"
+        },
+        "version": "0.0.1-SNAPSHOT"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Local development"
+        },
+        {
+            "url": "https://api.staging.nizam.ai",
+            "description": "Staging"
+        },
+        {
+            "url": "https://api.nizam.ai",
+            "description": "Production"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": [
+                
+            ]
+        }
+    ],
+    "tags": [
+        {
+            "name": "Assets",
+            "description": "Universal physical-hardware master \u2014 vehicles, drones, robots, trailers, containers, equipment. Kind-discriminated."
+        },
+        {
+            "name": "Assignments",
+            "description": "Time-bound bindings between assets and operators in a role. Append a new row to reassign; never mutate in place."
+        },
+        {
+            "name": "Identity",
+            "description": "Users, organizations, and the active session."
+        },
+        {
+            "name": "Invites",
+            "description": "Org-admin invites and recipient acceptance."
+        },
+        {
+            "name": "Lookups",
+            "description": "Static reference data \u2014 business categories."
+        },
+        {
+            "name": "Lookups",
+            "description": "Static reference data \u2014 countries, currencies, languages, timezones."
+        },
+        {
+            "name": "Operators",
+            "description": "Universal controlling-agent master \u2014 humans, autonomous software, teleoperators, hybrids. Kind-discriminated."
+        },
+        {
+            "name": "Organizations",
+            "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
+        }
+    ],
+    "paths": {
+        "/v1/invites/accept": {
+            "post": {
+                "tags": [
+                    "Invites"
+                ],
+                "summary": "Accept an invite",
+                "description": "Validates the token, links the calling user to the organization, and marks the invite accepted.",
+                "operationId": "acceptInvite",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AcceptInviteRequest"
+                            },
+                            "example": {
+                                "token": "5f8d2c4e6a1b3d7f9c0e2a4b6d8c0e2a4b6d8c0e2a4b6d8c"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invite"
+                                },
+                                "example": {
+                                    "id": "b3c4d5e6-7f8a-9b0c-1d2e-3f4a5b6c7d8e",
+                                    "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "invited_email": "ali@nizam.ai",
+                                    "role": "dispatcher",
+                                    "status": "pending",
+                                    "expires_at": "2026-05-28T14:00:00Z",
+                                    "token": "5f8d2c4e6a1b3d7f9c0e2a4b6d8c0e2a4b6d8c0e2a4b6d8c",
+                                    "object": "invite"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/invites/accept",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "invite.email_mismatch": {
+                                        "summary": "Email mismatch",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/invite/email_mismatch",
+                                            "title": "Email mismatch",
+                                            "status": 403,
+                                            "detail": "This invite was sent to a different email address than the one you signed in with.",
+                                            "instance": "/v1/invites/accept",
+                                            "code": "invite.email_mismatch",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed \u2014 request body didn't satisfy `@Valid` constraints.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/validation_failed",
+                                    "title": "Validation failed",
+                                    "status": 422,
+                                    "detail": "Request body failed validation.",
+                                    "instance": "/v1/invites/accept",
+                                    "code": "validation_failed",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
+                                    "errors": [
+                                        {
+                                            "code": "must_not_be_blank",
+                                            "field": "email",
+                                            "message": "must not be blank"
+                                        },
+                                        {
+                                            "code": "out_of_range",
+                                            "field": "dropoff.lat",
+                                            "message": "latitude must be in [-90, 90]"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/invites/accept",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Invite not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "invite.not_found": {
+                                        "summary": "Invite not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/invite/not_found",
+                                            "title": "Invite not found",
+                                            "status": 404,
+                                            "detail": "No invite matches that token, or it is no longer valid.",
+                                            "instance": "/v1/invites/accept",
+                                            "code": "invite.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "410": {
+                        "description": "Invite expired \u00b7 Invite revoked",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "invite.expired": {
+                                        "summary": "Invite expired",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/invite/expired",
+                                            "title": "Invite expired",
+                                            "status": 410,
+                                            "detail": "This invite is no longer valid. Ask the sender for a fresh one.",
+                                            "instance": "/v1/invites/accept",
+                                            "code": "invite.expired",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "invite.revoked": {
+                                        "summary": "Invite revoked",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/invite/revoked",
+                                            "title": "Invite revoked",
+                                            "status": 410,
+                                            "detail": "This invite has been cancelled.",
+                                            "instance": "/v1/invites/accept",
+                                            "code": "invite.revoked",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Invite already accepted",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "invite.already_accepted": {
+                                        "summary": "Invite already accepted",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/invite/already_accepted",
+                                            "title": "Invite already accepted",
+                                            "status": 409,
+                                            "detail": "This invite was already accepted.",
+                                            "instance": "/v1/invites/accept",
+                                            "code": "invite.already_accepted",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "carrier",
+                    "operator"
+                ]
+            }
+        },
+        "/v1/lookups/business-categories": {
+            "get": {
+                "tags": [
+                    "Lookups"
+                ],
+                "summary": "List the self-selected verticals organizations can pick on onboarding",
+                "operationId": "listBusinessCategories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponse"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                            "status": "active",
+                                            "email": "ali@nizam.ai",
+                                            "name": "Ali Issa",
+                                            "last_login_at": "2026-05-20T14:00:00Z",
+                                            "login_count": 7,
+                                            "object": "user"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/lookups/business-categories",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/lookups/business-categories",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/me": {
+            "get": {
+                "tags": [
+                    "Identity"
+                ],
+                "summary": "Get the active user",
+                "description": "Returns the authenticated user merged with profile claims from their JWT.\n\nJIT-provisions a shadow row on the first call (so a brand-new Keycloak user can hit any\nendpoint without an explicit signup step) and stamps `last_login_at` + increments\n`login_count` on every subsequent call.\n\nThe `roles` array combines realm roles (flat, e.g. `platform_admin`) with portal-scoped\nclient roles (prefixed, e.g. `dashboard:dispatcher`). The frontend usually drops the\nportal prefix when rendering since it knows its own portal.\n",
+                "operationId": "me",
+                "responses": {
+                    "200": {
+                        "description": "The current user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                },
+                                "example": {
+                                    "id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                    "portal": "dashboard",
+                                    "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "roles": [
+                                        "dashboard:dispatcher"
+                                    ],
+                                    "email": "ali@nizam.ai",
+                                    "name": "Ali Issa",
+                                    "last_login_at": "2026-05-20T14:00:00Z",
+                                    "login_count": 7,
+                                    "object": "user"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/me",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/me",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/me",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Email already taken",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "user.email_already_taken": {
+                                        "summary": "Email already taken",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/user/email_already_taken",
+                                            "title": "Email already taken",
+                                            "status": 409,
+                                            "detail": "A user with this email is already registered.",
+                                            "instance": "/v1/me",
+                                            "code": "user.email_already_taken",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
+                                            "errors": [
+                                                {
+                                                    "code": "already_taken",
+                                                    "field": "email",
+                                                    "message": "This email is already in use."
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ProblemDetail": {
+                "description": "RFC 9457 Problem Details for HTTP APIs, with Nizam extensions for `code`, `trace_id`, and `errors`.",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "URI reference identifying the problem type.",
+                        "example": "https://docs.nizam.ai/errors/validation_failed"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Short human-readable summary.",
+                        "example": "Validation failed"
+                    },
+                    "status": {
+                        "example": 422
+                    },
+                    "detail": {
+                        "type": "string",
+                        "description": "Human-readable explanation specific to this occurrence.",
+                        "example": "Request body failed validation."
+                    },
+                    "instance": {
+                        "type": "string",
+                        "description": "URI reference for the specific occurrence (typically the request path).",
+                        "example": "/v1/tasks"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Machine-readable identifier. Stable across releases. Snake_case; resource-prefixed for domain errors (e.g., `user.email_already_taken`).",
+                        "example": "validation_failed"
+                    },
+                    "trace_id": {
+                        "type": "string",
+                        "description": "OpenTelemetry trace id from the request \u2014 match to logs for support.",
+                        "example": "00-4bf92f3577b34da6a3ce929d0e0e4736-\u2026"
+                    },
+                    "errors": {
+                        "type": "array",
+                        "description": "Per-field validation errors. Populated only when status=422.",
+                        "items": {
+                            "$ref": "#/components/schemas/ApiFieldError"
+                        }
+                    }
+                },
+                "required": [
+                    "code",
+                    "status",
+                    "title",
+                    "type"
+                ]
+            },
+            "ApiFieldError": {
+                "description": "One field-level entry inside a 422 validation problem.",
+                "properties": {
+                    "field": {
+                        "type": "string",
+                        "description": "Dot-notated JSON path matching the request shape.",
+                        "example": "dropoff.lat"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Stable machine-readable code.",
+                        "example": "out_of_range"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Human-readable detail (English).",
+                        "example": "latitude must be in [-90, 90]"
+                    }
+                },
+                "required": [
+                    "code",
+                    "field",
+                    "message"
+                ]
+            },
+            "InviteUserRequest": {
+                "description": "Tenant-admin invite payload.",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Recipient email.",
+                        "example": "newhire@acme.example",
+                        "minLength": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name (optional).",
+                        "example": "New Hire"
+                    }
+                },
+                "required": [
+                    "email"
+                ]
+            },
+            "UserResource": {
+                "description": "A persisted User row (admin-facing view).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "suspended",
+                            "deactivated",
+                            "pending_verification"
+                        ],
+                        "example": "active"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Email shadowed from Keycloak.",
+                        "example": "ali@nizam.ai"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Ali Issa"
+                    },
+                    "last_login_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Timestamp of the last login.",
+                        "example": "2026-05-20T14:00:00Z"
+                    },
+                    "login_count": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Total logins observed.",
+                        "example": 7
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "user"
+                        ],
+                        "example": "user"
+                    }
+                }
+            },
+            "CreateOrganizationRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Display name of the organization.",
+                        "example": "Acme Logistics",
+                        "maxLength": 191,
+                        "minLength": 1
+                    },
+                    "slug": {
+                        "type": "string",
+                        "description": "Optional URL-safe slug. When omitted, the server derives one from the name.",
+                        "example": "acme-logistics",
+                        "maxLength": 64,
+                        "minLength": 2,
+                        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                    },
+                    "primary_domain": {
+                        "type": "string",
+                        "description": "Optional primary email domain. When set, Keycloak attaches it to the new Organization so per-domain IdP discovery works.",
+                        "example": "acme.com",
+                        "maxLength": 253,
+                        "minLength": 0
+                    },
+                    "business_category": {
+                        "type": "string",
+                        "description": "Optional self-selected vertical from /v1/lookups/business-categories. Lowercase slug (e.g. 'restaurant', 'third_party_logistics'). Drives downstream personalization.",
+                        "example": "third_party_logistics",
+                        "maxLength": 64,
+                        "minLength": 0
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Optional contact phone number in E.164 format (leading +, country code, then digits).",
+                        "example": "+15551234567",
+                        "maxLength": 32,
+                        "minLength": 0
+                    },
+                    "country": {
+                        "type": "string",
+                        "description": "Optional ISO 3166-1 alpha-2 country code.",
+                        "example": "US",
+                        "pattern": "^[A-Za-z]{2}$"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "description": "Optional IANA timezone identifier.",
+                        "example": "America/Los_Angeles",
+                        "maxLength": 64,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            },
+            "Organization": {
+                "description": "A tenant \u2014 a logistics company, 3PL, or LSP.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID. Equal to the Keycloak Organization id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Acme Logistics"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "description": "URL-safe identifier \u2014 used in deep links and admin tooling.",
+                        "example": "acme-logistics"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "suspended",
+                            "inactive"
+                        ]
+                    },
+                    "founder_user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "User id of the human who originally created this organization. Immutable for the row's lifetime \u2014 does NOT change when ownership is transferred.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "owner_user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "User id of the current owner. Receives all admin notifications by default. Mutable; reassigned via ownership transfer. May be null transiently if the owner user has been hard-deleted.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When this organization was created.",
+                        "example": "2026-01-15T09:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "organization"
+                        ],
+                        "example": "organization"
+                    }
+                }
+            },
+            "CreateAutonomousOperatorRequest": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/CreateOperatorRequest"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "kind": {
+                                "type": "string",
+                                "description": "Discriminator. Always `autonomous` for this variant.",
+                                "enum": [
+                                    "autonomous"
+                                ],
+                                "example": "autonomous",
+                                "minLength": 1
+                            },
+                            "vendor": {
+                                "type": "string",
+                                "description": "Software vendor.",
+                                "example": "Waymo",
+                                "minLength": 1
+                            },
+                            "product": {
+                                "type": "string",
+                                "description": "Software product.",
+                                "example": "Waymo Driver",
+                                "minLength": 1
+                            },
+                            "version": {
+                                "type": "string",
+                                "description": "Software version.",
+                                "example": "7.3",
+                                "minLength": 1
+                            },
+                            "instance_id": {
+                                "type": "string",
+                                "description": "Instance id within the version.",
+                                "example": "4711"
+                            },
+                            "responsible_party": {
+                                "type": "string",
+                                "format": "uuid",
+                                "description": "Legal entity accountable for this operator's actions (a user id).",
+                                "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                            }
+                        }
+                    }
+                ],
+                "description": "Create an autonomous (software-agent) operator.",
+                "required": [
+                    "kind",
+                    "product",
+                    "responsible_party",
+                    "vendor",
+                    "version"
+                ]
+            },
+            "CreateHumanOperatorRequest": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/CreateOperatorRequest"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "kind": {
+                                "type": "string",
+                                "description": "Discriminator. Always `human` for this variant.",
+                                "enum": [
+                                    "human"
+                                ],
+                                "example": "human",
+                                "minLength": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "Display name.",
+                                "example": "Maria Chen"
+                            },
+                            "user_id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "description": "Linked user id (when the human has a Nizam login).",
+                                "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                            },
+                            "license_number": {
+                                "type": "string",
+                                "description": "Driver license number.",
+                                "example": "TX-12345678"
+                            },
+                            "license_class": {
+                                "type": "string",
+                                "description": "License class.",
+                                "example": "CDL-A"
+                            },
+                            "license_expires_at": {
+                                "type": "string",
+                                "format": "date",
+                                "description": "Expiry date.",
+                                "example": "2030-12-31"
+                            },
+                            "license_country": {
+                                "type": "string",
+                                "description": "ISO 3166-1 alpha-2 issuing country.",
+                                "example": "US"
+                            }
+                        }
+                    }
+                ],
+                "description": "Create a human operator.",
+                "required": [
+                    "kind"
+                ]
+            },
+            "CreateOperatorRequest": {
+                "description": "Create a new operator. The kind discriminator selects the variant.",
+                "discriminator": {
+                    "propertyName": "kind",
+                    "mapping": {
+                        "human": "#/components/schemas/CreateHumanOperatorRequest",
+                        "autonomous": "#/components/schemas/CreateAutonomousOperatorRequest",
+                        "teleoperated": "#/components/schemas/CreateTeleoperatedOperatorRequest"
+                    }
+                },
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/CreateHumanOperatorRequest"
+                    },
+                    {
+                        "$ref": "#/components/schemas/CreateAutonomousOperatorRequest"
+                    },
+                    {
+                        "$ref": "#/components/schemas/CreateTeleoperatedOperatorRequest"
+                    }
+                ],
+                "properties": {
+                    "kind": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "kind"
+                ]
+            },
+            "CreateTeleoperatedOperatorRequest": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/CreateOperatorRequest"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "kind": {
+                                "type": "string",
+                                "description": "Discriminator. Always `teleoperated` for this variant.",
+                                "enum": [
+                                    "teleoperated"
+                                ],
+                                "example": "teleoperated",
+                                "minLength": 1
+                            },
+                            "controller_user_id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "description": "User id of the human controller at the remote console.",
+                                "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                            },
+                            "control_platform": {
+                                "type": "string",
+                                "description": "Control platform identifier.",
+                                "example": "phantom-auto"
+                            },
+                            "responsible_party": {
+                                "type": "string",
+                                "format": "uuid",
+                                "description": "Legal entity accountable.",
+                                "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                            }
+                        }
+                    }
+                ],
+                "description": "Create a teleoperated (human-via-software) operator.",
+                "required": [
+                    "controller_user_id",
+                    "kind",
+                    "responsible_party"
+                ]
+            },
+            "Operator": {
+                "description": "A controlling agent \u2014 human, autonomous software, teleoperator, or hybrid.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "description": "Kind discriminator.",
+                        "enum": [
+                            "human",
+                            "autonomous",
+                            "teleoperated",
+                            "hybrid"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "offline",
+                            "available",
+                            "on_duty",
+                            "on_break",
+                            "decommissioned"
+                        ]
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Maria Chen"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Linked user id (humans with a Nizam login). Null for software agents.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "responsible_party_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Legal entity accountable for this operator (required for autonomous/teleoperated).",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Owning organization id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "operator"
+                        ],
+                        "example": "operator"
+                    }
+                }
+            },
+            "CreateInviteRequest": {
+                "properties": {
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Organization the invite is for.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Recipient email.",
+                        "example": "ali@nizam.ai",
+                        "minLength": 1
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "Role the recipient will hold after acceptance. Lowercase enum names from OrgUserRole.",
+                        "enum": [
+                            "super_admin",
+                            "admin",
+                            "dispatcher",
+                            "manager",
+                            "staff",
+                            "viewer",
+                            "billing_admin"
+                        ],
+                        "minLength": 1,
+                        "pattern": "^(super_admin|admin|dispatcher|manager|staff|viewer|billing_admin)$"
+                    },
+                    "ttl_days": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "TTL in days. Defaults to 7.",
+                        "example": 7
+                    }
+                },
+                "required": [
+                    "email",
+                    "organization_id",
+                    "role"
+                ]
+            },
+            "Invite": {
+                "description": "A pending membership awaiting acceptance.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID of this invite.",
+                        "example": "b3c4d5e6-7f8a-9b0c-1d2e-3f4a5b6c7d8e"
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Organization the invite confers membership in.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "invited_email": {
+                        "type": "string",
+                        "description": "Recipient email \u2014 canonical lowercase form.",
+                        "example": "ali@nizam.ai"
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "Role the recipient will hold after acceptance.",
+                        "enum": [
+                            "super_admin",
+                            "admin",
+                            "dispatcher",
+                            "manager",
+                            "staff",
+                            "viewer",
+                            "billing_admin"
+                        ],
+                        "example": "dispatcher"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "pending",
+                            "accepted",
+                            "expired",
+                            "revoked"
+                        ]
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the invite expires. Recipients must accept before then.",
+                        "example": "2026-05-28T14:00:00Z"
+                    },
+                    "token": {
+                        "type": "string",
+                        "description": "Bearer secret used to redeem the invite. Returned only on POST /v1/invites; subsequent lookups omit it.",
+                        "example": "5f8d2c4e6a1b3d7f9c0e2a4b6d8c0e2a4b6d8c0e2a4b6d8c"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "invite"
+                        ],
+                        "example": "invite"
+                    }
+                }
+            },
+            "AcceptInviteRequest": {
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "description": "Token from the invite link.",
+                        "example": "5f8d2c4e6a1b3d7f9c0e2a4b6d8c0e2a4b6d8c0e2a4b6d8c",
+                        "maxLength": 2147483647,
+                        "minLength": 32
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "Assignment": {
+                "description": "Time-bound binding between an asset and an operator in a role.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "b3c4d5e6-7f8a-9b0c-1d2e-3f4a5b6c7d8e"
+                    },
+                    "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Asset id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Operator id.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "Role discriminator for concurrent assignments on the same asset.",
+                        "enum": [
+                            "primary",
+                            "co_operator",
+                            "safety_monitor",
+                            "remote_pilot",
+                            "supervisor"
+                        ]
+                    },
+                    "valid_from": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start of validity.",
+                        "example": "2026-05-20T08:00:00Z"
+                    },
+                    "valid_until": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "End of validity (null = still active).",
+                        "example": "2026-05-20T16:00:00Z"
+                    },
+                    "terminated_reason": {
+                        "type": "string",
+                        "description": "Why the assignment was closed (null while active).",
+                        "enum": [
+                            "shift_end",
+                            "asset_maintenance",
+                            "operator_off_duty",
+                            "incident",
+                            "software_update",
+                            "reassigned",
+                            "contract_ended",
+                            "manual_close"
+                        ]
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "assignment"
+                        ],
+                        "example": "assignment"
+                    }
+                }
+            },
+            "OpenAssignmentRequest": {
+                "description": "Open a new assignment.",
+                "properties": {
+                    "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Asset id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Operator id.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "Role discriminator.",
+                        "enum": [
+                            "primary",
+                            "co_operator",
+                            "safety_monitor",
+                            "remote_pilot",
+                            "supervisor"
+                        ]
+                    }
+                },
+                "required": [
+                    "asset_id",
+                    "operator_id",
+                    "role"
+                ]
+            },
+            "CloseAssignmentRequest": {
+                "description": "Close an active assignment.",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "description": "Why the assignment is being closed.",
+                        "enum": [
+                            "shift_end",
+                            "asset_maintenance",
+                            "operator_off_duty",
+                            "incident",
+                            "software_update",
+                            "reassigned",
+                            "contract_ended",
+                            "manual_close"
+                        ]
+                    }
+                },
+                "required": [
+                    "reason"
+                ]
+            },
+            "Asset": {
+                "description": "A physical asset tracked by the fleet \u2014 vehicle, drone, robot, container, etc.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "description": "Top-level kind.",
+                        "enum": [
+                            "ground_vehicle",
+                            "aerial_vehicle",
+                            "marine_vehicle",
+                            "robot",
+                            "agv",
+                            "trailer",
+                            "container",
+                            "pallet",
+                            "equipment"
+                        ]
+                    },
+                    "sub_kind": {
+                        "type": "string",
+                        "description": "Sub-kind within the kind (free-form).",
+                        "example": "van"
+                    },
+                    "autonomy_level": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "SAE J3016 autonomy level 0..5.",
+                        "example": 2
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "maintenance",
+                            "out_of_service",
+                            "retired",
+                            "sold",
+                            "inactive",
+                            "lost"
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Truck 7"
+                    },
+                    "vin": {
+                        "type": "string",
+                        "description": "Vehicle Identification Number.",
+                        "example": "1HGCM82633A123456"
+                    },
+                    "plate_number": {
+                        "type": "string",
+                        "description": "License plate.",
+                        "example": "AB-123-CD"
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Owning organization id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "current_primary_operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Current primary operator (active assignment, role=primary).",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "asset"
+                        ],
+                        "example": "asset"
+                    }
+                }
+            },
+            "CreateAssetRequest": {
+                "description": "Create a new asset.",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "description": "Top-level kind.",
+                        "enum": [
+                            "ground_vehicle",
+                            "aerial_vehicle",
+                            "marine_vehicle",
+                            "robot",
+                            "agv",
+                            "trailer",
+                            "container",
+                            "pallet",
+                            "equipment"
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Truck 7"
+                    },
+                    "autonomy_level": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "SAE J3016 autonomy level 0..5.",
+                        "example": 0,
+                        "maximum": 5,
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "kind"
+                ]
+            },
+            "UserUpdateRequest": {
+                "description": "Tenant-admin partial update (contact fields only).",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "New email (optional).",
+                        "example": "renamed@acme.example"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "New display name (optional).",
+                        "example": "Ali Issa"
+                    }
+                }
+            },
+            "UpdateOrganizationRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "New display name. Omit to leave unchanged.",
+                        "example": "Acme Logistics",
+                        "maxLength": 191,
+                        "minLength": 1
+                    },
+                    "slug": {
+                        "type": "string",
+                        "description": "New URL-safe slug. Cross-tenant unique. Cascades to the Keycloak Organization's alias. Omit to leave unchanged.",
+                        "example": "acme-logistics",
+                        "maxLength": 64,
+                        "minLength": 2,
+                        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                    },
+                    "business_category": {
+                        "type": "string",
+                        "description": "New business category \u2014 lowercase slug from /v1/lookups/business-categories. Omit to leave unchanged.",
+                        "example": "third_party_logistics",
+                        "maxLength": 64,
+                        "minLength": 0
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "New contact phone in E.164 format. Omit to leave unchanged.",
+                        "example": "+15551234567",
+                        "maxLength": 32,
+                        "minLength": 0
+                    },
+                    "country": {
+                        "type": "string",
+                        "description": "New ISO 3166-1 alpha-2 country code. Omit to leave unchanged.",
+                        "example": "US",
+                        "pattern": "^[A-Za-z]{2}$"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "description": "New IANA timezone identifier. Omit to leave unchanged.",
+                        "example": "America/Los_Angeles",
+                        "maxLength": 64,
+                        "minLength": 0
+                    }
+                }
+            },
+            "InternalUserUpdateRequest": {
+                "description": "Platform-staff partial update (contact + lifecycle status).",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "New email (optional).",
+                        "example": "renamed@acme.example"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "New display name (optional).",
+                        "example": "Ali Issa"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "New lifecycle status (optional).",
+                        "enum": [
+                            "active",
+                            "suspended",
+                            "deactivated",
+                            "pending_verification"
+                        ],
+                        "example": "suspended"
+                    }
+                }
+            },
+            "ListResponse": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/UserResource"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "User": {
+                "description": "The current authenticated user \u2014 identity + portal context + login activity.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID. Equal to the Keycloak `sub` claim.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "portal": {
+                        "type": "string",
+                        "description": "Which portal issued the bearer token used for this request.",
+                        "enum": [
+                            "dashboard",
+                            "merchant",
+                            "customer",
+                            "carrier",
+                            "operator",
+                            "platform_staff",
+                            "admin"
+                        ]
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Keycloak Organization id the user belongs to. Null for cross-tenant platform admins.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "description": "Realm roles (flat, e.g. `platform_admin`) plus portal-scoped client roles (prefixed, e.g. `dashboard:dispatcher`).",
+                            "example": "dashboard:dispatcher"
+                        }
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Email shadowed from Keycloak. Null until the user completes a profile.",
+                        "example": "ali@nizam.ai"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name shadowed from Keycloak.",
+                        "example": "Ali Issa"
+                    },
+                    "last_login_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Timestamp of this login. Null only on the very first call before provisioning completes.",
+                        "example": "2026-05-20T14:00:00Z"
+                    },
+                    "login_count": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Total logins observed by this service.",
+                        "example": 7
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "user"
+                        ],
+                        "example": "user"
+                    }
+                }
+            },
+            "OrganizationMembership": {
+                "description": "An organization the current user belongs to, with their role inside it.",
+                "properties": {
+                    "organization": {
+                        "$ref": "#/components/schemas/Organization"
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "The user's role in this organization.",
+                        "enum": [
+                            "super_admin",
+                            "admin",
+                            "dispatcher",
+                            "manager",
+                            "staff",
+                            "viewer",
+                            "billing_admin"
+                        ],
+                        "example": "dispatcher"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "organization_membership"
+                        ],
+                        "example": "organization_membership"
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "expandParam": {
+                "name": "expand[]",
+                "in": "query",
+                "description": "Inline related resources instead of returning id references. Dot-notation for nested (e.g., `order.merchant`). Max depth 4.",
+                "required": false,
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "example": "[\"worker\", \"order.merchant\"]"
+            },
+            "fieldsParam": {
+                "name": "fields[<type>]",
+                "in": "query",
+                "description": "Sparse fieldsets \u2014 JSON:API grammar. The `id` and `object` fields are always returned.",
+                "required": false,
+                "style": "deepObject",
+                "explode": true,
+                "schema": {
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "examples": {
+                    "user-and-org": {
+                        "value": {
+                            "user": "id,email",
+                            "organization": "id,name"
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Keycloak-issued JWT bearer token. Use the Dashboard / Merchant / Customer / Carrier portal client for interactive flows, or `nizam-backend` (Client Credentials) for service accounts.",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
