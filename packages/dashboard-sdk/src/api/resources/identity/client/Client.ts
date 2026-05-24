@@ -114,11 +114,12 @@ export class IdentityClient {
     }
 
     /**
-     * Dashboard sees the active set; platform staff additionally see soft-deleted rows and may sort by `deleted_at`.
+     * Dashboard sees co-members of the caller's active organization (tenant-scoped via the organization_users join). Platform staff bypass RLS and see across tenants, and may sort by `deleted_at`.
      *
      * @param {NizamDashboard.ListUsersRequest} request
      * @param {IdentityClient.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.InternalServerError}
@@ -129,14 +130,14 @@ export class IdentityClient {
     public listUsers(
         request: NizamDashboard.ListUsersRequest = {},
         requestOptions?: IdentityClient.RequestOptions,
-    ): core.HttpResponsePromise<NizamDashboard.ListResponse> {
+    ): core.HttpResponsePromise<NizamDashboard.ListResponseUserResource> {
         return core.HttpResponsePromise.fromPromise(this.__listUsers(request, requestOptions));
     }
 
     private async __listUsers(
         request: NizamDashboard.ListUsersRequest = {},
         requestOptions?: IdentityClient.RequestOptions,
-    ): Promise<core.WithRawResponse<NizamDashboard.ListResponse>> {
+    ): Promise<core.WithRawResponse<NizamDashboard.ListResponseUserResource>> {
         const { limit, offset, sort } = request;
         const _queryParams: Record<string, unknown> = {
             limit,
@@ -170,11 +171,19 @@ export class IdentityClient {
             logging: this._options.logging,
         });
         if (_response.ok) {
-            return { data: _response.body as NizamDashboard.ListResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as NizamDashboard.ListResponseUserResource,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,

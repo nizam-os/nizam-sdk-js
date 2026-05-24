@@ -79,19 +79,15 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ListResponse"
+                                    "$ref": "#/components/schemas/ListResponseBusinessCategory"
                                 },
                                 "example": {
                                     "object": "list",
                                     "data": [
                                         {
-                                            "id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
-                                            "status": "active",
-                                            "email": "ali@nizam.ai",
-                                            "name": "Ali Issa",
-                                            "last_login_at": "2026-05-20T14:00:00Z",
-                                            "login_count": 7,
-                                            "object": "user"
+                                            "slug": "third_party_logistics",
+                                            "display_name": "Third-Party Logistics",
+                                            "object": "business_category"
                                         }
                                     ],
                                     "has_more": true,
@@ -147,6 +143,311 @@
                     "carrier",
                     "operator",
                     "platform_staff"
+                ]
+            }
+        },
+        "/v1/lookups/countries": {
+            "get": {
+                "tags": [
+                    "Lookups"
+                ],
+                "summary": "List ISO 3166-1 countries with calling codes",
+                "operationId": "listCountries",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseCountry"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "code": "CA",
+                                            "name": "Canada",
+                                            "calling_code": "+1",
+                                            "object": "country"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/lookups/countries",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/lookups/countries",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    
+                ]
+            }
+        },
+        "/v1/lookups/currencies": {
+            "get": {
+                "tags": [
+                    "Lookups"
+                ],
+                "summary": "List ISO 4217 currencies",
+                "operationId": "listCurrencies",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseCurrency"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "code": "CAD",
+                                            "name": "Canadian Dollar",
+                                            "symbol": "$",
+                                            "fraction_digits": 2,
+                                            "object": "currency"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/lookups/currencies",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/lookups/currencies",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    
+                ]
+            }
+        },
+        "/v1/lookups/languages": {
+            "get": {
+                "tags": [
+                    "Lookups"
+                ],
+                "summary": "List ISO 639-1 languages",
+                "operationId": "listLanguages",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseLanguage"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "code": "en",
+                                            "name": "English",
+                                            "native_name": "English",
+                                            "object": "language"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/lookups/languages",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/lookups/languages",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    
+                ]
+            }
+        },
+        "/v1/lookups/timezones": {
+            "get": {
+                "tags": [
+                    "Lookups"
+                ],
+                "summary": "List IANA timezones with current GMT offsets",
+                "operationId": "listTimezones",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseTimezone"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "id": "America/Toronto",
+                                            "display_name": "Eastern Standard Time (Toronto)",
+                                            "gmt_offset_minutes": -300,
+                                            "object": "timezone"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/lookups/timezones",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/lookups/timezones",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    
                 ]
             }
         },
@@ -259,8 +560,8 @@
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
                                             "errors": [
                                                 {
-                                                    "code": "already_taken",
                                                     "field": "email",
+                                                    "code": "already_taken",
                                                     "message": "This email is already in use."
                                                 }
                                             ]
@@ -1252,7 +1553,7 @@
                     }
                 }
             },
-            "ListResponse": {
+            "ListResponseUserResource": {
                 "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
                 "properties": {
                     "object": {
@@ -1384,6 +1685,328 @@
                             "organization_membership"
                         ],
                         "example": "organization_membership"
+                    }
+                }
+            },
+            "ListResponseTimezone": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Timezone"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "Timezone": {
+                "description": "IANA timezone with localized display name + current GMT offset.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "IANA timezone id (e.g. `America/New_York`).",
+                        "example": "America/Toronto"
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "description": "Long display name in the Accept-Language locale.",
+                        "example": "Eastern Standard Time (Toronto)"
+                    },
+                    "gmt_offset_minutes": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Current offset from UTC in minutes (DST-aware).",
+                        "example": -300
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "timezone"
+                        ],
+                        "example": "timezone"
+                    }
+                }
+            },
+            "Language": {
+                "description": "ISO 639-1 language with localized + native names.",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "ISO 639-1 two-letter code.",
+                        "example": "en"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name in the Accept-Language locale.",
+                        "example": "English"
+                    },
+                    "native_name": {
+                        "type": "string",
+                        "description": "Name in the language itself, useful in language pickers.",
+                        "example": "English"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "language"
+                        ],
+                        "example": "language"
+                    }
+                }
+            },
+            "ListResponseLanguage": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Language"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "Currency": {
+                "description": "ISO 4217 currency with localized name + symbol.",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "ISO 4217 code.",
+                        "example": "CAD"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name in the Accept-Language locale.",
+                        "example": "Canadian Dollar"
+                    },
+                    "symbol": {
+                        "type": "string",
+                        "description": "Short symbol in the Accept-Language locale.",
+                        "example": "$"
+                    },
+                    "fraction_digits": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Default number of fractional digits per ISO 4217.",
+                        "example": 2
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "currency"
+                        ],
+                        "example": "currency"
+                    }
+                }
+            },
+            "ListResponseCurrency": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Currency"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "Country": {
+                "description": "ISO 3166-1 alpha-2 country with localized name + E.164 calling code.",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "ISO 3166-1 alpha-2 code.",
+                        "example": "CA"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name in the Accept-Language locale.",
+                        "example": "Canada"
+                    },
+                    "calling_code": {
+                        "type": "string",
+                        "description": "E.164 country calling code with `+` prefix, or null if not allocated.",
+                        "example": "+1"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "country"
+                        ],
+                        "example": "country"
+                    }
+                }
+            },
+            "ListResponseCountry": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Country"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "BusinessCategory": {
+                "description": "Self-selected vertical an organization operates in. Picker option for the onboarding flow.",
+                "properties": {
+                    "slug": {
+                        "type": "string",
+                        "description": "Stable slug \u2014 matches the DB CHECK constraint on `organizations.business_category`.",
+                        "example": "third_party_logistics"
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "description": "Human-readable label for picker UIs.",
+                        "example": "Third-Party Logistics"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "business_category"
+                        ],
+                        "example": "business_category"
+                    }
+                }
+            },
+            "ListResponseBusinessCategory": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/BusinessCategory"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
                     }
                 }
             }

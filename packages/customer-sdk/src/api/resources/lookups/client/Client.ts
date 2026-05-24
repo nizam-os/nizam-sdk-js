@@ -36,13 +36,13 @@ export class LookupsClient {
      */
     public listBusinessCategories(
         requestOptions?: LookupsClient.RequestOptions,
-    ): core.HttpResponsePromise<NizamCustomer.ListResponse> {
+    ): core.HttpResponsePromise<NizamCustomer.ListResponseBusinessCategory> {
         return core.HttpResponsePromise.fromPromise(this.__listBusinessCategories(requestOptions));
     }
 
     private async __listBusinessCategories(
         requestOptions?: LookupsClient.RequestOptions,
-    ): Promise<core.WithRawResponse<NizamCustomer.ListResponse>> {
+    ): Promise<core.WithRawResponse<NizamCustomer.ListResponseBusinessCategory>> {
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
@@ -66,7 +66,10 @@ export class LookupsClient {
             logging: this._options.logging,
         });
         if (_response.ok) {
-            return { data: _response.body as NizamCustomer.ListResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as NizamCustomer.ListResponseBusinessCategory,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
@@ -96,5 +99,277 @@ export class LookupsClient {
             "GET",
             "/v1/lookups/business-categories",
         );
+    }
+
+    /**
+     * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCustomer.UnauthorizedError}
+     * @throws {@link NizamCustomer.InternalServerError}
+     *
+     * @example
+     *     await client.lookups.listCountries()
+     */
+    public listCountries(
+        requestOptions?: LookupsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamCustomer.ListResponseCountry> {
+        return core.HttpResponsePromise.fromPromise(this.__listCountries(requestOptions));
+    }
+
+    private async __listCountries(
+        requestOptions?: LookupsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamCustomer.ListResponseCountry>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCustomerEnvironment.Production,
+                "v1/lookups/countries",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamCustomer.ListResponseCountry, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCustomer.UnauthorizedError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCustomer.InternalServerError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCustomerError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/lookups/countries");
+    }
+
+    /**
+     * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCustomer.UnauthorizedError}
+     * @throws {@link NizamCustomer.InternalServerError}
+     *
+     * @example
+     *     await client.lookups.listCurrencies()
+     */
+    public listCurrencies(
+        requestOptions?: LookupsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamCustomer.ListResponseCurrency> {
+        return core.HttpResponsePromise.fromPromise(this.__listCurrencies(requestOptions));
+    }
+
+    private async __listCurrencies(
+        requestOptions?: LookupsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamCustomer.ListResponseCurrency>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCustomerEnvironment.Production,
+                "v1/lookups/currencies",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamCustomer.ListResponseCurrency, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCustomer.UnauthorizedError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCustomer.InternalServerError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCustomerError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/lookups/currencies");
+    }
+
+    /**
+     * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCustomer.UnauthorizedError}
+     * @throws {@link NizamCustomer.InternalServerError}
+     *
+     * @example
+     *     await client.lookups.listLanguages()
+     */
+    public listLanguages(
+        requestOptions?: LookupsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamCustomer.ListResponseLanguage> {
+        return core.HttpResponsePromise.fromPromise(this.__listLanguages(requestOptions));
+    }
+
+    private async __listLanguages(
+        requestOptions?: LookupsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamCustomer.ListResponseLanguage>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCustomerEnvironment.Production,
+                "v1/lookups/languages",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamCustomer.ListResponseLanguage, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCustomer.UnauthorizedError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCustomer.InternalServerError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCustomerError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/lookups/languages");
+    }
+
+    /**
+     * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCustomer.UnauthorizedError}
+     * @throws {@link NizamCustomer.InternalServerError}
+     *
+     * @example
+     *     await client.lookups.listTimezones()
+     */
+    public listTimezones(
+        requestOptions?: LookupsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamCustomer.ListResponseTimezone> {
+        return core.HttpResponsePromise.fromPromise(this.__listTimezones(requestOptions));
+    }
+
+    private async __listTimezones(
+        requestOptions?: LookupsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamCustomer.ListResponseTimezone>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCustomerEnvironment.Production,
+                "v1/lookups/timezones",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamCustomer.ListResponseTimezone, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCustomer.UnauthorizedError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCustomer.InternalServerError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCustomerError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/lookups/timezones");
     }
 }
