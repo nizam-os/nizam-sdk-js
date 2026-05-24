@@ -16,92 +16,13 @@ export declare namespace OrganizationsClient {
 }
 
 /**
- * Tenants — the top-level container for users, merchants, and operations.
+ * Organization aggregate — tenant CRUD.
  */
 export class OrganizationsClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<OrganizationsClient.Options>;
 
     constructor(options: OrganizationsClient.Options) {
         this._options = normalizeClientOptionsWithAuth(options);
-    }
-
-    /**
-     * Returns every organization the calling user is a member of, with their role inside.
-     *
-     * @param {OrganizationsClient.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link NizamDashboard.UnauthorizedError}
-     * @throws {@link NizamDashboard.ForbiddenError}
-     * @throws {@link NizamDashboard.InternalServerError}
-     *
-     * @example
-     *     await client.organizations.listMyOrganizations()
-     */
-    public listMyOrganizations(
-        requestOptions?: OrganizationsClient.RequestOptions,
-    ): core.HttpResponsePromise<NizamDashboard.OrganizationMembership[]> {
-        return core.HttpResponsePromise.fromPromise(this.__listMyOrganizations(requestOptions));
-    }
-
-    private async __listMyOrganizations(
-        requestOptions?: OrganizationsClient.RequestOptions,
-    ): Promise<core.WithRawResponse<NizamDashboard.OrganizationMembership[]>> {
-        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
-        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            _authRequest.headers,
-            this._options?.headers,
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.NizamDashboardEnvironment.Production,
-                "v1/me/organizations",
-            ),
-            method: "GET",
-            headers: _headers,
-            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
-            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
-            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-            fetchFn: this._options?.fetch,
-            logging: this._options.logging,
-        });
-        if (_response.ok) {
-            return {
-                data: _response.body as NizamDashboard.OrganizationMembership[],
-                rawResponse: _response.rawResponse,
-            };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch (_response.error.statusCode) {
-                case 401:
-                    throw new NizamDashboard.UnauthorizedError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 403:
-                    throw new NizamDashboard.ForbiddenError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 500:
-                    throw new NizamDashboard.InternalServerError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                default:
-                    throw new errors.NizamDashboardError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/me/organizations");
     }
 
     /**
@@ -489,104 +410,5 @@ export class OrganizationsClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "PATCH", "/v1/organizations/{id}");
-    }
-
-    /**
-     * Removes the caller's membership from the organization. The owner cannot leave — they must transfer ownership (future endpoint) or delete the org instead.
-     *
-     * @param {NizamDashboard.LeaveOrganizationRequest} request
-     * @param {OrganizationsClient.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link NizamDashboard.UnauthorizedError}
-     * @throws {@link NizamDashboard.ForbiddenError}
-     * @throws {@link NizamDashboard.NotFoundError}
-     * @throws {@link NizamDashboard.ConflictError}
-     * @throws {@link NizamDashboard.InternalServerError}
-     *
-     * @example
-     *     await client.organizations.leaveOrganization({
-     *         id: "00000000-0000-0000-0000-000000000000"
-     *     })
-     */
-    public leaveOrganization(
-        request: NizamDashboard.LeaveOrganizationRequest,
-        requestOptions?: OrganizationsClient.RequestOptions,
-    ): core.HttpResponsePromise<void> {
-        return core.HttpResponsePromise.fromPromise(this.__leaveOrganization(request, requestOptions));
-    }
-
-    private async __leaveOrganization(
-        request: NizamDashboard.LeaveOrganizationRequest,
-        requestOptions?: OrganizationsClient.RequestOptions,
-    ): Promise<core.WithRawResponse<void>> {
-        const { id } = request;
-        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
-        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            _authRequest.headers,
-            this._options?.headers,
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.NizamDashboardEnvironment.Production,
-                `v1/organizations/${core.url.encodePathParam(id)}/members/me`,
-            ),
-            method: "DELETE",
-            headers: _headers,
-            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
-            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
-            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-            fetchFn: this._options?.fetch,
-            logging: this._options.logging,
-        });
-        if (_response.ok) {
-            return { data: undefined, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch (_response.error.statusCode) {
-                case 401:
-                    throw new NizamDashboard.UnauthorizedError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 403:
-                    throw new NizamDashboard.ForbiddenError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 404:
-                    throw new NizamDashboard.NotFoundError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 409:
-                    throw new NizamDashboard.ConflictError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 500:
-                    throw new NizamDashboard.InternalServerError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                default:
-                    throw new errors.NizamDashboardError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        return handleNonStatusCodeError(
-            _response.error,
-            _response.rawResponse,
-            "DELETE",
-            "/v1/organizations/{id}/members/me",
-        );
     }
 }

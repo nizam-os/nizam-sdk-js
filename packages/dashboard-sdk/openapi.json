@@ -41,10 +41,6 @@
             "description": "Time-bound bindings between assets and operators in a role. Append a new row to reassign; never mutate in place."
         },
         {
-            "name": "Identity",
-            "description": "Users, organizations, and the active session."
-        },
-        {
             "name": "Invites",
             "description": "Org-admin invites and recipient acceptance."
         },
@@ -57,12 +53,32 @@
             "description": "Static reference data \u2014 countries, currencies, languages, timezones."
         },
         {
+            "name": "Memberships",
+            "description": "User \u2194 organization memberships \u2014 list the caller's memberships, join, leave, role checks."
+        },
+        {
+            "name": "Memberships",
+            "description": "User \u2194 organization memberships \u2014 list, join, leave, role checks."
+        },
+        {
             "name": "Operators",
             "description": "Universal controlling-agent master \u2014 humans, autonomous software, teleoperators, hybrids. Kind-discriminated."
         },
         {
             "name": "Organizations",
             "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
+        },
+        {
+            "name": "Organizations",
+            "description": "Organization aggregate \u2014 tenant CRUD."
+        },
+        {
+            "name": "Users",
+            "description": "User aggregate \u2014 current session (`/me`) and user-entity operations."
+        },
+        {
+            "name": "Users",
+            "description": "User aggregate \u2014 current session (`/me`) and user-entity operations (invite, list, lifecycle, platform-staff admin)."
         }
     ],
     "paths": {
@@ -925,27 +941,27 @@
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
                                 "examples": {
-                                    "organization.not_a_member": {
+                                    "membership.not_a_member": {
                                         "summary": "Not a member",
                                         "value": {
-                                            "type": "https://docs.nizam.ai/errors/organization/not_a_member",
+                                            "type": "https://docs.nizam.ai/errors/membership/not_a_member",
                                             "title": "Not a member",
                                             "status": 403,
                                             "detail": "The caller is not a member of this organization.",
                                             "instance": "/v1/invites",
-                                            "code": "organization.not_a_member",
+                                            "code": "membership.not_a_member",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     },
-                                    "organization.insufficient_role": {
+                                    "membership.insufficient_role": {
                                         "summary": "Insufficient role",
                                         "value": {
-                                            "type": "https://docs.nizam.ai/errors/organization/insufficient_role",
+                                            "type": "https://docs.nizam.ai/errors/membership/insufficient_role",
                                             "title": "Insufficient role",
                                             "status": 403,
                                             "detail": "This action requires a higher organization role.",
                                             "instance": "/v1/invites",
-                                            "code": "organization.insufficient_role",
+                                            "code": "membership.insufficient_role",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -1262,7 +1278,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -1343,7 +1361,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -1420,7 +1440,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -1496,7 +1518,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -1572,7 +1596,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -1625,7 +1651,7 @@
         "/v1/me": {
             "get": {
                 "tags": [
-                    "Identity"
+                    "Users"
                 ],
                 "summary": "Get the active user",
                 "description": "Returns the authenticated user merged with profile claims from their JWT.\n\nJIT-provisions a shadow row on the first call (so a brand-new Keycloak user can hit any\nendpoint without an explicit signup step) and stamps `last_login_at` + increments\n`login_count` on every subsequent call.\n\nThe `roles` array combines realm roles (flat, e.g. `platform_admin`) with portal-scoped\nclient roles (prefixed, e.g. `dashboard:dispatcher`). The frontend usually drops the\nportal prefix when rendering since it knows its own portal.\n",
@@ -1753,41 +1779,82 @@
                 ]
             }
         },
-        "/v1/me/organizations": {
+        "/v1/me/memberships": {
             "get": {
                 "tags": [
-                    "Organizations"
+                    "Memberships"
                 ],
-                "summary": "List organizations the current user belongs to",
-                "description": "Returns every organization the calling user is a member of, with their role inside.",
-                "operationId": "listMyOrganizations",
+                "summary": "List the current user's organization memberships",
+                "description": "Returns the caller's organization memberships \u2014 each entry is a `{organization, role}` pair, so the role per org is available without a second fetch. Bounded by the caller's own memberships \u2014 typically under 50 \u2014 and returned in a single page; the response carries the standard `ListResponse` envelope and a `first` Link header rel for wire-shape consistency with paginated endpoints, but the `starting_after` / `ending_before` cursors are no-ops here. Promote to keyset pagination when membership counts grow to where a single page is no longer enough.",
+                "operationId": "listMyMemberships",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/OrganizationMembership"
-                                    }
+                                    "$ref": "#/components/schemas/ListResponseMembership"
                                 },
-                                "example": [
-                                    {
-                                        "organization": {
-                                            "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
-                                            "name": "Acme Logistics",
-                                            "slug": "acme-logistics",
-                                            "status": "active",
-                                            "founder_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
-                                            "owner_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
-                                            "created_at": "2026-01-15T09:30:00Z",
-                                            "object": "organization"
-                                        },
-                                        "role": "dispatcher",
-                                        "object": "organization_membership"
-                                    }
-                                ]
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "organization": {
+                                                "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                                "name": "Acme Logistics",
+                                                "slug": "acme-logistics",
+                                                "status": "active",
+                                                "founder_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                                "owner_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                                "created_at": "2026-01-15T09:30:00Z",
+                                                "object": "organization"
+                                            },
+                                            "role": "dispatcher",
+                                            "object": "membership"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
                             }
                         }
                     },
@@ -1803,7 +1870,7 @@
                                     "title": "Unauthorized",
                                     "status": 401,
                                     "detail": "Missing, expired, or invalid bearer token.",
-                                    "instance": "/v1/me/organizations",
+                                    "instance": "/v1/me/memberships",
                                     "code": "unauthorized",
                                     "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                 }
@@ -1822,7 +1889,7 @@
                                     "title": "Forbidden",
                                     "status": 403,
                                     "detail": "Authenticated, but the role lacks the required scope for this operation.",
-                                    "instance": "/v1/me/organizations",
+                                    "instance": "/v1/me/memberships",
                                     "code": "forbidden",
                                     "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                 }
@@ -1841,7 +1908,7 @@
                                     "title": "Internal Server Error",
                                     "status": 500,
                                     "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
-                                    "instance": "/v1/me/organizations",
+                                    "instance": "/v1/me/memberships",
                                     "code": "internal",
                                     "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                 }
@@ -2501,15 +2568,15 @@
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
                                 "examples": {
-                                    "organization.insufficient_role": {
+                                    "membership.insufficient_role": {
                                         "summary": "Insufficient role",
                                         "value": {
-                                            "type": "https://docs.nizam.ai/errors/organization/insufficient_role",
+                                            "type": "https://docs.nizam.ai/errors/membership/insufficient_role",
                                             "title": "Insufficient role",
                                             "status": 403,
                                             "detail": "This action requires a higher organization role.",
                                             "instance": "/v1/organizations/{id}",
-                                            "code": "organization.insufficient_role",
+                                            "code": "membership.insufficient_role",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -2650,27 +2717,27 @@
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
                                 "examples": {
-                                    "organization.not_a_member": {
+                                    "membership.not_a_member": {
                                         "summary": "Not a member",
                                         "value": {
-                                            "type": "https://docs.nizam.ai/errors/organization/not_a_member",
+                                            "type": "https://docs.nizam.ai/errors/membership/not_a_member",
                                             "title": "Not a member",
                                             "status": 403,
                                             "detail": "The caller is not a member of this organization.",
                                             "instance": "/v1/organizations/{id}",
-                                            "code": "organization.not_a_member",
+                                            "code": "membership.not_a_member",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     },
-                                    "organization.insufficient_role": {
+                                    "membership.insufficient_role": {
                                         "summary": "Insufficient role",
                                         "value": {
-                                            "type": "https://docs.nizam.ai/errors/organization/insufficient_role",
+                                            "type": "https://docs.nizam.ai/errors/membership/insufficient_role",
                                             "title": "Insufficient role",
                                             "status": 403,
                                             "detail": "This action requires a higher organization role.",
                                             "instance": "/v1/organizations/{id}",
-                                            "code": "organization.insufficient_role",
+                                            "code": "membership.insufficient_role",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -2792,7 +2859,7 @@
         "/v1/organizations/{id}/members/me": {
             "delete": {
                 "tags": [
-                    "Organizations"
+                    "Memberships"
                 ],
                 "summary": "Leave an organization",
                 "description": "Removes the caller's membership from the organization. The owner cannot leave \u2014 they must transfer ownership (future endpoint) or delete the org instead.",
@@ -2840,15 +2907,15 @@
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
                                 "examples": {
-                                    "organization.not_a_member": {
+                                    "membership.not_a_member": {
                                         "summary": "Not a member",
                                         "value": {
-                                            "type": "https://docs.nizam.ai/errors/organization/not_a_member",
+                                            "type": "https://docs.nizam.ai/errors/membership/not_a_member",
                                             "title": "Not a member",
                                             "status": 403,
                                             "detail": "The caller is not a member of this organization.",
                                             "instance": "/v1/organizations/{id}/members/me",
-                                            "code": "organization.not_a_member",
+                                            "code": "membership.not_a_member",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -2875,30 +2942,6 @@
                             }
                         }
                     },
-                    "404": {
-                        "description": "Organization not found",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "examples": {
-                                    "organization.not_found": {
-                                        "summary": "Organization not found",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/organization/not_found",
-                                            "title": "Organization not found",
-                                            "status": 404,
-                                            "detail": "The requested organization does not exist or is not visible to the caller.",
-                                            "instance": "/v1/organizations/{id}/members/me",
-                                            "code": "organization.not_found",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
                     "409": {
                         "description": "Owner cannot leave",
                         "content": {
@@ -2907,15 +2950,15 @@
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
                                 "examples": {
-                                    "organization.owner_cannot_leave": {
+                                    "membership.owner_cannot_leave": {
                                         "summary": "Owner cannot leave",
                                         "value": {
-                                            "type": "https://docs.nizam.ai/errors/organization/owner_cannot_leave",
+                                            "type": "https://docs.nizam.ai/errors/membership/owner_cannot_leave",
                                             "title": "Owner cannot leave",
                                             "status": 409,
                                             "detail": "The owner cannot leave this organization. Transfer ownership first, or delete the organization.",
                                             "instance": "/v1/organizations/{id}/members/me",
-                                            "code": "organization.owner_cannot_leave",
+                                            "code": "membership.owner_cannot_leave",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -2932,34 +2975,12 @@
         "/v1/users": {
             "get": {
                 "tags": [
-                    "Identity"
+                    "Users"
                 ],
                 "summary": "List users (paginated)",
-                "description": "Dashboard sees co-members of the caller's active organization (tenant-scoped via the organization_users join). Platform staff bypass RLS and see across tenants, and may sort by `deleted_at`.",
+                "description": "Dashboard sees co-members of the caller's active organization (tenant-scoped via the organization_users join). Platform staff bypass RLS and see across tenants, and may sort by `deleted_at`. RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.",
                 "operationId": "listUsers",
                 "parameters": [
-                    {
-                        "name": "limit",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32",
-                            "default": 20
-                        },
-                        "example": 0
-                    },
-                    {
-                        "name": "offset",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32",
-                            "default": 0
-                        },
-                        "example": 0
-                    },
                     {
                         "name": "sort",
                         "in": "query",
@@ -2972,6 +2993,40 @@
                             }
                         },
                         "example": "<string>"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
                     }
                 ],
                 "responses": {
@@ -2996,7 +3051,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -3096,7 +3153,7 @@
             },
             "post": {
                 "tags": [
-                    "Identity"
+                    "Users"
                 ],
                 "summary": "Invite a new user",
                 "description": "Tenant-admin operation. Creates a placeholder User row that JIT provisioning replaces once the recipient completes Keycloak signup.",
@@ -3263,7 +3320,7 @@
         "/v1/users/{id}": {
             "delete": {
                 "tags": [
-                    "Identity"
+                    "Users"
                 ],
                 "summary": "Soft-delete a user",
                 "description": "Tenant-admin operation. Sets `deleted_at = NOW()`. Subsequent dashboard reads filter the row out; platform staff can still surface and act on it.",
@@ -3372,7 +3429,7 @@
             },
             "patch": {
                 "tags": [
-                    "Identity"
+                    "Users"
                 ],
                 "summary": "Update a user's contact fields",
                 "description": "Tenant-admin operation. Body has no `status` \u2014 lifecycle changes go through the platform-staff surface.",
@@ -4105,7 +4162,7 @@
                     },
                     "role": {
                         "type": "string",
-                        "description": "Role the recipient will hold after acceptance. Lowercase enum names from OrgUserRole.",
+                        "description": "Role the recipient will hold after acceptance. Lowercase enum names from MembershipRole.",
                         "enum": [
                             "super_admin",
                             "admin",
@@ -4566,10 +4623,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",
@@ -4648,7 +4715,53 @@
                     }
                 }
             },
-            "OrganizationMembership": {
+            "ListResponseMembership": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Membership"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "Membership": {
                 "description": "An organization the current user belongs to, with their role inside it.",
                 "properties": {
                     "organization": {
@@ -4672,9 +4785,9 @@
                         "type": "string",
                         "description": "Object type discriminator (Stripe pattern).",
                         "enum": [
-                            "organization_membership"
+                            "membership"
                         ],
-                        "example": "organization_membership"
+                        "example": "membership"
                     }
                 }
             },
@@ -4701,10 +4814,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",
@@ -4794,10 +4917,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",
@@ -4864,10 +4997,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",
@@ -4928,10 +5071,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",
@@ -4987,10 +5140,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",

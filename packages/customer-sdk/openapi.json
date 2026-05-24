@@ -41,10 +41,6 @@
             "description": "Time-bound bindings between assets and operators in a role. Append a new row to reassign; never mutate in place."
         },
         {
-            "name": "Identity",
-            "description": "Users, organizations, and the active session."
-        },
-        {
             "name": "Invites",
             "description": "Org-admin invites and recipient acceptance."
         },
@@ -57,12 +53,32 @@
             "description": "Static reference data \u2014 countries, currencies, languages, timezones."
         },
         {
+            "name": "Memberships",
+            "description": "User \u2194 organization memberships \u2014 list the caller's memberships, join, leave, role checks."
+        },
+        {
+            "name": "Memberships",
+            "description": "User \u2194 organization memberships \u2014 list, join, leave, role checks."
+        },
+        {
             "name": "Operators",
             "description": "Universal controlling-agent master \u2014 humans, autonomous software, teleoperators, hybrids. Kind-discriminated."
         },
         {
             "name": "Organizations",
             "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
+        },
+        {
+            "name": "Organizations",
+            "description": "Organization aggregate \u2014 tenant CRUD."
+        },
+        {
+            "name": "Users",
+            "description": "User aggregate \u2014 current session (`/me`) and user-entity operations."
+        },
+        {
+            "name": "Users",
+            "description": "User aggregate \u2014 current session (`/me`) and user-entity operations (invite, list, lifecycle, platform-staff admin)."
         }
     ],
     "paths": {
@@ -91,7 +107,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -172,7 +190,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -249,7 +269,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -325,7 +347,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -401,7 +425,9 @@
                                         }
                                     ],
                                     "has_more": true,
+                                    "has_previous": false,
                                     "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
                                     "limit": 20
                                 }
                             }
@@ -454,7 +480,7 @@
         "/v1/me": {
             "get": {
                 "tags": [
-                    "Identity"
+                    "Users"
                 ],
                 "summary": "Get the active user",
                 "description": "Returns the authenticated user merged with profile claims from their JWT.\n\nJIT-provisions a shadow row on the first call (so a brand-new Keycloak user can hit any\nendpoint without an explicit signup step) and stamps `last_login_at` + increments\n`login_count` on every subsequent call.\n\nThe `roles` array combines realm roles (flat, e.g. `platform_admin`) with portal-scoped\nclient roles (prefixed, e.g. `dashboard:dispatcher`). The frontend usually drops the\nportal prefix when rendering since it knows its own portal.\n",
@@ -1115,7 +1141,7 @@
                     },
                     "role": {
                         "type": "string",
-                        "description": "Role the recipient will hold after acceptance. Lowercase enum names from OrgUserRole.",
+                        "description": "Role the recipient will hold after acceptance. Lowercase enum names from MembershipRole.",
                         "enum": [
                             "super_admin",
                             "admin",
@@ -1576,10 +1602,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",
@@ -1658,7 +1694,53 @@
                     }
                 }
             },
-            "OrganizationMembership": {
+            "ListResponseMembership": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Membership"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "Membership": {
                 "description": "An organization the current user belongs to, with their role inside it.",
                 "properties": {
                     "organization": {
@@ -1682,9 +1764,9 @@
                         "type": "string",
                         "description": "Object type discriminator (Stripe pattern).",
                         "enum": [
-                            "organization_membership"
+                            "membership"
                         ],
-                        "example": "organization_membership"
+                        "example": "membership"
                     }
                 }
             },
@@ -1711,10 +1793,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",
@@ -1804,10 +1896,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",
@@ -1874,10 +1976,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",
@@ -1938,10 +2050,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",
@@ -1997,10 +2119,20 @@
                         "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
                         "example": true
                     },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
                     "next_cursor": {
                         "type": "string",
                         "description": "Opaque cursor for the next page. `null` on the last page.",
                         "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
                     },
                     "limit": {
                         "type": "integer",

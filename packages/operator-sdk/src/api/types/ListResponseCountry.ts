@@ -12,8 +12,12 @@ export interface ListResponseCountry {
     data?: NizamOperatorRuntime.Country[] | undefined;
     /** True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page. */
     has_more?: boolean | undefined;
+    /** True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page. */
+    has_previous?: boolean | undefined;
     /** Opaque cursor for the next page. `null` on the last page. */
     next_cursor?: string | undefined;
+    /** Opaque cursor for the previous page. `null` on the first page. */
+    prev_cursor?: string | undefined;
     /** Page size that produced this response. */
     limit?: number | undefined;
 }

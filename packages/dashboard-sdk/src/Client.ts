@@ -2,11 +2,12 @@
 
 import { AssetsClient } from "./api/resources/assets/client/Client.js";
 import { AssignmentsClient } from "./api/resources/assignments/client/Client.js";
-import { IdentityClient } from "./api/resources/identity/client/Client.js";
 import { InvitesClient } from "./api/resources/invites/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
+import { MembershipsClient } from "./api/resources/memberships/client/Client.js";
 import { OperatorsClient } from "./api/resources/operators/client/Client.js";
 import { OrganizationsClient } from "./api/resources/organizations/client/Client.js";
+import { UsersClient } from "./api/resources/users/client/Client.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "./BaseClient.js";
 import * as core from "./core/index.js";
@@ -23,9 +24,10 @@ export class NizamDashboardClient {
     protected _assignments: AssignmentsClient | undefined;
     protected _invites: InvitesClient | undefined;
     protected _lookups: LookupsClient | undefined;
-    protected _identity: IdentityClient | undefined;
-    protected _organizations: OrganizationsClient | undefined;
+    protected _users: UsersClient | undefined;
+    protected _memberships: MembershipsClient | undefined;
     protected _operators: OperatorsClient | undefined;
+    protected _organizations: OrganizationsClient | undefined;
 
     constructor(options: NizamDashboardClient.Options) {
         this._options = normalizeClientOptionsWithAuth(options);
@@ -47,16 +49,20 @@ export class NizamDashboardClient {
         return (this._lookups ??= new LookupsClient(this._options));
     }
 
-    public get identity(): IdentityClient {
-        return (this._identity ??= new IdentityClient(this._options));
+    public get users(): UsersClient {
+        return (this._users ??= new UsersClient(this._options));
     }
 
-    public get organizations(): OrganizationsClient {
-        return (this._organizations ??= new OrganizationsClient(this._options));
+    public get memberships(): MembershipsClient {
+        return (this._memberships ??= new MembershipsClient(this._options));
     }
 
     public get operators(): OperatorsClient {
         return (this._operators ??= new OperatorsClient(this._options));
+    }
+
+    public get organizations(): OrganizationsClient {
+        return (this._organizations ??= new OrganizationsClient(this._options));
     }
 
     /**
