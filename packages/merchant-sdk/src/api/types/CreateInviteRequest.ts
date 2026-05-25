@@ -5,16 +5,15 @@ export interface CreateInviteRequest {
     organization_id: string;
     /** Recipient email. */
     email: string;
-    /** Role the recipient will hold after acceptance. Lowercase enum names from MembershipRole. */
+    /** Role the recipient will hold after acceptance. */
     role: CreateInviteRequest.Role;
     /** TTL in days. Defaults to 7. */
     ttl_days?: number | undefined;
 }
 
 export namespace CreateInviteRequest {
-    /** Role the recipient will hold after acceptance. Lowercase enum names from MembershipRole. */
+    /** Role the recipient will hold after acceptance. */
     export const Role = {
-        SuperAdmin: "super_admin",
         Admin: "admin",
         Dispatcher: "dispatcher",
         Manager: "manager",

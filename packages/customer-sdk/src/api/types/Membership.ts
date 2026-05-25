@@ -16,7 +16,6 @@ export interface Membership {
 export namespace Membership {
     /** The user's role in this organization. */
     export const Role = {
-        SuperAdmin: "super_admin",
         Admin: "admin",
         Dispatcher: "dispatcher",
         Manager: "manager",

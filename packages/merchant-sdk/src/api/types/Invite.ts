@@ -25,7 +25,6 @@ export interface Invite {
 export namespace Invite {
     /** Role the recipient will hold after acceptance. */
     export const Role = {
-        SuperAdmin: "super_admin",
         Admin: "admin",
         Dispatcher: "dispatcher",
         Manager: "manager",

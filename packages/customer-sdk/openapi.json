@@ -1141,9 +1141,8 @@
                     },
                     "role": {
                         "type": "string",
-                        "description": "Role the recipient will hold after acceptance. Lowercase enum names from MembershipRole.",
+                        "description": "Role the recipient will hold after acceptance.",
                         "enum": [
-                            "super_admin",
                             "admin",
                             "dispatcher",
                             "manager",
@@ -1151,8 +1150,7 @@
                             "viewer",
                             "billing_admin"
                         ],
-                        "minLength": 1,
-                        "pattern": "^(super_admin|admin|dispatcher|manager|staff|viewer|billing_admin)$"
+                        "example": "dispatcher"
                     },
                     "ttl_days": {
                         "type": "integer",
@@ -1191,7 +1189,6 @@
                         "type": "string",
                         "description": "Role the recipient will hold after acceptance.",
                         "enum": [
-                            "super_admin",
                             "admin",
                             "dispatcher",
                             "manager",
@@ -1750,7 +1747,6 @@
                         "type": "string",
                         "description": "The user's role in this organization.",
                         "enum": [
-                            "super_admin",
                             "admin",
                             "dispatcher",
                             "manager",

@@ -5,7 +5,7 @@
  *     {
  *         organization_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
  *         email: "ali@nizam.ai",
- *         role: "super_admin",
+ *         role: "dispatcher",
  *         ttl_days: 7
  *     }
  */
@@ -14,16 +14,15 @@ export interface CreateInviteRequest {
     organization_id: string;
     /** Recipient email. */
     email: string;
-    /** Role the recipient will hold after acceptance. Lowercase enum names from MembershipRole. */
+    /** Role the recipient will hold after acceptance. */
     role: CreateInviteRequest.Role;
     /** TTL in days. Defaults to 7. */
     ttl_days?: number;
 }
 
 export namespace CreateInviteRequest {
-    /** Role the recipient will hold after acceptance. Lowercase enum names from MembershipRole. */
+    /** Role the recipient will hold after acceptance. */
     export const Role = {
-        SuperAdmin: "super_admin",
         Admin: "admin",
         Dispatcher: "dispatcher",
         Manager: "manager",
