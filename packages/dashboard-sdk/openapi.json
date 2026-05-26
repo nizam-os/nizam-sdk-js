@@ -33,6 +33,10 @@
     ],
     "tags": [
         {
+            "name": "Active organization",
+            "description": "Get and set the caller's preferred active organization \u2014 server-side cross-session memory of the picker choice (#65)."
+        },
+        {
             "name": "Assets",
             "description": "Universal physical-hardware master \u2014 vehicles, drones, robots, trailers, containers, equipment. Kind-discriminated."
         },
@@ -66,11 +70,11 @@
         },
         {
             "name": "Organizations",
-            "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
+            "description": "Organization aggregate \u2014 tenant CRUD."
         },
         {
             "name": "Organizations",
-            "description": "Organization aggregate \u2014 tenant CRUD."
+            "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
         },
         {
             "name": "Users",
@@ -1776,6 +1780,243 @@
                     "carrier",
                     "operator",
                     "platform_staff"
+                ]
+            }
+        },
+        "/v1/me/active-organization": {
+            "get": {
+                "tags": [
+                    "Active organization"
+                ],
+                "summary": "Get the caller's active organization context",
+                "description": "Returns the active organization the request was actually scoped to, the caller's stored\npreference, and the full memberships list. SPA bootstrap uses this to decide post-login\nrouting without making three separate calls.\n\nThe returned `active_organization_id` mirrors the principal's already-resolved scope \u2014\nthe value the active-org enricher pinned on this request, after consulting the\nX-Nizam-Organization header (if any), the stored preference, and the active memberships.\n",
+                "operationId": "getActiveOrganization",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ActiveOrganization"
+                                },
+                                "example": {
+                                    "active_organization_id": "1a2b3c4d-5e6f-7890-abcd-ef0123456789",
+                                    "preferred_organization_id": "1a2b3c4d-5e6f-7890-abcd-ef0123456789",
+                                    "memberships": [
+                                        {
+                                            "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                            "slug": "acme",
+                                            "name": "Acme Inc.",
+                                            "role": "admin"
+                                        }
+                                    ],
+                                    "object": "active_organization"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/me/active-organization",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/me/active-organization",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/me/active-organization",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Active organization"
+                ],
+                "summary": "Set the caller's preferred active organization",
+                "description": "Persists the caller's \"remembered active org\" preference. The slug must name an\norganization the caller is currently an active member of \u2014 otherwise the call fails\nwith `403 tenant.not_a_member` (same code the X-Nizam-Organization header path uses),\nnever silently writes the preference for an inaccessible org.\n\nOn success, returns the new bundled state in one round-trip. The cached\nmembership context for the caller is invalidated so the next request sees the new\npreference immediately.\n",
+                "operationId": "setActiveOrganization",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetActiveOrganizationRequest"
+                            },
+                            "example": {
+                                "slug": "acme-logistics"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ActiveOrganization"
+                                },
+                                "example": {
+                                    "active_organization_id": "1a2b3c4d-5e6f-7890-abcd-ef0123456789",
+                                    "preferred_organization_id": "1a2b3c4d-5e6f-7890-abcd-ef0123456789",
+                                    "memberships": [
+                                        {
+                                            "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                            "slug": "acme",
+                                            "name": "Acme Inc.",
+                                            "role": "admin"
+                                        }
+                                    ],
+                                    "object": "active_organization"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/me/active-organization",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "tenant.not_a_member": {
+                                        "summary": "Forbidden",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/tenant/not_a_member",
+                                            "title": "Forbidden",
+                                            "status": 403,
+                                            "detail": "The current session targets an organization the caller has no active membership in. Switch organizations or pick one you belong to.",
+                                            "instance": "/v1/me/active-organization",
+                                            "code": "tenant.not_a_member",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed \u2014 request body didn't satisfy `@Valid` constraints.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/validation_failed",
+                                    "title": "Validation failed",
+                                    "status": 422,
+                                    "detail": "Request body failed validation.",
+                                    "instance": "/v1/me/active-organization",
+                                    "code": "validation_failed",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
+                                    "errors": [
+                                        {
+                                            "field": "email",
+                                            "code": "must_not_be_blank",
+                                            "message": "must not be blank"
+                                        },
+                                        {
+                                            "field": "dropoff.lat",
+                                            "code": "out_of_range",
+                                            "message": "latitude must be in [-90, 90]"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/me/active-organization",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
                 ]
             }
         },
@@ -3843,7 +4084,7 @@
                     "id": {
                         "type": "string",
                         "format": "uuid",
-                        "description": "Stable UUID. Equal to the Keycloak Organization id.",
+                        "description": "Stable UUID owned by Nizam. Pin this value in URLs and external integrations. The matching Keycloak Organization is tracked server-side via a separate keycloak_id bridge and is not exposed over the SDK; do not assume the two ids are equal.",
                         "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
                     },
                     "name": {
@@ -4567,6 +4808,86 @@
                         "example": "America/Los_Angeles",
                         "maxLength": 64,
                         "minLength": 0
+                    }
+                }
+            },
+            "SetActiveOrganizationRequest": {
+                "description": "Request body for setting the caller's preferred active organization. The slug must name an organization the caller is currently an active member of.",
+                "properties": {
+                    "slug": {
+                        "type": "string",
+                        "description": "Slug of the organization to make active. Must match an active membership.",
+                        "example": "acme-logistics",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "slug"
+                ]
+            },
+            "ActiveOrganization": {
+                "description": "The caller's resolved active organization, stored preference, and full list of memberships.",
+                "properties": {
+                    "active_organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "ID of the organization the request was actually scoped to. Null when the caller has no active memberships.",
+                        "example": "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
+                    },
+                    "preferred_organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stored preference (users.last_active_organization_id). Null when the user has never picked.",
+                        "example": "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
+                    },
+                    "memberships": {
+                        "type": "array",
+                        "description": "All active memberships for the picker UI.",
+                        "items": {
+                            "$ref": "#/components/schemas/MembershipChoice"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "active_organization"
+                        ],
+                        "example": "active_organization"
+                    }
+                }
+            },
+            "MembershipChoice": {
+                "description": "One of the caller's active memberships \u2014 surfaced in the organization.select_required picker body.",
+                "properties": {
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable id of the organization.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "description": "URL-safe handle for the organization.",
+                        "example": "acme"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Acme Inc."
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "The caller's role in this organization. Lowercase enum names from MembershipRole.",
+                        "enum": [
+                            "admin",
+                            "dispatcher",
+                            "manager",
+                            "staff",
+                            "viewer",
+                            "billing_admin"
+                        ],
+                        "example": "admin"
                     }
                 }
             },

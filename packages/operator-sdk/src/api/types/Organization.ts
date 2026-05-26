@@ -4,7 +4,7 @@
  * A tenant — a logistics company, 3PL, or LSP.
  */
 export interface Organization {
-    /** Stable UUID. Equal to the Keycloak Organization id. */
+    /** Stable UUID owned by Nizam. Pin this value in URLs and external integrations. The matching Keycloak Organization is tracked server-side via a separate keycloak_id bridge and is not exposed over the SDK; do not assume the two ids are equal. */
     id?: string | undefined;
     /** Display name. */
     name?: string | undefined;

@@ -16,7 +16,7 @@ export declare namespace OrganizationsClient {
 }
 
 /**
- * Organization aggregate — tenant CRUD.
+ * Tenants — the top-level container for users, merchants, and operations.
  */
 export class OrganizationsClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<OrganizationsClient.Options>;

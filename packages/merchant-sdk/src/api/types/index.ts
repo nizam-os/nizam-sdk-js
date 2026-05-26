@@ -1,3 +1,4 @@
+export * from "./ActiveOrganization.js";
 export * from "./ApiFieldError.js";
 export * from "./Asset.js";
 export * from "./Assignment.js";
@@ -24,10 +25,12 @@ export * from "./ListResponseMembership.js";
 export * from "./ListResponseTimezone.js";
 export * from "./ListResponseUserResource.js";
 export * from "./Membership.js";
+export * from "./MembershipChoice.js";
 export * from "./OpenAssignmentRequest.js";
 export * from "./Operator.js";
 export * from "./Organization.js";
 export * from "./ProblemDetail.js";
+export * from "./SetActiveOrganizationRequest.js";
 export * from "./Timezone.js";
 export * from "./UpdateOrganizationRequest.js";
 export * from "./User.js";

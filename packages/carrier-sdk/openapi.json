@@ -33,6 +33,10 @@
     ],
     "tags": [
         {
+            "name": "Active organization",
+            "description": "Get and set the caller's preferred active organization \u2014 server-side cross-session memory of the picker choice (#65)."
+        },
+        {
             "name": "Assets",
             "description": "Universal physical-hardware master \u2014 vehicles, drones, robots, trailers, containers, equipment. Kind-discriminated."
         },
@@ -66,11 +70,11 @@
         },
         {
             "name": "Organizations",
-            "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
+            "description": "Organization aggregate \u2014 tenant CRUD."
         },
         {
             "name": "Organizations",
-            "description": "Organization aggregate \u2014 tenant CRUD."
+            "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
         },
         {
             "name": "Users",
@@ -1050,7 +1054,7 @@
                     "id": {
                         "type": "string",
                         "format": "uuid",
-                        "description": "Stable UUID. Equal to the Keycloak Organization id.",
+                        "description": "Stable UUID owned by Nizam. Pin this value in URLs and external integrations. The matching Keycloak Organization is tracked server-side via a separate keycloak_id bridge and is not exposed over the SDK; do not assume the two ids are equal.",
                         "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
                     },
                     "name": {
@@ -1774,6 +1778,86 @@
                         "example": "America/Los_Angeles",
                         "maxLength": 64,
                         "minLength": 0
+                    }
+                }
+            },
+            "SetActiveOrganizationRequest": {
+                "description": "Request body for setting the caller's preferred active organization. The slug must name an organization the caller is currently an active member of.",
+                "properties": {
+                    "slug": {
+                        "type": "string",
+                        "description": "Slug of the organization to make active. Must match an active membership.",
+                        "example": "acme-logistics",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "slug"
+                ]
+            },
+            "ActiveOrganization": {
+                "description": "The caller's resolved active organization, stored preference, and full list of memberships.",
+                "properties": {
+                    "active_organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "ID of the organization the request was actually scoped to. Null when the caller has no active memberships.",
+                        "example": "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
+                    },
+                    "preferred_organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stored preference (users.last_active_organization_id). Null when the user has never picked.",
+                        "example": "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
+                    },
+                    "memberships": {
+                        "type": "array",
+                        "description": "All active memberships for the picker UI.",
+                        "items": {
+                            "$ref": "#/components/schemas/MembershipChoice"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "active_organization"
+                        ],
+                        "example": "active_organization"
+                    }
+                }
+            },
+            "MembershipChoice": {
+                "description": "One of the caller's active memberships \u2014 surfaced in the organization.select_required picker body.",
+                "properties": {
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable id of the organization.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "description": "URL-safe handle for the organization.",
+                        "example": "acme"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Acme Inc."
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "The caller's role in this organization. Lowercase enum names from MembershipRole.",
+                        "enum": [
+                            "admin",
+                            "dispatcher",
+                            "manager",
+                            "staff",
+                            "viewer",
+                            "billing_admin"
+                        ],
+                        "example": "admin"
                     }
                 }
             },
