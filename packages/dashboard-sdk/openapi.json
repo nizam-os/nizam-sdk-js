@@ -2862,7 +2862,7 @@
                     "Organizations"
                 ],
                 "summary": "Soft-delete an organization",
-                "description": "Owner-only. Sets `deleted_at` on the organizations row; subsequent reads filter it out. The Keycloak Organization is intentionally left in place \u2014 restore is just an UPDATE un-setting `deleted_at`. Members are not removed; their memberships persist alongside the soft-deleted row in case a restore path is added later.",
+                "description": "Owner-only. Sets `deleted_at` on the organizations row; subsequent reads filter it out. The Keycloak Organization is intentionally left in place \u2014 restore is just an UPDATE un-setting `deleted_at`. Members are not removed; their memberships persist alongside the soft-deleted row in case a restore path is added later. L4 @HasPermission ensures the caller is an admin; the owner-only check inside the handler narrows further.\n\n> **Requires** `administer` on `organization` (SpiceDB permission expression).",
                 "operationId": "deleteOrganization",
                 "parameters": [
                     {
@@ -2976,7 +2976,7 @@
                     "Organizations"
                 ],
                 "summary": "Update mutable fields on an organization",
-                "description": "Set-only partial update. Null/omitted fields stay unchanged. A slug rename also renames the Keycloak Organization's alias inside the same transaction so the two stay in lockstep.",
+                "description": "Set-only partial update. Null/omitted fields stay unchanged. A slug rename also renames the Keycloak Organization's alias inside the same transaction so the two stay in lockstep. Gated by L4 \u2014 admins of the org are allowed; non-admins surface as 403 from Spring Security's access-denied handler.\n\n> **Requires** `administer` on `organization` (SpiceDB permission expression).",
                 "operationId": "updateOrganization",
                 "parameters": [
                     {
@@ -3056,31 +3056,14 @@
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
-                                "examples": {
-                                    "membership.not_a_member": {
-                                        "summary": "Not a member",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/membership/not_a_member",
-                                            "title": "Not a member",
-                                            "status": 403,
-                                            "detail": "The caller is not a member of this organization.",
-                                            "instance": "/v1/organizations/{id}",
-                                            "code": "membership.not_a_member",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                        }
-                                    },
-                                    "membership.insufficient_role": {
-                                        "summary": "Insufficient role",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/membership/insufficient_role",
-                                            "title": "Insufficient role",
-                                            "status": 403,
-                                            "detail": "This action requires a higher organization role.",
-                                            "instance": "/v1/organizations/{id}",
-                                            "code": "membership.insufficient_role",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                        }
-                                    }
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/organizations/{id}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                 }
                             }
                         }
