@@ -28,6 +28,8 @@ export class OrganizationsClient {
     /**
      * Creates a brand-new tenant with the calling user as the founding admin. The id is assigned by Keycloak so the same value identifies the organization in both systems. Slug is derived from the name when not supplied.
      *
+     * Supports the standard `Idempotency-Key` header — submit a UUID v4 per logical attempt (same value on retry). Cached responses replay for matching request bodies; mismatching fingerprints surface as 409 `idempotency.key_conflict`.
+     *
      * @param {NizamDashboard.CreateOrganizationRequest} request
      * @param {OrganizationsClient.RequestOptions} requestOptions - Request-specific configuration.
      *

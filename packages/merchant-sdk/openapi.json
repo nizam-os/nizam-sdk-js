@@ -49,6 +49,10 @@
             "description": "Org-admin invites and recipient acceptance."
         },
         {
+            "name": "Keycloak projections",
+            "description": "Platform-staff control plane for the durable Keycloak projection state machine."
+        },
+        {
             "name": "Lookups",
             "description": "Static reference data \u2014 business categories."
         },
@@ -1094,6 +1098,12 @@
                         "description": "When this organization was created.",
                         "example": "2026-01-15T09:30:00Z"
                     },
+                    "active_organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Populated ONLY on the POST /v1/organizations create response \u2014 the active organization id Nizam pinned for the founder as part of the same transaction that created the org. Null on every other endpoint (GET, list, membership embeds). Per issue #67 phase 1, the SPA writes its active-org cookie from this field instead of issuing a follow-up PATCH /v1/me/active-organization.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
                     "object": {
                         "type": "string",
                         "description": "Object type discriminator (Stripe pattern).",
@@ -1475,6 +1485,91 @@
                     "token"
                 ]
             },
+            "MembershipDriftResponse": {
+                "description": "One org with divergent membership sets.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Nizam organization id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "keycloak_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Matching Keycloak organization id.",
+                        "example": "1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a"
+                    },
+                    "in_nizam_only": {
+                        "type": "array",
+                        "description": "User ids present in the Nizam member set but not in KC.",
+                        "example": [
+                            "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "User ids present in the Nizam member set but not in KC."
+                        },
+                        "uniqueItems": true
+                    },
+                    "in_kc_only": {
+                        "type": "array",
+                        "description": "User ids present in the KC member set but not in Nizam.",
+                        "example": [
+                            "e5f6a1b2-c3d4-5e6f-7a8b-9c0d1e2f3a4b"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "User ids present in the KC member set but not in Nizam."
+                        },
+                        "uniqueItems": true
+                    }
+                }
+            },
+            "ReconcileResponse": {
+                "description": "Drift report for a single aggregate reconciliation.",
+                "properties": {
+                    "nizam_has_kc_missing": {
+                        "type": "array",
+                        "description": "Nizam org ids whose stored keycloak_id no longer resolves on the KC side.",
+                        "example": [
+                            "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Nizam org ids whose stored keycloak_id no longer resolves on the KC side."
+                        }
+                    },
+                    "kc_has_nizam_missing": {
+                        "type": "array",
+                        "description": "KC org ids with no matching Nizam organizations.keycloak_id row.",
+                        "example": [
+                            "1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "KC org ids with no matching Nizam organizations.keycloak_id row."
+                        }
+                    },
+                    "membership_divergent": {
+                        "type": "array",
+                        "description": "Per-org membership-set divergences (KC vs Nizam).",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/MembershipDriftResponse"
+                        }
+                    }
+                }
+            },
             "Assignment": {
                 "description": "Time-bound binding between an asset and an operator in a role.",
                 "properties": {
@@ -1813,6 +1908,14 @@
                     "memberships": {
                         "type": "array",
                         "description": "All active memberships for the picker UI.",
+                        "example": [
+                            {
+                                "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                "slug": "acme",
+                                "name": "Acme Inc.",
+                                "role": "admin"
+                            }
+                        ],
                         "items": {
                             "$ref": "#/components/schemas/MembershipChoice"
                         }
@@ -1829,6 +1932,14 @@
             },
             "MembershipChoice": {
                 "description": "One of the caller's active memberships \u2014 surfaced in the organization.select_required picker body.",
+                "example": [
+                    {
+                        "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                        "slug": "acme",
+                        "name": "Acme Inc.",
+                        "role": "admin"
+                    }
+                ],
                 "properties": {
                     "organization_id": {
                         "type": "string",

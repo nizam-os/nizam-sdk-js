@@ -18,6 +18,8 @@ export interface Organization {
     owner_user_id?: string | undefined;
     /** When this organization was created. */
     created_at?: string | undefined;
+    /** Populated ONLY on the POST /v1/organizations create response — the active organization id Nizam pinned for the founder as part of the same transaction that created the org. Null on every other endpoint (GET, list, membership embeds). Per issue #67 phase 1, the SPA writes its active-org cookie from this field instead of issuing a follow-up PATCH /v1/me/active-organization. */
+    active_organization_id?: string | undefined;
     /** Object type discriminator (Stripe pattern). */
     object?: Organization.Object_ | undefined;
 }

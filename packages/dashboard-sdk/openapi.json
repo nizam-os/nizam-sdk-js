@@ -49,6 +49,10 @@
             "description": "Org-admin invites and recipient acceptance."
         },
         {
+            "name": "Keycloak projections",
+            "description": "Platform-staff control plane for the durable Keycloak projection state machine."
+        },
+        {
             "name": "Lookups",
             "description": "Static reference data \u2014 business categories."
         },
@@ -2084,6 +2088,7 @@
                                                 "founder_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
                                                 "owner_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
                                                 "created_at": "2026-01-15T09:30:00Z",
+                                                "active_organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
                                                 "object": "organization"
                                             },
                                             "role": "dispatcher",
@@ -2465,7 +2470,7 @@
                     "Organizations"
                 ],
                 "summary": "Create a new organization",
-                "description": "Creates a brand-new tenant with the calling user as the founding admin. The id is assigned by Keycloak so the same value identifies the organization in both systems. Slug is derived from the name when not supplied.\n",
+                "description": "Creates a brand-new tenant with the calling user as the founding admin. The id is assigned by Keycloak so the same value identifies the organization in both systems. Slug is derived from the name when not supplied.\n\nSupports the standard `Idempotency-Key` header \u2014 submit a UUID v4 per logical attempt (same value on retry). Cached responses replay for matching request bodies; mismatching fingerprints surface as 409 `idempotency.key_conflict`. ",
                 "operationId": "createOrganization",
                 "requestBody": {
                     "content": {
@@ -2502,6 +2507,7 @@
                                     "founder_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
                                     "owner_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
                                     "created_at": "2026-01-15T09:30:00Z",
+                                    "active_organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
                                     "object": "organization"
                                 }
                             }
@@ -2596,7 +2602,7 @@
                         }
                     },
                     "409": {
-                        "description": "Slug already taken",
+                        "description": "Slug already taken \u00b7 Domain already taken \u00b7 Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -2620,6 +2626,49 @@
                                                     "message": "This slug is already in use."
                                                 }
                                             ]
+                                        }
+                                    },
+                                    "organization.domain_taken": {
+                                        "summary": "Domain already taken",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/organization/domain_taken",
+                                            "title": "Domain already taken",
+                                            "status": 409,
+                                            "detail": "This domain is already attached to another organization.",
+                                            "instance": "/v1/organizations",
+                                            "code": "organization.domain_taken",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
+                                            "errors": [
+                                                {
+                                                    "field": "primary_domain",
+                                                    "code": "already_taken",
+                                                    "message": "This domain is already attached to another organization."
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/organizations",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight. Retry in a moment.",
+                                            "instance": "/v1/organizations",
+                                            "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
                                 }
@@ -2668,6 +2717,7 @@
                                     "founder_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
                                     "owner_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
                                     "created_at": "2026-01-15T09:30:00Z",
+                                    "active_organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
                                     "object": "organization"
                                 }
                             }
@@ -2926,6 +2976,7 @@
                                     "founder_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
                                     "owner_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
                                     "created_at": "2026-01-15T09:30:00Z",
+                                    "active_organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
                                     "object": "organization"
                                 }
                             }
@@ -4124,6 +4175,12 @@
                         "description": "When this organization was created.",
                         "example": "2026-01-15T09:30:00Z"
                     },
+                    "active_organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Populated ONLY on the POST /v1/organizations create response \u2014 the active organization id Nizam pinned for the founder as part of the same transaction that created the org. Null on every other endpoint (GET, list, membership embeds). Per issue #67 phase 1, the SPA writes its active-org cookie from this field instead of issuing a follow-up PATCH /v1/me/active-organization.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
                     "object": {
                         "type": "string",
                         "description": "Object type discriminator (Stripe pattern).",
@@ -4505,6 +4562,91 @@
                     "token"
                 ]
             },
+            "MembershipDriftResponse": {
+                "description": "One org with divergent membership sets.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Nizam organization id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "keycloak_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Matching Keycloak organization id.",
+                        "example": "1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a"
+                    },
+                    "in_nizam_only": {
+                        "type": "array",
+                        "description": "User ids present in the Nizam member set but not in KC.",
+                        "example": [
+                            "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "User ids present in the Nizam member set but not in KC."
+                        },
+                        "uniqueItems": true
+                    },
+                    "in_kc_only": {
+                        "type": "array",
+                        "description": "User ids present in the KC member set but not in Nizam.",
+                        "example": [
+                            "e5f6a1b2-c3d4-5e6f-7a8b-9c0d1e2f3a4b"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "User ids present in the KC member set but not in Nizam."
+                        },
+                        "uniqueItems": true
+                    }
+                }
+            },
+            "ReconcileResponse": {
+                "description": "Drift report for a single aggregate reconciliation.",
+                "properties": {
+                    "nizam_has_kc_missing": {
+                        "type": "array",
+                        "description": "Nizam org ids whose stored keycloak_id no longer resolves on the KC side.",
+                        "example": [
+                            "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Nizam org ids whose stored keycloak_id no longer resolves on the KC side."
+                        }
+                    },
+                    "kc_has_nizam_missing": {
+                        "type": "array",
+                        "description": "KC org ids with no matching Nizam organizations.keycloak_id row.",
+                        "example": [
+                            "1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "KC org ids with no matching Nizam organizations.keycloak_id row."
+                        }
+                    },
+                    "membership_divergent": {
+                        "type": "array",
+                        "description": "Per-org membership-set divergences (KC vs Nizam).",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/MembershipDriftResponse"
+                        }
+                    }
+                }
+            },
             "Assignment": {
                 "description": "Time-bound binding between an asset and an operator in a role.",
                 "properties": {
@@ -4843,6 +4985,14 @@
                     "memberships": {
                         "type": "array",
                         "description": "All active memberships for the picker UI.",
+                        "example": [
+                            {
+                                "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                "slug": "acme",
+                                "name": "Acme Inc.",
+                                "role": "admin"
+                            }
+                        ],
                         "items": {
                             "$ref": "#/components/schemas/MembershipChoice"
                         }
@@ -4859,6 +5009,14 @@
             },
             "MembershipChoice": {
                 "description": "One of the caller's active memberships \u2014 surfaced in the organization.select_required picker body.",
+                "example": [
+                    {
+                        "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                        "slug": "acme",
+                        "name": "Acme Inc.",
+                        "role": "admin"
+                    }
+                ],
                 "properties": {
                     "organization_id": {
                         "type": "string",

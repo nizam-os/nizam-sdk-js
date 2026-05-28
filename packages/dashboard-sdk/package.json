@@ -1,6 +1,6 @@
 {
   "name": "@nizam-os/dashboard-sdk",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "Nizam Dashboard API SDK for TypeScript / JavaScript.",
   "license": "MIT",
   "private": false,
