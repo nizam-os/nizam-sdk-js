@@ -38,4 +38,3 @@ export * from "./Timezone.js";
 export * from "./UpdateOrganizationRequest.js";
 export * from "./User.js";
 export * from "./UserResource.js";
-export * from "./UserUpdateRequest.js";

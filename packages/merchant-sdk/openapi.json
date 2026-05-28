@@ -1814,22 +1814,6 @@
                     "kind"
                 ]
             },
-            "UserUpdateRequest": {
-                "description": "Tenant-admin partial update (contact fields only).",
-                "properties": {
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "description": "New email (optional).",
-                        "example": "renamed@acme.example"
-                    },
-                    "name": {
-                        "type": "string",
-                        "description": "New display name (optional).",
-                        "example": "Ali Issa"
-                    }
-                }
-            },
             "UpdateOrganizationRequest": {
                 "properties": {
                     "name": {

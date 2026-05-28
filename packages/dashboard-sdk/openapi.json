@@ -3270,7 +3270,7 @@
                     "Users"
                 ],
                 "summary": "List users (paginated)",
-                "description": "Dashboard sees co-members of the caller's active organization (tenant-scoped via the organization_users join). Platform staff bypass RLS and see across tenants, and may sort by `deleted_at`. RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.",
+                "description": "Dashboard sees co-members of the caller's active organization (tenant-scoped via the organization_users join). Platform staff bypass RLS and see across tenants. Allowed sort fields: `created_at`, `name` (prefix with `-` for descending). RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.",
                 "operationId": "listUsers",
                 "parameters": [
                     {
@@ -3409,7 +3409,7 @@
                         }
                     },
                     "400": {
-                        "description": "Missing organization context",
+                        "description": "Missing organization context \u00b7 Validation failed",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -3427,6 +3427,18 @@
                                             "code": "auth.missing_organization",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
+                                    },
+                                    "validation_failed": {
+                                        "summary": "Validation failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/validation_failed",
+                                            "title": "Validation failed",
+                                            "status": 400,
+                                            "detail": "Sort field is not supported on this endpoint.",
+                                            "instance": "/v1/users",
+                                            "code": "validation_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
                                     }
                                 }
                             }
@@ -3436,12 +3448,7 @@
                 "x-accessible-to": [
                     "dashboard",
                     "platform_staff"
-                ],
-                "x-restricted-sort-fields": {
-                    "deleted_at": [
-                        "platform_staff"
-                    ]
-                }
+                ]
             },
             "post": {
                 "tags": [
@@ -3588,318 +3595,6 @@
                                             "status": 409,
                                             "detail": "A user with this email is already registered.",
                                             "instance": "/v1/users",
-                                            "code": "user.email_already_taken",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
-                                            "errors": [
-                                                {
-                                                    "field": "email",
-                                                    "code": "already_taken",
-                                                    "message": "This email is already in use."
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "x-accessible-to": [
-                    "dashboard"
-                ]
-            }
-        },
-        "/v1/users/{id}": {
-            "delete": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Soft-delete a user",
-                "description": "Tenant-admin operation. Sets `deleted_at = NOW()`. Subsequent dashboard reads filter the row out; platform staff can still surface and act on it.",
-                "operationId": "softDeleteUser",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        },
-                        "example": "00000000-0000-0000-0000-000000000000"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "401": {
-                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "example": {
-                                    "type": "https://docs.nizam.ai/errors/unauthorized",
-                                    "title": "Unauthorized",
-                                    "status": 401,
-                                    "detail": "Missing, expired, or invalid bearer token.",
-                                    "instance": "/v1/users/{id}",
-                                    "code": "unauthorized",
-                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "example": {
-                                    "type": "https://docs.nizam.ai/errors/forbidden",
-                                    "title": "Forbidden",
-                                    "status": 403,
-                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
-                                    "instance": "/v1/users/{id}",
-                                    "code": "forbidden",
-                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "example": {
-                                    "type": "https://docs.nizam.ai/errors/internal",
-                                    "title": "Internal Server Error",
-                                    "status": 500,
-                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
-                                    "instance": "/v1/users/{id}",
-                                    "code": "internal",
-                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "examples": {
-                                    "user.not_found": {
-                                        "summary": "User not found",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/user/not_found",
-                                            "title": "User not found",
-                                            "status": 404,
-                                            "detail": "No user matches the given id.",
-                                            "instance": "/v1/users/{id}",
-                                            "code": "user.not_found",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "x-accessible-to": [
-                    "dashboard"
-                ]
-            },
-            "patch": {
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Update a user's contact fields",
-                "description": "Tenant-admin operation. Body has no `status` \u2014 lifecycle changes go through the platform-staff surface.",
-                "operationId": "updateUser",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        },
-                        "example": "00000000-0000-0000-0000-000000000000"
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/UserUpdateRequest"
-                            },
-                            "example": {
-                                "email": "renamed@acme.example",
-                                "name": "Ali Issa"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/UserResource"
-                                },
-                                "example": {
-                                    "id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
-                                    "status": "active",
-                                    "email": "ali@nizam.ai",
-                                    "name": "Ali Issa",
-                                    "last_login_at": "2026-05-20T14:00:00Z",
-                                    "login_count": 7,
-                                    "object": "user"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "example": {
-                                    "type": "https://docs.nizam.ai/errors/unauthorized",
-                                    "title": "Unauthorized",
-                                    "status": 401,
-                                    "detail": "Missing, expired, or invalid bearer token.",
-                                    "instance": "/v1/users/{id}",
-                                    "code": "unauthorized",
-                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "example": {
-                                    "type": "https://docs.nizam.ai/errors/forbidden",
-                                    "title": "Forbidden",
-                                    "status": 403,
-                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
-                                    "instance": "/v1/users/{id}",
-                                    "code": "forbidden",
-                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation failed \u2014 request body didn't satisfy `@Valid` constraints.",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "example": {
-                                    "type": "https://docs.nizam.ai/errors/validation_failed",
-                                    "title": "Validation failed",
-                                    "status": 422,
-                                    "detail": "Request body failed validation.",
-                                    "instance": "/v1/users/{id}",
-                                    "code": "validation_failed",
-                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
-                                    "errors": [
-                                        {
-                                            "field": "email",
-                                            "code": "must_not_be_blank",
-                                            "message": "must not be blank"
-                                        },
-                                        {
-                                            "field": "dropoff.lat",
-                                            "code": "out_of_range",
-                                            "message": "latitude must be in [-90, 90]"
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "example": {
-                                    "type": "https://docs.nizam.ai/errors/internal",
-                                    "title": "Internal Server Error",
-                                    "status": 500,
-                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
-                                    "instance": "/v1/users/{id}",
-                                    "code": "internal",
-                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "examples": {
-                                    "user.not_found": {
-                                        "summary": "User not found",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/user/not_found",
-                                            "title": "User not found",
-                                            "status": 404,
-                                            "detail": "No user matches the given id.",
-                                            "instance": "/v1/users/{id}",
-                                            "code": "user.not_found",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Email already taken",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "examples": {
-                                    "user.email_already_taken": {
-                                        "summary": "Email already taken",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/user/email_already_taken",
-                                            "title": "Email already taken",
-                                            "status": 409,
-                                            "detail": "A user with this email is already registered.",
-                                            "instance": "/v1/users/{id}",
                                             "code": "user.email_already_taken",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
                                             "errors": [
@@ -4890,22 +4585,6 @@
                 "required": [
                     "kind"
                 ]
-            },
-            "UserUpdateRequest": {
-                "description": "Tenant-admin partial update (contact fields only).",
-                "properties": {
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "description": "New email (optional).",
-                        "example": "renamed@acme.example"
-                    },
-                    "name": {
-                        "type": "string",
-                        "description": "New display name (optional).",
-                        "example": "Ali Issa"
-                    }
-                }
             },
             "UpdateOrganizationRequest": {
                 "properties": {
