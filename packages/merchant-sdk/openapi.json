@@ -263,7 +263,7 @@
                                             "type": "https://docs.nizam.ai/errors/invite/expired",
                                             "title": "Invite expired",
                                             "status": 410,
-                                            "detail": "This invite is no longer valid. Ask the sender for a fresh one.",
+                                            "detail": "This invite is no longer valid.",
                                             "instance": "/v1/invites/accept",
                                             "code": "invite.expired",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"

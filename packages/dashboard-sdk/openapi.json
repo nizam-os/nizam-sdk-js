@@ -239,7 +239,7 @@
                                             "type": "https://docs.nizam.ai/errors/auth/missing_organization",
                                             "title": "Missing organization context",
                                             "status": 400,
-                                            "detail": "This endpoint requires an active organization on the token. Pick an organization and try again.",
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
                                             "instance": "/v1/assets",
                                             "code": "auth.missing_organization",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
@@ -542,6 +542,30 @@
                                                     "message": "An active assignment in this role already exists."
                                                 }
                                             ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing organization context",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/assignments",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
                                 }
@@ -1206,7 +1230,7 @@
                                             "type": "https://docs.nizam.ai/errors/invite/expired",
                                             "title": "Invite expired",
                                             "status": 410,
-                                            "detail": "This invite is no longer valid. Ask the sender for a fresh one.",
+                                            "detail": "This invite is no longer valid.",
                                             "instance": "/v1/invites/accept",
                                             "code": "invite.expired",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
@@ -1958,7 +1982,7 @@
                                             "type": "https://docs.nizam.ai/errors/tenant/not_a_member",
                                             "title": "Forbidden",
                                             "status": 403,
-                                            "detail": "The current session targets an organization the caller has no active membership in. Switch organizations or pick one you belong to.",
+                                            "detail": "Caller has no active membership in the requested organization.",
                                             "instance": "/v1/me/active-organization",
                                             "code": "tenant.not_a_member",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
@@ -2330,6 +2354,30 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Missing organization context",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/operators",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "x-accessible-to": [
@@ -2665,7 +2713,7 @@
                                             "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
                                             "title": "Idempotency key currently in flight",
                                             "status": 409,
-                                            "detail": "Another request with this Idempotency-Key is still in flight. Retry in a moment.",
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
                                             "instance": "/v1/organizations",
                                             "code": "idempotency.in_progress",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
@@ -3248,7 +3296,7 @@
                                             "type": "https://docs.nizam.ai/errors/membership/owner_cannot_leave",
                                             "title": "Owner cannot leave",
                                             "status": 409,
-                                            "detail": "The owner cannot leave this organization. Transfer ownership first, or delete the organization.",
+                                            "detail": "The owner of an organization cannot leave it.",
                                             "instance": "/v1/organizations/{id}/members/me",
                                             "code": "membership.owner_cannot_leave",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
@@ -3422,7 +3470,7 @@
                                             "type": "https://docs.nizam.ai/errors/auth/missing_organization",
                                             "title": "Missing organization context",
                                             "status": 400,
-                                            "detail": "This endpoint requires an active organization on the token. Pick an organization and try again.",
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
                                             "instance": "/v1/users",
                                             "code": "auth.missing_organization",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
