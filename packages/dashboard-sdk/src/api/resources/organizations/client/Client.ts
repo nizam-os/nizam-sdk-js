@@ -26,6 +26,102 @@ export class OrganizationsClient {
     }
 
     /**
+     * Dashboard callers see exactly the organizations they can read — their own memberships plus any cross-tenant read grants (3PL / delegated), resolved via SpiceDB `lookupResources(read)`. Platform staff see every tenant. Allowed sort field: `created_at` (prefix with `-` for descending). RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.
+     *
+     * @param {NizamDashboard.ListOrganizationsRequest} request
+     * @param {OrganizationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.organizations.listOrganizations({
+     *         starting_after: "Y3Vyc29yX25leHRfMDFKNVE=",
+     *         ending_before: "Y3Vyc29yX25leHRfMDFKNVE="
+     *     })
+     */
+    public listOrganizations(
+        request: NizamDashboard.ListOrganizationsRequest = {},
+        requestOptions?: OrganizationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.ListResponseOrganization> {
+        return core.HttpResponsePromise.fromPromise(this.__listOrganizations(request, requestOptions));
+    }
+
+    private async __listOrganizations(
+        request: NizamDashboard.ListOrganizationsRequest = {},
+        requestOptions?: OrganizationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.ListResponseOrganization>> {
+        const { sort, limit, starting_after: startingAfter, ending_before: endingBefore } = request;
+        const _queryParams: Record<string, unknown> = {
+            sort,
+            limit,
+            starting_after: startingAfter,
+            ending_before: endingBefore,
+        };
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/organizations",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url
+                .queryBuilder()
+                .addMany(_queryParams)
+                .mergeAdditional(requestOptions?.queryParams)
+                .build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as NizamDashboard.ListResponseOrganization,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/organizations");
+    }
+
+    /**
      * Creates a brand-new tenant with the calling user as the founding admin. The id is assigned by Keycloak so the same value identifies the organization in both systems. Slug is derived from the name when not supplied.
      *
      * Supports the standard `Idempotency-Key` header — submit a UUID v4 per logical attempt (same value on retry). Cached responses replay for matching request bodies; mismatching fingerprints surface as 409 `idempotency.key_conflict`.
@@ -130,7 +226,7 @@ export class OrganizationsClient {
     }
 
     /**
-     * Returns one organization. RLS narrows visibility — non-members get 404 indistinguishable from a non-existent id (prevents tenant probing).
+     * Returns one organization. Visible to members, platform staff, and L4-granted cross-tenant readers; everyone else gets 404 — indistinguishable from a non-existent id (prevents tenant probing).
      *
      * @param {NizamDashboard.GetOrganizationRequest} request
      * @param {OrganizationsClient.RequestOptions} requestOptions - Request-specific configuration.

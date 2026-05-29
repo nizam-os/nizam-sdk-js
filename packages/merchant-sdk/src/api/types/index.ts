@@ -22,6 +22,7 @@ export * from "./ListResponseCountry.js";
 export * from "./ListResponseCurrency.js";
 export * from "./ListResponseLanguage.js";
 export * from "./ListResponseMembership.js";
+export * from "./ListResponseOrganization.js";
 export * from "./ListResponseTimezone.js";
 export * from "./ListResponseUserResource.js";
 export * from "./Membership.js";

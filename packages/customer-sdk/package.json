@@ -1,6 +1,6 @@
 {
   "name": "@nizam-os/customer-sdk",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Nizam Customer API SDK for TypeScript / JavaScript.",
   "license": "MIT",
   "private": false,

@@ -1801,6 +1801,52 @@
                     }
                 }
             },
+            "ListResponseOrganization": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Organization"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
             "User": {
                 "description": "The current authenticated user \u2014 identity + portal context + login activity.",
                 "properties": {

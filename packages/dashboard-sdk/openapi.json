@@ -2513,6 +2513,157 @@
             }
         },
         "/v1/organizations": {
+            "get": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "List organizations (paginated)",
+                "description": "Dashboard callers see exactly the organizations they can read \u2014 their own memberships plus any cross-tenant read grants (3PL / delegated), resolved via SpiceDB `lookupResources(read)`. Platform staff see every tenant. Allowed sort field: `created_at` (prefix with `-` for descending). RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.",
+                "operationId": "listOrganizations",
+                "parameters": [
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": "<string>"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseOrganization"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                            "name": "Acme Logistics",
+                                            "slug": "acme-logistics",
+                                            "status": "active",
+                                            "founder_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                            "owner_user_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                            "created_at": "2026-01-15T09:30:00Z",
+                                            "active_organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                            "object": "organization"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/organizations",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/organizations",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/organizations",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "platform_staff"
+                ]
+            },
             "post": {
                 "tags": [
                     "Organizations"
@@ -2735,7 +2886,7 @@
                     "Organizations"
                 ],
                 "summary": "Get an organization by id",
-                "description": "Returns one organization. RLS narrows visibility \u2014 non-members get 404 indistinguishable from a non-existent id (prevents tenant probing).",
+                "description": "Returns one organization. Visible to members, platform staff, and L4-granted cross-tenant readers; everyone else gets 404 \u2014 indistinguishable from a non-existent id (prevents tenant probing).",
                 "operationId": "getOrganization",
                 "parameters": [
                     {
@@ -4802,6 +4953,52 @@
                         "description": "Page of resources. Empty array when there are no matches.",
                         "items": {
                             "$ref": "#/components/schemas/UserResource"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "ListResponseOrganization": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Organization"
                         }
                     },
                     "has_more": {
