@@ -404,7 +404,7 @@ export class OrganizationsClient {
     }
 
     /**
-     * Set-only partial update. Null/omitted fields stay unchanged. A slug rename also renames the Keycloak Organization's alias inside the same transaction so the two stay in lockstep. Gated by L4 — admins of the org are allowed; non-admins surface as 403 from Spring Security's access-denied handler.
+     * Set-only partial update. Null/omitted fields stay unchanged. The slug is a Nizam-side handle; Keycloak Organizations are addressed by their immutable KC id, so a slug rename needs no Keycloak change. Gated by L4 — admins of the org are allowed; non-admins surface as 403 from Spring Security's access-denied handler.
      *
      * > **Requires** `administer` on `organization` (SpiceDB permission expression).
      *

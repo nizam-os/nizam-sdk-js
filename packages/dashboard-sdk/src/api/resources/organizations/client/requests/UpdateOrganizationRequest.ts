@@ -16,7 +16,7 @@ export interface UpdateOrganizationRequest {
     id: string;
     /** New display name. Omit to leave unchanged. */
     name?: string;
-    /** New URL-safe slug. Cross-tenant unique. Cascades to the Keycloak Organization's alias. Omit to leave unchanged. */
+    /** New URL-safe slug. Cross-tenant unique. Omit to leave unchanged. */
     slug?: string;
     /** New business category — lowercase slug from /v1/lookups/business-categories. Omit to leave unchanged. */
     business_category?: string;

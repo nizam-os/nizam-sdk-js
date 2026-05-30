@@ -1825,7 +1825,7 @@
                     },
                     "slug": {
                         "type": "string",
-                        "description": "New URL-safe slug. Cross-tenant unique. Cascades to the Keycloak Organization's alias. Omit to leave unchanged.",
+                        "description": "New URL-safe slug. Cross-tenant unique. Omit to leave unchanged.",
                         "example": "acme-logistics",
                         "maxLength": 64,
                         "minLength": 2,
