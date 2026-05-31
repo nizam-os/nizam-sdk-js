@@ -37,6 +37,10 @@
             "description": "Get and set the caller's preferred active organization \u2014 server-side cross-session memory of the picker choice (#65)."
         },
         {
+            "name": "Activity",
+            "description": "Organization activity feed \u2014 the append-only timeline of what happened, and the durable source of truth behind realtime dashboard updates."
+        },
+        {
             "name": "Assets",
             "description": "Universal physical-hardware master \u2014 vehicles, drones, robots, trailers, containers, equipment. Kind-discriminated."
         },
@@ -79,6 +83,10 @@
         {
             "name": "Organizations",
             "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
+        },
+        {
+            "name": "Realtime",
+            "description": "Realtime (STOMP/WebSocket) session bootstrap \u2014 mint a ticket to open a connection."
         },
         {
             "name": "Users",
@@ -843,6 +851,98 @@
                     "platform_staff"
                 ]
             }
+        },
+        "/v1/realtime/tickets": {
+            "post": {
+                "tags": [
+                    "Realtime"
+                ],
+                "summary": "Mint a realtime connection ticket",
+                "description": "Returns a short-lived ticket to present as `Authorization: Bearer <ticket>` on the STOMP CONNECT frame to `/ws`. Browser clients need this because their Keycloak access token lives in an HTTP-only cookie that JavaScript cannot read; native/mobile clients holding a Keycloak access token may present it directly on CONNECT and skip this call. Mint a fresh ticket per connection attempt \u2014 it expires within seconds.",
+                "operationId": "createRealtimeTicket",
+                "responses": {
+                    "200": {
+                        "description": "A short-lived realtime ticket.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RealtimeTicket"
+                                },
+                                "example": {
+                                    "ticket": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJuaXphbS1yZWFsdGltZS10aWNrZXQifQ.c2lnbmF0dXJl",
+                                    "expires_at": "2026-05-20T14:01:00Z",
+                                    "object": "realtime_ticket"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/realtime/tickets",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/realtime/tickets",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/realtime/tickets",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
         }
     },
     "components": {
@@ -993,6 +1093,30 @@
                             "user"
                         ],
                         "example": "user"
+                    }
+                }
+            },
+            "RealtimeTicket": {
+                "description": "A short-lived ticket authorizing a single realtime (STOMP/WebSocket) connection.",
+                "properties": {
+                    "ticket": {
+                        "type": "string",
+                        "description": "The signed ticket. Send it as `Authorization: Bearer <ticket>` on the STOMP CONNECT frame to /ws. Opaque to the client; do not parse or store it.",
+                        "example": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJuaXphbS1yZWFsdGltZS10aWNrZXQifQ.c2lnbmF0dXJl"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the ticket expires (ISO-8601). Connect promptly; mint a fresh ticket for each new connection attempt.",
+                        "example": "2026-05-20T14:01:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "realtime_ticket"
+                        ],
+                        "example": "realtime_ticket"
                     }
                 }
             },
@@ -2561,6 +2685,139 @@
                         "description": "Page of resources. Empty array when there are no matches.",
                         "items": {
                             "$ref": "#/components/schemas/BusinessCategory"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "ActivityResource": {
+                "description": "One entry in an organization's activity feed (append-only audit timeline).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID of this activity row \u2014 the resource id and pagination key.",
+                        "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    },
+                    "event_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Per-publication idempotency key \u2014 equal to the realtime ActivityFeedItem's `id` for the same event, so a client can dedupe realtime against REST. Null for directly-written audit rows.",
+                        "example": "f0e1d2c3-b4a5-6789-0abc-def123456789"
+                    },
+                    "event": {
+                        "type": "string",
+                        "description": "Canonical event verb.",
+                        "enum": [
+                            "created",
+                            "updated",
+                            "deleted",
+                            "restored",
+                            "state_changed",
+                            "assigned",
+                            "unassigned",
+                            "completed",
+                            "failed",
+                            "cancelled",
+                            "sent",
+                            "received",
+                            "attached",
+                            "detached",
+                            "logged_in",
+                            "logged_out",
+                            "custom"
+                        ],
+                        "example": "assigned"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Human-readable narrative shown in the feed UI.",
+                        "example": "Task 24627851-4850-48b1-95f3-848067b8d278 assigned to driver"
+                    },
+                    "subject_type": {
+                        "type": "string",
+                        "description": "Type of the entity the action targeted (polymorphic subject).",
+                        "example": "task"
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Id of the entity the action targeted.",
+                        "example": "24627851-4850-48b1-95f3-848067b8d278"
+                    },
+                    "causer_type": {
+                        "type": "string",
+                        "description": "Type of the actor that performed the action.",
+                        "example": "user"
+                    },
+                    "causer_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Id of the actor that performed the action. Null for system/scheduled actions.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "log_name": {
+                        "type": "string",
+                        "description": "Optional UI filtering bucket.",
+                        "example": "fleet"
+                    },
+                    "occurred_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the activity was recorded \u2014 the authoritative timestamp.",
+                        "example": "2026-05-20T14:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "activity"
+                        ],
+                        "example": "activity"
+                    }
+                }
+            },
+            "ListResponseActivityResource": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/ActivityResource"
                         }
                     },
                     "has_more": {

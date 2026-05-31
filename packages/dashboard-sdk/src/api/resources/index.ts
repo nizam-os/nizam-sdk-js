@@ -1,5 +1,7 @@
 export * from "./activeOrganization/client/requests/index.js";
 export * as activeOrganization from "./activeOrganization/index.js";
+export * from "./activity/client/requests/index.js";
+export * as activity from "./activity/index.js";
 export * from "./assets/client/requests/index.js";
 export * as assets from "./assets/index.js";
 export * from "./assignments/client/requests/index.js";
@@ -13,5 +15,6 @@ export * from "./operators/client/requests/index.js";
 export * as operators from "./operators/index.js";
 export * from "./organizations/client/requests/index.js";
 export * as organizations from "./organizations/index.js";
+export * as realtime from "./realtime/index.js";
 export * from "./users/client/requests/index.js";
 export * as users from "./users/index.js";
