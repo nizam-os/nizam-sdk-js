@@ -29,8 +29,9 @@ export class UsersClient {
      * Returns the authenticated user merged with profile claims from their JWT.
      *
      * JIT-provisions a shadow row on the first call (so a brand-new Keycloak user can hit any
-     * endpoint without an explicit signup step) and stamps `last_login_at` + increments
-     * `login_count` on every subsequent call.
+     * endpoint without an explicit signup step). Records a login (`last_login_at` = the token's
+     * `auth_time`, `login_count` incremented) only when a genuinely new authentication is seen;
+     * repeated calls within the same session don't write.
      *
      * The `roles` array combines realm roles (flat, e.g. `platform_admin`) with portal-scoped
      * client roles (prefixed, e.g. `dashboard:dispatcher`). The frontend usually drops the
@@ -231,6 +232,11 @@ export class UsersClient {
      *     await client.users.inviteUser({
      *         email: "newhire@acme.example",
      *         name: "New Hire"
+     *     })
+     *
+     * @example
+     *     await client.users.inviteUser({
+     *         email: "newhire@acme.example"
      *     })
      */
     public inviteUser(

@@ -3,6 +3,11 @@
 /**
  * @example
  *     {
+ *         name: "Acme Logistics"
+ *     }
+ *
+ * @example
+ *     {
  *         name: "Acme Logistics",
  *         slug: "acme-logistics",
  *         primary_domain: "acme.com",

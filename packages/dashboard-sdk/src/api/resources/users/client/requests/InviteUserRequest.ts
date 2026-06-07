@@ -6,6 +6,11 @@
  *         email: "newhire@acme.example",
  *         name: "New Hire"
  *     }
+ *
+ * @example
+ *     {
+ *         email: "newhire@acme.example"
+ *     }
  */
 export interface InviteUserRequest {
     /** Recipient email. */

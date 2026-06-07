@@ -129,6 +129,11 @@ export class ActiveOrganizationClient {
      *     await client.activeOrganization.setActiveOrganization({
      *         slug: "acme-logistics"
      *     })
+     *
+     * @example
+     *     await client.activeOrganization.setActiveOrganization({
+     *         slug: "globex-freight"
+     *     })
      */
     public setActiveOrganization(
         request: NizamDashboard.SetActiveOrganizationRequest,

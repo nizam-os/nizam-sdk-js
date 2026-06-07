@@ -7,6 +7,13 @@
  *         operator_id: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
  *         role: "primary"
  *     }
+ *
+ * @example
+ *     {
+ *         asset_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+ *         operator_id: "d2e3f4a5-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
+ *         role: "safety_monitor"
+ *     }
  */
 export interface OpenAssignmentRequest {
     /** Asset id. */

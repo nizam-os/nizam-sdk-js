@@ -7,6 +7,25 @@
  *         name: "Truck 7",
  *         autonomy_level: 0
  *     }
+ *
+ * @example
+ *     {
+ *         kind: "aerial_vehicle",
+ *         name: "Delivery Drone D-12",
+ *         autonomy_level: 4
+ *     }
+ *
+ * @example
+ *     {
+ *         kind: "robot",
+ *         name: "Picker Bot 3",
+ *         autonomy_level: 5
+ *     }
+ *
+ * @example
+ *     {
+ *         kind: "container"
+ *     }
  */
 export interface CreateAssetRequest {
     /** Top-level kind. */

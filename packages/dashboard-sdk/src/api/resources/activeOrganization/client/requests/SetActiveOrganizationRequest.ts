@@ -5,6 +5,11 @@
  *     {
  *         slug: "acme-logistics"
  *     }
+ *
+ * @example
+ *     {
+ *         slug: "globex-freight"
+ *     }
  */
 export interface SetActiveOrganizationRequest {
     /** Slug of the organization to make active. Must match an active membership. */

@@ -112,8 +112,14 @@
                             "schema": {
                                 "$ref": "#/components/schemas/AcceptInviteRequest"
                             },
-                            "example": {
-                                "token": "5f8d2c4e6a1b3d7f9c0e2a4b6d8c0e2a4b6d8c0e2a4b6d8c"
+                            "examples": {
+                                "redeem": {
+                                    "summary": "Redeem an invite token",
+                                    "description": "redeem",
+                                    "value": {
+                                        "token": "5f8d2c4e6a1b3d7f9c0e2a4b6d8c0e2a4b6d8c0e2a4b6d8c"
+                                    }
+                                }
                             }
                         }
                     },
@@ -727,7 +733,7 @@
                     "Users"
                 ],
                 "summary": "Get the active user",
-                "description": "Returns the authenticated user merged with profile claims from their JWT.\n\nJIT-provisions a shadow row on the first call (so a brand-new Keycloak user can hit any\nendpoint without an explicit signup step) and stamps `last_login_at` + increments\n`login_count` on every subsequent call.\n\nThe `roles` array combines realm roles (flat, e.g. `platform_admin`) with portal-scoped\nclient roles (prefixed, e.g. `dashboard:dispatcher`). The frontend usually drops the\nportal prefix when rendering since it knows its own portal.\n",
+                "description": "Returns the authenticated user merged with profile claims from their JWT.\n\nJIT-provisions a shadow row on the first call (so a brand-new Keycloak user can hit any\nendpoint without an explicit signup step). Records a login (`last_login_at` = the token's\n`auth_time`, `login_count` incremented) only when a genuinely new authentication is seen;\nrepeated calls within the same session don't write.\n\nThe `roles` array combines realm roles (flat, e.g. `platform_admin`) with portal-scoped\nclient roles (prefixed, e.g. `dashboard:dispatcher`). The frontend usually drops the\nportal prefix when rendering since it knows its own portal.\n",
                 "operationId": "me",
                 "responses": {
                     "200": {
@@ -1239,55 +1245,47 @@
                 }
             },
             "CreateAutonomousOperatorRequest": {
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/CreateOperatorRequest"
-                    },
-                    {
-                        "type": "object",
-                        "properties": {
-                            "kind": {
-                                "type": "string",
-                                "description": "Discriminator. Always `autonomous` for this variant.",
-                                "enum": [
-                                    "autonomous"
-                                ],
-                                "example": "autonomous",
-                                "minLength": 1
-                            },
-                            "vendor": {
-                                "type": "string",
-                                "description": "Software vendor.",
-                                "example": "Waymo",
-                                "minLength": 1
-                            },
-                            "product": {
-                                "type": "string",
-                                "description": "Software product.",
-                                "example": "Waymo Driver",
-                                "minLength": 1
-                            },
-                            "version": {
-                                "type": "string",
-                                "description": "Software version.",
-                                "example": "7.3",
-                                "minLength": 1
-                            },
-                            "instance_id": {
-                                "type": "string",
-                                "description": "Instance id within the version.",
-                                "example": "4711"
-                            },
-                            "responsible_party": {
-                                "type": "string",
-                                "format": "uuid",
-                                "description": "Legal entity accountable for this operator's actions (a user id).",
-                                "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
-                            }
-                        }
-                    }
-                ],
                 "description": "Create an autonomous (software-agent) operator.",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "description": "Discriminator. Always `autonomous` for this variant.",
+                        "enum": [
+                            "autonomous"
+                        ],
+                        "example": "autonomous",
+                        "minLength": 1
+                    },
+                    "vendor": {
+                        "type": "string",
+                        "description": "Software vendor.",
+                        "example": "Waymo",
+                        "minLength": 1
+                    },
+                    "product": {
+                        "type": "string",
+                        "description": "Software product.",
+                        "example": "Waymo Driver",
+                        "minLength": 1
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "Software version.",
+                        "example": "7.3",
+                        "minLength": 1
+                    },
+                    "instance_id": {
+                        "type": "string",
+                        "description": "Instance id within the version.",
+                        "example": "4711"
+                    },
+                    "responsible_party": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Legal entity accountable for this operator's actions (a user id).",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    }
+                },
                 "required": [
                     "kind",
                     "product",
@@ -1297,58 +1295,50 @@
                 ]
             },
             "CreateHumanOperatorRequest": {
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/CreateOperatorRequest"
-                    },
-                    {
-                        "type": "object",
-                        "properties": {
-                            "kind": {
-                                "type": "string",
-                                "description": "Discriminator. Always `human` for this variant.",
-                                "enum": [
-                                    "human"
-                                ],
-                                "example": "human",
-                                "minLength": 1
-                            },
-                            "name": {
-                                "type": "string",
-                                "description": "Display name.",
-                                "example": "Maria Chen"
-                            },
-                            "user_id": {
-                                "type": "string",
-                                "format": "uuid",
-                                "description": "Linked user id (when the human has a Nizam login).",
-                                "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
-                            },
-                            "license_number": {
-                                "type": "string",
-                                "description": "Driver license number.",
-                                "example": "TX-12345678"
-                            },
-                            "license_class": {
-                                "type": "string",
-                                "description": "License class.",
-                                "example": "CDL-A"
-                            },
-                            "license_expires_at": {
-                                "type": "string",
-                                "format": "date",
-                                "description": "Expiry date.",
-                                "example": "2030-12-31"
-                            },
-                            "license_country": {
-                                "type": "string",
-                                "description": "ISO 3166-1 alpha-2 issuing country.",
-                                "example": "US"
-                            }
-                        }
-                    }
-                ],
                 "description": "Create a human operator.",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "description": "Discriminator. Always `human` for this variant.",
+                        "enum": [
+                            "human"
+                        ],
+                        "example": "human",
+                        "minLength": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Maria Chen"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Linked user id (when the human has a Nizam login).",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "license_number": {
+                        "type": "string",
+                        "description": "Driver license number.",
+                        "example": "TX-12345678"
+                    },
+                    "license_class": {
+                        "type": "string",
+                        "description": "License class.",
+                        "example": "CDL-A"
+                    },
+                    "license_expires_at": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Expiry date.",
+                        "example": "2030-12-31"
+                    },
+                    "license_country": {
+                        "type": "string",
+                        "description": "ISO 3166-1 alpha-2 issuing country.",
+                        "example": "US"
+                    }
+                },
                 "required": [
                     "kind"
                 ]
@@ -1384,43 +1374,35 @@
                 ]
             },
             "CreateTeleoperatedOperatorRequest": {
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/CreateOperatorRequest"
-                    },
-                    {
-                        "type": "object",
-                        "properties": {
-                            "kind": {
-                                "type": "string",
-                                "description": "Discriminator. Always `teleoperated` for this variant.",
-                                "enum": [
-                                    "teleoperated"
-                                ],
-                                "example": "teleoperated",
-                                "minLength": 1
-                            },
-                            "controller_user_id": {
-                                "type": "string",
-                                "format": "uuid",
-                                "description": "User id of the human controller at the remote console.",
-                                "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
-                            },
-                            "control_platform": {
-                                "type": "string",
-                                "description": "Control platform identifier.",
-                                "example": "phantom-auto"
-                            },
-                            "responsible_party": {
-                                "type": "string",
-                                "format": "uuid",
-                                "description": "Legal entity accountable.",
-                                "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
-                            }
-                        }
-                    }
-                ],
                 "description": "Create a teleoperated (human-via-software) operator.",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "description": "Discriminator. Always `teleoperated` for this variant.",
+                        "enum": [
+                            "teleoperated"
+                        ],
+                        "example": "teleoperated",
+                        "minLength": 1
+                    },
+                    "controller_user_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "User id of the human controller at the remote console.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "control_platform": {
+                        "type": "string",
+                        "description": "Control platform identifier.",
+                        "example": "phantom-auto"
+                    },
+                    "responsible_party": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Legal entity accountable.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    }
+                },
                 "required": [
                     "controller_user_id",
                     "kind",
@@ -1694,6 +1676,39 @@
                     }
                 }
             },
+            "OpenAssignmentRequest": {
+                "description": "Open a new assignment.",
+                "properties": {
+                    "asset_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Asset id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Operator id.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "Role discriminator.",
+                        "enum": [
+                            "primary",
+                            "co_operator",
+                            "safety_monitor",
+                            "remote_pilot",
+                            "supervisor"
+                        ]
+                    }
+                },
+                "required": [
+                    "asset_id",
+                    "operator_id",
+                    "role"
+                ]
+            },
             "Assignment": {
                 "description": "Time-bound binding between an asset and an operator in a role.",
                 "properties": {
@@ -1762,39 +1777,6 @@
                     }
                 }
             },
-            "OpenAssignmentRequest": {
-                "description": "Open a new assignment.",
-                "properties": {
-                    "asset_id": {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "Asset id.",
-                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
-                    },
-                    "operator_id": {
-                        "type": "string",
-                        "format": "uuid",
-                        "description": "Operator id.",
-                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
-                    },
-                    "role": {
-                        "type": "string",
-                        "description": "Role discriminator.",
-                        "enum": [
-                            "primary",
-                            "co_operator",
-                            "safety_monitor",
-                            "remote_pilot",
-                            "supervisor"
-                        ]
-                    }
-                },
-                "required": [
-                    "asset_id",
-                    "operator_id",
-                    "role"
-                ]
-            },
             "CloseAssignmentRequest": {
                 "description": "Close an active assignment.",
                 "properties": {
@@ -1815,6 +1797,42 @@
                 },
                 "required": [
                     "reason"
+                ]
+            },
+            "CreateAssetRequest": {
+                "description": "Create a new asset.",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "description": "Top-level kind.",
+                        "enum": [
+                            "ground_vehicle",
+                            "aerial_vehicle",
+                            "marine_vehicle",
+                            "robot",
+                            "agv",
+                            "trailer",
+                            "container",
+                            "pallet",
+                            "equipment"
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Truck 7"
+                    },
+                    "autonomy_level": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "SAE J3016 autonomy level 0..5.",
+                        "example": 0,
+                        "maximum": 5,
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "kind"
                 ]
             },
             "Asset": {
@@ -1901,42 +1919,6 @@
                         "example": "asset"
                     }
                 }
-            },
-            "CreateAssetRequest": {
-                "description": "Create a new asset.",
-                "properties": {
-                    "kind": {
-                        "type": "string",
-                        "description": "Top-level kind.",
-                        "enum": [
-                            "ground_vehicle",
-                            "aerial_vehicle",
-                            "marine_vehicle",
-                            "robot",
-                            "agv",
-                            "trailer",
-                            "container",
-                            "pallet",
-                            "equipment"
-                        ]
-                    },
-                    "name": {
-                        "type": "string",
-                        "description": "Display name.",
-                        "example": "Truck 7"
-                    },
-                    "autonomy_level": {
-                        "type": "integer",
-                        "format": "int32",
-                        "description": "SAE J3016 autonomy level 0..5.",
-                        "example": 0,
-                        "maximum": 5,
-                        "minimum": 0
-                    }
-                },
-                "required": [
-                    "kind"
-                ]
             },
             "UpdateOrganizationRequest": {
                 "properties": {
@@ -2685,6 +2667,148 @@
                         "description": "Page of resources. Empty array when there are no matches.",
                         "items": {
                             "$ref": "#/components/schemas/BusinessCategory"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "AssetListItem": {
+                "description": "An asset as returned by the list/search endpoint \u2014 the asset fields plus relevance metadata when the request was a search.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "description": "Top-level kind.",
+                        "enum": [
+                            "ground_vehicle",
+                            "aerial_vehicle",
+                            "marine_vehicle",
+                            "robot",
+                            "agv",
+                            "trailer",
+                            "container",
+                            "pallet",
+                            "equipment"
+                        ]
+                    },
+                    "sub_kind": {
+                        "type": "string",
+                        "description": "Sub-kind within the kind (free-form).",
+                        "example": "van"
+                    },
+                    "autonomy_level": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "SAE J3016 autonomy level 0..5.",
+                        "example": 2
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "maintenance",
+                            "out_of_service",
+                            "retired",
+                            "sold",
+                            "inactive",
+                            "lost"
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Truck 7"
+                    },
+                    "vin": {
+                        "type": "string",
+                        "description": "Vehicle Identification Number.",
+                        "example": "1HGCM82633A123456"
+                    },
+                    "plate_number": {
+                        "type": "string",
+                        "description": "License plate.",
+                        "example": "AB-123-CD"
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Owning organization id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "current_primary_operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Current primary operator (active assignment, role=primary).",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "rank": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Relevance score (descending) when the request carried `q`; 0 for plain listings. Scores are only comparable within a single response.",
+                        "example": 0.6079
+                    },
+                    "snippet": {
+                        "type": "string",
+                        "description": "Highlighted match fragment when the request carried `q&highlight=true`. Matched terms are wrapped in `<mark>\u2026</mark>`.",
+                        "example": "Mercedes <mark>Sprinter</mark> 313"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "asset"
+                        ],
+                        "example": "asset"
+                    }
+                }
+            },
+            "ListResponseAssetListItem": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/AssetListItem"
                         }
                     },
                     "has_more": {

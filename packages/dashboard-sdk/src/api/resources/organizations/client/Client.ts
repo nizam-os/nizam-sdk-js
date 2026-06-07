@@ -137,6 +137,11 @@ export class OrganizationsClient {
      *
      * @example
      *     await client.organizations.createOrganization({
+     *         name: "Acme Logistics"
+     *     })
+     *
+     * @example
+     *     await client.organizations.createOrganization({
      *         name: "Acme Logistics",
      *         slug: "acme-logistics",
      *         primary_domain: "acme.com",
@@ -421,12 +426,15 @@ export class OrganizationsClient {
      * @example
      *     await client.organizations.updateOrganization({
      *         id: "00000000-0000-0000-0000-000000000000",
-     *         name: "Acme Logistics",
-     *         slug: "acme-logistics",
-     *         business_category: "third_party_logistics",
-     *         phone: "+15551234567",
-     *         country: "US",
-     *         timezone: "America/Los_Angeles"
+     *         name: "Acme Freight"
+     *     })
+     *
+     * @example
+     *     await client.organizations.updateOrganization({
+     *         id: "00000000-0000-0000-0000-000000000000",
+     *         business_category: "courier",
+     *         phone: "+15557654321",
+     *         timezone: "America/New_York"
      *     })
      */
     public updateOrganization(

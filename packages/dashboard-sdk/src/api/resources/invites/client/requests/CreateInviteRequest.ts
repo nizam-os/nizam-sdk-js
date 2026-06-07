@@ -5,8 +5,23 @@
  *     {
  *         organization_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
  *         email: "ali@nizam.ai",
+ *         role: "admin"
+ *     }
+ *
+ * @example
+ *     {
+ *         organization_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+ *         email: "jordan@example.com",
  *         role: "dispatcher",
- *         ttl_days: 7
+ *         ttl_days: 14
+ *     }
+ *
+ * @example
+ *     {
+ *         organization_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+ *         email: "auditor@partner.example",
+ *         role: "viewer",
+ *         ttl_days: 3
  *     }
  */
 export interface CreateInviteRequest {

@@ -44,6 +44,13 @@ export class AssignmentsClient {
      *         operator_id: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
      *         role: "primary"
      *     })
+     *
+     * @example
+     *     await client.assignments.openAssignment({
+     *         asset_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+     *         operator_id: "d2e3f4a5-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
+     *         role: "safety_monitor"
+     *     })
      */
     public openAssignment(
         request: NizamDashboard.OpenAssignmentRequest,
@@ -232,6 +239,12 @@ export class AssignmentsClient {
      *     await client.assignments.closeAssignment({
      *         id: "00000000-0000-0000-0000-000000000000",
      *         reason: "shift_end"
+     *     })
+     *
+     * @example
+     *     await client.assignments.closeAssignment({
+     *         id: "00000000-0000-0000-0000-000000000000",
+     *         reason: "incident"
      *     })
      */
     public closeAssignment(

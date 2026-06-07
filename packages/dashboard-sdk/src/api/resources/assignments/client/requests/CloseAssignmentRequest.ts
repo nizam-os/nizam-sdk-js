@@ -6,6 +6,12 @@
  *         id: "00000000-0000-0000-0000-000000000000",
  *         reason: "shift_end"
  *     }
+ *
+ * @example
+ *     {
+ *         id: "00000000-0000-0000-0000-000000000000",
+ *         reason: "incident"
+ *     }
  */
 export interface CloseAssignmentRequest {
     id: string;
