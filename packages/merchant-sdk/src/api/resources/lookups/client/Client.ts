@@ -29,6 +29,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamMerchant.UnauthorizedError}
+     * @throws {@link NizamMerchant.TooManyRequestsError}
      * @throws {@link NizamMerchant.InternalServerError}
      *
      * @example
@@ -79,6 +80,11 @@ export class LookupsClient {
                         _response.error.body as NizamMerchant.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamMerchant.TooManyRequestsError(
+                        _response.error.body as NizamMerchant.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamMerchant.InternalServerError(
                         _response.error.body as NizamMerchant.ProblemDetail,
@@ -105,6 +111,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamMerchant.UnauthorizedError}
+     * @throws {@link NizamMerchant.TooManyRequestsError}
      * @throws {@link NizamMerchant.InternalServerError}
      *
      * @example
@@ -152,6 +159,11 @@ export class LookupsClient {
                         _response.error.body as NizamMerchant.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamMerchant.TooManyRequestsError(
+                        _response.error.body as NizamMerchant.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamMerchant.InternalServerError(
                         _response.error.body as NizamMerchant.ProblemDetail,
@@ -173,6 +185,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamMerchant.UnauthorizedError}
+     * @throws {@link NizamMerchant.TooManyRequestsError}
      * @throws {@link NizamMerchant.InternalServerError}
      *
      * @example
@@ -220,6 +233,11 @@ export class LookupsClient {
                         _response.error.body as NizamMerchant.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamMerchant.TooManyRequestsError(
+                        _response.error.body as NizamMerchant.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamMerchant.InternalServerError(
                         _response.error.body as NizamMerchant.ProblemDetail,
@@ -241,6 +259,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamMerchant.UnauthorizedError}
+     * @throws {@link NizamMerchant.TooManyRequestsError}
      * @throws {@link NizamMerchant.InternalServerError}
      *
      * @example
@@ -288,6 +307,11 @@ export class LookupsClient {
                         _response.error.body as NizamMerchant.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamMerchant.TooManyRequestsError(
+                        _response.error.body as NizamMerchant.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamMerchant.InternalServerError(
                         _response.error.body as NizamMerchant.ProblemDetail,
@@ -309,6 +333,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamMerchant.UnauthorizedError}
+     * @throws {@link NizamMerchant.TooManyRequestsError}
      * @throws {@link NizamMerchant.InternalServerError}
      *
      * @example
@@ -353,6 +378,11 @@ export class LookupsClient {
             switch (_response.error.statusCode) {
                 case 401:
                     throw new NizamMerchant.UnauthorizedError(
+                        _response.error.body as NizamMerchant.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamMerchant.TooManyRequestsError(
                         _response.error.body as NizamMerchant.ProblemDetail,
                         _response.rawResponse,
                     );

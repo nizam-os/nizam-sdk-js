@@ -42,6 +42,7 @@ export class UsersClient {
      * @throws {@link NizamCustomer.UnauthorizedError}
      * @throws {@link NizamCustomer.ForbiddenError}
      * @throws {@link NizamCustomer.ConflictError}
+     * @throws {@link NizamCustomer.TooManyRequestsError}
      * @throws {@link NizamCustomer.InternalServerError}
      *
      * @example
@@ -92,6 +93,11 @@ export class UsersClient {
                     );
                 case 409:
                     throw new NizamCustomer.ConflictError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCustomer.TooManyRequestsError(
                         _response.error.body as NizamCustomer.ProblemDetail,
                         _response.rawResponse,
                     );

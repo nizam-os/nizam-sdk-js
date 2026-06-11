@@ -38,6 +38,7 @@ export class ActiveOrganizationClient {
      *
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -90,6 +91,11 @@ export class ActiveOrganizationClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamDashboard.InternalServerError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -123,6 +129,7 @@ export class ActiveOrganizationClient {
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -189,6 +196,11 @@ export class ActiveOrganizationClient {
                     );
                 case 422:
                     throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );

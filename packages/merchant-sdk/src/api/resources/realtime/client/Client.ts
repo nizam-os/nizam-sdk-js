@@ -32,6 +32,7 @@ export class RealtimeClient {
      *
      * @throws {@link NizamMerchant.UnauthorizedError}
      * @throws {@link NizamMerchant.ForbiddenError}
+     * @throws {@link NizamMerchant.TooManyRequestsError}
      * @throws {@link NizamMerchant.InternalServerError}
      *
      * @example
@@ -81,6 +82,11 @@ export class RealtimeClient {
                     );
                 case 403:
                     throw new NizamMerchant.ForbiddenError(
+                        _response.error.body as NizamMerchant.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamMerchant.TooManyRequestsError(
                         _response.error.body as NizamMerchant.ProblemDetail,
                         _response.rawResponse,
                     );

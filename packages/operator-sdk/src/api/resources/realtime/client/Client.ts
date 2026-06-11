@@ -32,6 +32,7 @@ export class RealtimeClient {
      *
      * @throws {@link NizamOperatorRuntime.UnauthorizedError}
      * @throws {@link NizamOperatorRuntime.ForbiddenError}
+     * @throws {@link NizamOperatorRuntime.TooManyRequestsError}
      * @throws {@link NizamOperatorRuntime.InternalServerError}
      *
      * @example
@@ -81,6 +82,11 @@ export class RealtimeClient {
                     );
                 case 403:
                     throw new NizamOperatorRuntime.ForbiddenError(
+                        _response.error.body as NizamOperatorRuntime.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamOperatorRuntime.TooManyRequestsError(
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
                         _response.rawResponse,
                     );

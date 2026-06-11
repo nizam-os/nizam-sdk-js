@@ -37,6 +37,7 @@ export class InvitesClient {
      * @throws {@link NizamCarrier.ConflictError}
      * @throws {@link NizamCarrier.GoneError}
      * @throws {@link NizamCarrier.UnprocessableEntityError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
      * @throws {@link NizamCarrier.InternalServerError}
      *
      * @example
@@ -113,6 +114,11 @@ export class InvitesClient {
                     );
                 case 422:
                     throw new NizamCarrier.UnprocessableEntityError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
                         _response.error.body as NizamCarrier.ProblemDetail,
                         _response.rawResponse,
                     );

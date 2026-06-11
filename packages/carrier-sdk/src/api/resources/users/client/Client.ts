@@ -42,6 +42,7 @@ export class UsersClient {
      * @throws {@link NizamCarrier.UnauthorizedError}
      * @throws {@link NizamCarrier.ForbiddenError}
      * @throws {@link NizamCarrier.ConflictError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
      * @throws {@link NizamCarrier.InternalServerError}
      *
      * @example
@@ -92,6 +93,11 @@ export class UsersClient {
                     );
                 case 409:
                     throw new NizamCarrier.ConflictError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
                         _response.error.body as NizamCarrier.ProblemDetail,
                         _response.rawResponse,
                     );

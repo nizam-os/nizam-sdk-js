@@ -29,6 +29,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamOperatorRuntime.UnauthorizedError}
+     * @throws {@link NizamOperatorRuntime.TooManyRequestsError}
      * @throws {@link NizamOperatorRuntime.InternalServerError}
      *
      * @example
@@ -79,6 +80,11 @@ export class LookupsClient {
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamOperatorRuntime.TooManyRequestsError(
+                        _response.error.body as NizamOperatorRuntime.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamOperatorRuntime.InternalServerError(
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
@@ -105,6 +111,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamOperatorRuntime.UnauthorizedError}
+     * @throws {@link NizamOperatorRuntime.TooManyRequestsError}
      * @throws {@link NizamOperatorRuntime.InternalServerError}
      *
      * @example
@@ -155,6 +162,11 @@ export class LookupsClient {
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamOperatorRuntime.TooManyRequestsError(
+                        _response.error.body as NizamOperatorRuntime.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamOperatorRuntime.InternalServerError(
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
@@ -176,6 +188,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamOperatorRuntime.UnauthorizedError}
+     * @throws {@link NizamOperatorRuntime.TooManyRequestsError}
      * @throws {@link NizamOperatorRuntime.InternalServerError}
      *
      * @example
@@ -226,6 +239,11 @@ export class LookupsClient {
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamOperatorRuntime.TooManyRequestsError(
+                        _response.error.body as NizamOperatorRuntime.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamOperatorRuntime.InternalServerError(
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
@@ -247,6 +265,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamOperatorRuntime.UnauthorizedError}
+     * @throws {@link NizamOperatorRuntime.TooManyRequestsError}
      * @throws {@link NizamOperatorRuntime.InternalServerError}
      *
      * @example
@@ -297,6 +316,11 @@ export class LookupsClient {
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamOperatorRuntime.TooManyRequestsError(
+                        _response.error.body as NizamOperatorRuntime.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamOperatorRuntime.InternalServerError(
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
@@ -318,6 +342,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamOperatorRuntime.UnauthorizedError}
+     * @throws {@link NizamOperatorRuntime.TooManyRequestsError}
      * @throws {@link NizamOperatorRuntime.InternalServerError}
      *
      * @example
@@ -365,6 +390,11 @@ export class LookupsClient {
             switch (_response.error.statusCode) {
                 case 401:
                     throw new NizamOperatorRuntime.UnauthorizedError(
+                        _response.error.body as NizamOperatorRuntime.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamOperatorRuntime.TooManyRequestsError(
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
                         _response.rawResponse,
                     );

@@ -32,6 +32,7 @@ export class RealtimeClient {
      *
      * @throws {@link NizamCarrier.UnauthorizedError}
      * @throws {@link NizamCarrier.ForbiddenError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
      * @throws {@link NizamCarrier.InternalServerError}
      *
      * @example
@@ -81,6 +82,11 @@ export class RealtimeClient {
                     );
                 case 403:
                     throw new NizamCarrier.ForbiddenError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
                         _response.error.body as NizamCarrier.ProblemDetail,
                         _response.rawResponse,
                     );

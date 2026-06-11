@@ -37,6 +37,7 @@ export class InvitesClient {
      * @throws {@link NizamOperatorRuntime.ConflictError}
      * @throws {@link NizamOperatorRuntime.GoneError}
      * @throws {@link NizamOperatorRuntime.UnprocessableEntityError}
+     * @throws {@link NizamOperatorRuntime.TooManyRequestsError}
      * @throws {@link NizamOperatorRuntime.InternalServerError}
      *
      * @example
@@ -113,6 +114,11 @@ export class InvitesClient {
                     );
                 case 422:
                     throw new NizamOperatorRuntime.UnprocessableEntityError(
+                        _response.error.body as NizamOperatorRuntime.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamOperatorRuntime.TooManyRequestsError(
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
                         _response.rawResponse,
                     );

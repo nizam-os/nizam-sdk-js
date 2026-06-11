@@ -36,6 +36,7 @@ export class AssignmentsClient {
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.ConflictError}
      * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -119,6 +120,11 @@ export class AssignmentsClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamDashboard.InternalServerError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -143,6 +149,7 @@ export class AssignmentsClient {
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -205,6 +212,11 @@ export class AssignmentsClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamDashboard.InternalServerError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -233,6 +245,7 @@ export class AssignmentsClient {
      * @throws {@link NizamDashboard.NotFoundError}
      * @throws {@link NizamDashboard.ConflictError}
      * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -312,6 +325,11 @@ export class AssignmentsClient {
                     );
                 case 422:
                     throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );

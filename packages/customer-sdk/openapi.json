@@ -150,6 +150,51 @@
                             }
                         }
                     },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/lookups/business-categories",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
                         "content": {
@@ -228,6 +273,51 @@
                                     "detail": "Missing, expired, or invalid bearer token.",
                                     "instance": "/v1/lookups/countries",
                                     "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/lookups/countries",
+                                    "code": "rate_limited",
                                     "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                 }
                             }
@@ -312,6 +402,51 @@
                             }
                         }
                     },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/lookups/currencies",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
                         "content": {
@@ -390,6 +525,51 @@
                             }
                         }
                     },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/lookups/languages",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
                         "content": {
@@ -463,6 +643,51 @@
                                     "detail": "Missing, expired, or invalid bearer token.",
                                     "instance": "/v1/lookups/timezones",
                                     "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/lookups/timezones",
+                                    "code": "rate_limited",
                                     "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                 }
                             }
@@ -558,6 +783,51 @@
                                     "detail": "Authenticated, but the role lacks the required scope for this operation.",
                                     "instance": "/v1/me",
                                     "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/me",
+                                    "code": "rate_limited",
                                     "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                 }
                             }
@@ -681,6 +951,51 @@
                                     "detail": "Authenticated, but the role lacks the required scope for this operation.",
                                     "instance": "/v1/realtime/tickets",
                                     "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/realtime/tickets",
+                                    "code": "rate_limited",
                                     "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                 }
                             }

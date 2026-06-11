@@ -35,6 +35,7 @@ export class OperatorsClient {
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -120,6 +121,11 @@ export class OperatorsClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamDashboard.InternalServerError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -144,6 +150,7 @@ export class OperatorsClient {
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -203,6 +210,11 @@ export class OperatorsClient {
                     );
                 case 404:
                     throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );

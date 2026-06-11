@@ -29,6 +29,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -79,6 +80,11 @@ export class LookupsClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamDashboard.InternalServerError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -105,6 +111,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -152,6 +159,11 @@ export class LookupsClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamDashboard.InternalServerError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -173,6 +185,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -220,6 +233,11 @@ export class LookupsClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamDashboard.InternalServerError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -241,6 +259,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -288,6 +307,11 @@ export class LookupsClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 500:
                     throw new NizamDashboard.InternalServerError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -309,6 +333,7 @@ export class LookupsClient {
      * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
@@ -353,6 +378,11 @@ export class LookupsClient {
             switch (_response.error.statusCode) {
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );

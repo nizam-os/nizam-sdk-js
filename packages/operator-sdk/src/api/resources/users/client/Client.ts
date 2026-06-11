@@ -42,6 +42,7 @@ export class UsersClient {
      * @throws {@link NizamOperatorRuntime.UnauthorizedError}
      * @throws {@link NizamOperatorRuntime.ForbiddenError}
      * @throws {@link NizamOperatorRuntime.ConflictError}
+     * @throws {@link NizamOperatorRuntime.TooManyRequestsError}
      * @throws {@link NizamOperatorRuntime.InternalServerError}
      *
      * @example
@@ -94,6 +95,11 @@ export class UsersClient {
                     );
                 case 409:
                     throw new NizamOperatorRuntime.ConflictError(
+                        _response.error.body as NizamOperatorRuntime.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamOperatorRuntime.TooManyRequestsError(
                         _response.error.body as NizamOperatorRuntime.ProblemDetail,
                         _response.rawResponse,
                     );
