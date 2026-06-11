@@ -124,11 +124,12 @@ export class OrganizationsClient {
     /**
      * Creates a brand-new tenant with the calling user as the founding admin. The id is assigned by Keycloak so the same value identifies the organization in both systems. Slug is derived from the name when not supplied.
      *
-     * Supports the standard `Idempotency-Key` header — submit a UUID v4 per logical attempt (same value on retry). Cached responses replay for matching request bodies; mismatching fingerprints surface as 409 `idempotency.key_conflict`.
+     * Supports the standard `Idempotency-Key` header — submit a UUID (v4 recommended) per logical attempt (same value on retry); malformed keys are rejected with 400 `idempotency.invalid_key`. Successful responses and 4xx domain rejections replay for matching request bodies; transient 5xx responses are never cached, so retrying with the same key re-executes. Mismatching fingerprints surface as 409 `idempotency.key_conflict`.
      *
      * @param {NizamDashboard.CreateOrganizationRequest} request
      * @param {OrganizationsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.ConflictError}
@@ -193,6 +194,11 @@ export class OrganizationsClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,

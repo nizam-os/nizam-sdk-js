@@ -1439,6 +1439,14 @@
                         "items": {
                             "$ref": "#/components/schemas/MembershipDriftResponse"
                         }
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "keycloak_reconciliation"
+                        ],
+                        "example": "keycloak_reconciliation"
                     }
                 }
             },
@@ -1851,7 +1859,8 @@
                             "deactivated",
                             "pending_verification"
                         ],
-                        "example": "suspended"
+                        "example": "suspended",
+                        "pattern": "active|suspended|deactivated|pending_verification"
                     }
                 }
             },

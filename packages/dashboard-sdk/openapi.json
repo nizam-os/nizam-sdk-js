@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "Nizam API \u2014 Dashboard",
-        "description": "The **Nizam Dashboard API** is the surface for tenant administrators, dispatchers, and operations staff working inside a single Organization. Use this API to onboard an organization, invite teammates, manage fleet assets and operators, open and close assignments, and orchestrate day-to-day logistics work.\n\nThis is one of the [audience-scoped Nizam APIs](https://docs.nizam.ai/api/overview). It shares the wire-level conventions (RFC 9457 errors, cursor pagination, expand grammar) with every other Nizam audience \u2014 see the [API conventions reference](https://docs.nizam.ai/api/conventions) for the canonical description. This page covers what's specific to the Dashboard.\n\n## Audience\n\nThis API ships in the **Dashboard SDK** (`@nizam-os/dashboard-sdk` on npm; equivalent packages on PyPI / Maven Central when the language SDK exists). Consumers are:\n\n- **Tenant admins** \u2014 set up the organization, invite users, configure billing, manage integrations.\n- **Dispatchers** \u2014 operate the fleet: open assignments, track operators, manage tasks and orders.\n- **Operations staff** \u2014 read-mostly visibility into the operational state.\n- **Viewers** \u2014 read-only access for stakeholders.\n\nCustomers, end-buyers, carriers, and the operator-runtime stack each have their own SDK. If your consumer is a driver app or autopilot, use [`@nizam-os/operator-sdk`](https://docs.nizam.ai/operator) instead.\n\n## Authentication\n\nIssued by the **`nizam-dashboard`** Keycloak client. Authorization Code + PKCE flow \u2014 see the [Keycloak setup guide](https://docs.nizam.ai/auth/dashboard) for redirect URI configuration.\n\nEvery JWT carries:\n\n| Claim | Meaning |\n|---|---|\n| `azp` | `nizam-dashboard` \u2014 identifies this Portal at the server. |\n| `sub` | The user's UUID (matches `identity.users.id`). |\n| `organization` | The Keycloak Organization the user belongs to, including its UUID. RLS scopes every database query to this id. |\n| `realm_access.roles` | Realm-level roles (e.g., `platform_admin` if the user is internal Nizam staff acting through the Dashboard). |\n| `resource_access.nizam-dashboard.roles` | Dashboard roles for this user. |\n\n## Roles\n\nGranted via the `nizam-dashboard` client role assignment in Keycloak:\n\n| Role | Capability |\n|---|---|\n| `admin` | Full Dashboard access. User invites, organization settings, fleet CRUD. |\n| `dispatcher` | Operational dispatching \u2014 assignments, tasks, route plans. No org settings, no user invites. |\n| `staff` | Read-write on operational state; can't reconfigure the organization. |\n| `viewer` | Read-only access. |\n\nEndpoint authorization is layered: `@AccessibleTo(Portal.DASHBOARD)` gates the SDK at the audience boundary; `@PreAuthorize(\"hasRole('admin')\")` gates individual operations within. The [authorization model](https://docs.nizam.ai/auth/rbac) page walks through both layers.\n\n## Surface\n\nThe Dashboard API is Nizam's largest surface \u2014 every tenant-side feature shows up here.\n\n| Concept | Highlights |\n|---|---|\n| **Organizations** | `POST /v1/organizations` to create a tenant. `PATCH /v1/organizations/{id}` for slug / category / domain updates. Owner-only delete. |\n| **Users & invites** | `POST /v1/users` invites a teammate. `PATCH /v1/users/{id}` updates contact fields (NO status \u2014 status changes are platform-staff only). `DELETE /v1/users/{id}` soft-deletes. |\n| **Fleet \u2014 assets** | `POST /v1/assets` creates a vehicle / drone / robot / container / trailer. Kind-discriminated. |\n| **Fleet \u2014 operators** | `POST /v1/operators` registers a human driver, an autonomous software agent, or a teleoperated controller. |\n| **Fleet \u2014 assignments** | `POST /v1/assignments` binds an operator to an asset in a role. `POST /v1/assignments/{id}/close` ends the binding. Reassignment is open-new + close-old; never mutate in place. |\n\n## Multi-tenancy\n\nEvery Dashboard request is scoped to the calling user's Organization via Postgres Row-Level Security. Cross-tenant operations don't exist in this SDK; they live on the [Platform Staff API](https://docs.nizam.ai/platform-staff) \u2014 a different SDK with stricter audit.\n\n## Status\n\nThe Dashboard surface is the most evolved of the Nizam audiences. New endpoints land here first; cross-Portal patterns are validated on the Dashboard before being mirrored to other SDKs.\n",
+        "description": "The **Nizam Dashboard API** is the surface for tenant administrators, dispatchers, and operations staff working inside a single Organization. Use this API to onboard an organization, invite teammates, manage fleet assets and operators, open and close assignments, and orchestrate day-to-day logistics work.\n\nThis is one of the [audience-scoped Nizam APIs](https://docs.nizam.ai/api/overview). It shares the wire-level conventions (RFC 9457 errors, cursor pagination, expand grammar) with every other Nizam audience \u2014 see the [API conventions reference](https://docs.nizam.ai/api/conventions) for the canonical description. This page covers what's specific to the Dashboard.\n\n## Audience\n\nThis API ships in the **Dashboard SDK** (`@nizam-os/dashboard-sdk` on npm; equivalent packages on PyPI / Maven Central when the language SDK exists). Consumers are:\n\n- **Tenant admins** \u2014 set up the organization, invite users, configure billing, manage integrations.\n- **Dispatchers** \u2014 operate the fleet: open assignments, track operators, manage tasks and orders.\n- **Operations staff** \u2014 read-mostly visibility into the operational state.\n- **Viewers** \u2014 read-only access for stakeholders.\n\nCustomers, end-buyers, carriers, and the operator-runtime stack each have their own SDK. If your consumer is a driver app or autopilot, use [`@nizam-os/operator-sdk`](https://docs.nizam.ai/operator) instead.\n\n## Authentication\n\nIssued by the **`nizam-dashboard`** Keycloak client. Authorization Code + PKCE flow \u2014 see the [Keycloak setup guide](https://docs.nizam.ai/auth/dashboard) for redirect URI configuration.\n\nEvery JWT carries:\n\n| Claim | Meaning |\n|---|---|\n| `azp` | `nizam-dashboard` \u2014 identifies this Portal at the server. |\n| `sub` | The user's UUID (matches `identity.users.id`). |\n| `organization` | The Keycloak Organization the user belongs to, including its UUID. RLS scopes every database query to this id. |\n| `realm_access.roles` | Realm-level roles (e.g., `platform_admin` if the user is internal Nizam staff acting through the Dashboard). |\n| `resource_access.nizam-dashboard.roles` | Dashboard roles for this user. |\n\n## Roles\n\nGranted via the `nizam-dashboard` client role assignment in Keycloak:\n\n| Role | Capability |\n|---|---|\n| `admin` | Full Dashboard access. User invites, organization settings, fleet CRUD. |\n| `dispatcher` | Operational dispatching \u2014 assignments, tasks, route plans. No org settings, no user invites. |\n| `staff` | Read-write on operational state; can't reconfigure the organization. |\n| `viewer` | Read-only access. |\n\nEndpoint authorization is layered: `@AccessibleTo(Portal.DASHBOARD)` gates the SDK at the audience boundary; `@PreAuthorize(\"hasAuthority('dashboard:admin')\")` gates individual operations within. The [authorization model](https://docs.nizam.ai/auth/rbac) page walks through both layers.\n\n## Surface\n\nThe Dashboard API is Nizam's largest surface \u2014 every tenant-side feature shows up here.\n\n| Concept | Highlights |\n|---|---|\n| **Organizations** | `POST /v1/organizations` to create a tenant. `PATCH /v1/organizations/{id}` for slug / category / domain updates. Owner-only delete. |\n| **Users & invites** | `POST /v1/users` invites a teammate. `PATCH /v1/users/{id}` updates contact fields (NO status \u2014 status changes are platform-staff only). `DELETE /v1/users/{id}` soft-deletes. |\n| **Fleet \u2014 assets** | `POST /v1/assets` creates a vehicle / drone / robot / container / trailer. Kind-discriminated. |\n| **Fleet \u2014 operators** | `POST /v1/operators` registers a human driver, an autonomous software agent, or a teleoperated controller. |\n| **Fleet \u2014 assignments** | `POST /v1/assignments` binds an operator to an asset in a role. `POST /v1/assignments/{id}/close` ends the binding. Reassignment is open-new + close-old; never mutate in place. |\n\n## Multi-tenancy\n\nEvery Dashboard request is scoped to the calling user's Organization via Postgres Row-Level Security. Cross-tenant operations don't exist in this SDK; they live on the [Platform Staff API](https://docs.nizam.ai/platform-staff) \u2014 a different SDK with stricter audit.\n\n## Status\n\nThe Dashboard surface is the most evolved of the Nizam audiences. New endpoints land here first; cross-Portal patterns are validated on the Dashboard before being mirrored to other SDKs.\n",
         "contact": {
             "name": "Nizam Support",
             "url": "https://nizam.ai",
@@ -3170,7 +3170,7 @@
                     "Organizations"
                 ],
                 "summary": "Create a new organization",
-                "description": "Creates a brand-new tenant with the calling user as the founding admin. The id is assigned by Keycloak so the same value identifies the organization in both systems. Slug is derived from the name when not supplied.\n\nSupports the standard `Idempotency-Key` header \u2014 submit a UUID v4 per logical attempt (same value on retry). Cached responses replay for matching request bodies; mismatching fingerprints surface as 409 `idempotency.key_conflict`. ",
+                "description": "Creates a brand-new tenant with the calling user as the founding admin. The id is assigned by Keycloak so the same value identifies the organization in both systems. Slug is derived from the name when not supplied.\n\nSupports the standard `Idempotency-Key` header \u2014 submit a UUID (v4 recommended) per logical attempt (same value on retry); malformed keys are rejected with 400 `idempotency.invalid_key`. Successful responses and 4xx domain rejections replay for matching request bodies; transient 5xx responses are never cached, so retrying with the same key re-executes. Mismatching fingerprints surface as 409 `idempotency.key_conflict`. ",
                 "operationId": "createOrganization",
                 "requestBody": {
                     "content": {
@@ -3381,6 +3381,30 @@
                                             "detail": "Another request with this Idempotency-Key is still in flight.",
                                             "instance": "/v1/organizations",
                                             "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Idempotency-Key header",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/organizations",
+                                            "code": "idempotency.invalid_key",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -5150,6 +5174,14 @@
                         "items": {
                             "$ref": "#/components/schemas/MembershipDriftResponse"
                         }
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern).",
+                        "enum": [
+                            "keycloak_reconciliation"
+                        ],
+                        "example": "keycloak_reconciliation"
                     }
                 }
             },
@@ -5562,7 +5594,8 @@
                             "deactivated",
                             "pending_verification"
                         ],
-                        "example": "suspended"
+                        "example": "suspended",
+                        "pattern": "active|suspended|deactivated|pending_verification"
                     }
                 }
             },
