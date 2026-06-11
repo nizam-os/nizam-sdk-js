@@ -13,6 +13,12 @@ export interface ListAssetsRequest {
     q?: string;
     /** Include a highlighted match snippet per hit (search mode only). */
     highlight?: boolean;
+    /** Filter by lifecycle status. Comma-separated; values: `active`, `maintenance`, `out_of_service`, `retired`, `sold`, `inactive`, `lost`. */
+    status?: string | string[];
+    /** Filter by top-level kind. Comma-separated; values: `ground_vehicle`, `aerial_vehicle`, `marine_vehicle`, `robot`, `agv`, `trailer`, `container`, `pallet`, `equipment`. */
+    kind?: string | string[];
+    /** Sort order. Allowed fields: `created_at`, `name`, `plate_number`. Prefix a field with `-` for descending (e.g. `-created_at`); unknown fields are rejected with `400 validation_failed`. */
+    sort?: string | string[];
     /** Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied. */
     limit?: number;
     /** Opaque cursor — return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`. */

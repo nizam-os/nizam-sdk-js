@@ -24,6 +24,8 @@ export interface AssetListItem {
     organization_id?: string | undefined;
     /** Current primary operator (active assignment, role=primary). */
     current_primary_operator_id?: string | undefined;
+    /** Creation timestamp (ISO-8601 UTC). */
+    created_at?: string | undefined;
     /** Relevance score (descending) when the request carried `q`; 0 for plain listings. Scores are only comparable within a single response. */
     rank?: number | undefined;
     /** Highlighted match fragment when the request carried `q&highlight=true`. Matched terms are wrapped in `<mark>…</mark>`. */

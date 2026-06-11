@@ -26,7 +26,7 @@ export class AssetsClient {
     }
 
     /**
-     * Without `q`: the org's assets ordered by `created_at` descending. With `q`: ranked search across name, VIN, code, plate, serial, call sign, make, model and sub-kind — accent-insensitive and language-agnostic (epic #97). Matching is hybrid: whole words and word-prefixes (type-ahead — `pick` finds `Picker Bot 3`) plus substrings and typos (`ick`, or a misspelled `sprintr`, still match). Results are ordered by relevance and support forward-only cursors (`starting_after`). `highlight=true` adds a `<mark>`-wrapped match snippet.
+     * Without `q`: the org's assets ordered by `created_at` descending (or an explicit `sort`). With `q`: ranked search across name, VIN, code, plate, serial, call sign, make, model and sub-kind — accent-insensitive and language-agnostic (epic #97). Matching is hybrid: whole words and word-prefixes (type-ahead — `pick` finds `Picker Bot 3`) plus substrings and typos (`ick`, or a misspelled `sprintr`, still match). `q` results are ordered by relevance unless `sort` is given, in which case the search narrows the rows and `sort` orders them. Allowed sort fields: `created_at`, `name`, `plate_number` — a single field, `-` prefix for descending. `status` / `kind` accept comma-separated values and narrow every mode. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort that minted them — switching sorts restarts from the first page. `highlight=true` adds a `<mark>`-wrapped match snippet (relevance mode only).
      *
      * @param {NizamDashboard.ListAssetsRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -55,10 +55,22 @@ export class AssetsClient {
         request: NizamDashboard.ListAssetsRequest = {},
         requestOptions?: AssetsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.ListResponseAssetListItem>> {
-        const { q, highlight, limit, starting_after: startingAfter, ending_before: endingBefore } = request;
+        const {
+            q,
+            highlight,
+            status,
+            kind,
+            sort,
+            limit,
+            starting_after: startingAfter,
+            ending_before: endingBefore,
+        } = request;
         const _queryParams: Record<string, unknown> = {
             q,
             highlight,
+            status,
+            kind,
+            sort,
             limit,
             starting_after: startingAfter,
             ending_before: endingBefore,

@@ -8,7 +8,7 @@
  *     }
  */
 export interface ListOrganizationsRequest {
-    /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+    /** Sort order. Allowed fields: `created_at`. Prefix a field with `-` for descending (e.g. `-created_at`); unknown fields are rejected with `400 validation_failed`. */
     sort?: string | string[];
     /** Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied. */
     limit?: number;
