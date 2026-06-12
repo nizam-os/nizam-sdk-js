@@ -19,6 +19,8 @@ export interface User {
     last_login_at?: string | undefined;
     /** Total logins observed by this service. */
     login_count?: number | undefined;
+    /** File id of the current profile picture (epic #151 / #166); null until one is uploaded. Request bytes via the files download-url endpoint, or let `GET /users/{id}/profile-picture` pick the nearest thumbnail. */
+    profile_picture_file_id?: string | undefined;
     /** Object type discriminator (Stripe pattern). */
     object?: User.Object_ | undefined;
 }

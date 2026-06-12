@@ -301,8 +301,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -313,8 +313,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -537,8 +537,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -549,8 +549,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -761,8 +761,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -773,8 +773,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -968,8 +968,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -980,8 +980,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -1201,8 +1201,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -1213,8 +1213,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -1476,8 +1476,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -1488,8 +1488,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -1635,8 +1635,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -1647,8 +1647,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -1837,8 +1837,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -1849,8 +1849,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2082,8 +2082,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2094,8 +2094,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2291,8 +2291,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2303,8 +2303,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2419,8 +2419,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2431,8 +2431,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2543,8 +2543,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2555,8 +2555,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2666,8 +2666,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2678,8 +2678,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2789,8 +2789,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2801,8 +2801,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2877,6 +2877,7 @@
                                     "name": "Ali Issa",
                                     "last_login_at": "2026-05-20T14:00:00Z",
                                     "login_count": 7,
+                                    "profile_picture_file_id": "7a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
                                     "object": "user"
                                 }
                             }
@@ -2929,8 +2930,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2941,8 +2942,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -3098,8 +3099,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -3110,8 +3111,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -3360,8 +3361,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -3372,8 +3373,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -3557,8 +3558,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -3569,8 +3570,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -3752,8 +3753,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -3764,8 +3765,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -4003,8 +4004,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -4015,8 +4016,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -4233,8 +4234,8 @@
                                     
                                 }
                             },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -4245,8 +4246,8 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -6512,6 +6513,12 @@
                         "format": "int64",
                         "description": "Total logins observed by this service.",
                         "example": 7
+                    },
+                    "profile_picture_file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "File id of the current profile picture (epic #151 / #166); null until one is uploaded. Request bytes via the files download-url endpoint, or let `GET /users/{id}/profile-picture` pick the nearest thumbnail.",
+                        "example": "7a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
                     },
                     "object": {
                         "type": "string",
