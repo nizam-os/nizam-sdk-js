@@ -2,6 +2,7 @@
 
 import { InvitesClient } from "./api/resources/invites/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
+import { PositionsClient } from "./api/resources/positions/client/Client.js";
 import { RealtimeClient } from "./api/resources/realtime/client/Client.js";
 import { UsersClient } from "./api/resources/users/client/Client.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
@@ -19,6 +20,7 @@ export class NizamOperatorRuntimeClient {
     protected _invites: InvitesClient | undefined;
     protected _lookups: LookupsClient | undefined;
     protected _users: UsersClient | undefined;
+    protected _positions: PositionsClient | undefined;
     protected _realtime: RealtimeClient | undefined;
 
     constructor(options: NizamOperatorRuntimeClient.Options) {
@@ -35,6 +37,10 @@ export class NizamOperatorRuntimeClient {
 
     public get users(): UsersClient {
         return (this._users ??= new UsersClient(this._options));
+    }
+
+    public get positions(): PositionsClient {
+        return (this._positions ??= new PositionsClient(this._options));
     }
 
     public get realtime(): RealtimeClient {

@@ -1733,6 +1733,650 @@
                 ]
             }
         },
+        "/v1/fleet/positions": {
+            "get": {
+                "tags": [
+                    "Positions"
+                ],
+                "summary": "Recorded position history (newest first)",
+                "description": "Keyset-paginated track over a required [start, end) device-time window (max 31 days \u2014 the window drives partition pruning). Optionally narrowed to one operator.",
+                "operationId": "listPositions",
+                "parameters": [
+                    {
+                        "name": "operator_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2026-05-20T14:00:00Z"
+                    },
+                    {
+                        "name": "end",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2026-05-20T14:00:00Z"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponsePosition"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "id": "b7e6a2f0-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
+                                            "operator_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                            "lat": 45.5017,
+                                            "lng": -73.5673,
+                                            "heading": 182.5,
+                                            "bearing": 190.0,
+                                            "speed": 42.3,
+                                            "altitude": 35.2,
+                                            "recorded_at": "2026-01-15T12:34:56Z",
+                                            "object": "position"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/fleet/positions",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/fleet/positions",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/fleet/positions",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/fleet/positions",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing organization context \u00b7 Validation failed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/fleet/positions",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "validation_failed": {
+                                        "summary": "Validation failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/validation_failed",
+                                            "title": "Validation failed",
+                                            "status": 400,
+                                            "detail": "A query parameter is invalid.",
+                                            "instance": "/v1/fleet/positions",
+                                            "code": "validation_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/fleet/positions/current": {
+            "get": {
+                "tags": [
+                    "Positions"
+                ],
+                "summary": "Current position of every operator in the organization",
+                "description": "Live snapshot for initial map load and STOMP-reconnect reconciliation. Served from the Redis hot cache (positions fresher than ~60s); a cold cache falls back to the most recent recorded position per operator over the last 15 minutes. Unpaginated by design: the result is bounded by the fleet's currently-reporting operators.",
+                "operationId": "listCurrentPositions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseOperatorPosition"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "operator_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                            "lat": 45.5017,
+                                            "lng": -73.5673,
+                                            "heading": 182.5,
+                                            "bearing": 190.0,
+                                            "speed": 42.3,
+                                            "altitude": 35.2,
+                                            "captured_at": "2026-01-15T12:34:56Z",
+                                            "object": "operator_position"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/fleet/positions/current",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/fleet/positions/current",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/fleet/positions/current",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/fleet/positions/current",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing organization context",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/fleet/positions/current",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/fleet/positions/heatmap": {
+            "get": {
+                "tags": [
+                    "Positions"
+                ],
+                "summary": "H3-aggregated position counts for a viewport",
+                "description": "Counts recorded positions per H3 hex cell (resolution 9 \u2248 150 m or 11 \u2248 24 m) inside a `bbox` viewport over a device-time window (default: the last 24 hours). Cells are returned as hex strings \u2014 H3 indexes exceed the JavaScript safe-integer range. Unpaginated: bounded by the viewport's cell cover (max 4096 cells).",
+                "operationId": "getPositionsHeatmap",
+                "parameters": [
+                    {
+                        "name": "h3_res",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 9
+                        },
+                        "example": 0
+                    },
+                    {
+                        "name": "bbox",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "<string>"
+                    },
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2026-05-20T14:00:00Z"
+                    },
+                    {
+                        "name": "end",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2026-05-20T14:00:00Z"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseHeatmapCell"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "h3_cell": "892a1072cffffff",
+                                            "h3_res": 9,
+                                            "count": 17,
+                                            "object": "heatmap_cell"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/fleet/positions/heatmap",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/fleet/positions/heatmap",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/fleet/positions/heatmap",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/fleet/positions/heatmap",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing organization context \u00b7 Validation failed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/fleet/positions/heatmap",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "validation_failed": {
+                                        "summary": "Validation failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/validation_failed",
+                                            "title": "Validation failed",
+                                            "status": 400,
+                                            "detail": "A query parameter is invalid.",
+                                            "instance": "/v1/fleet/positions/heatmap",
+                                            "code": "validation_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
         "/v1/invites": {
             "post": {
                 "tags": [
@@ -7014,6 +7658,31 @@
                     }
                 }
             },
+            "MqttToken": {
+                "description": "A short-lived MQTT publish credential for the position ingest broker.",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "description": "JWT to present as the MQTT CONNECT password. The CONNECT username must be the operator id embedded in the token's operator_id claim.",
+                        "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJtcXR0In0.sig"
+                    },
+                    "expires_in": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Seconds until the token expires. Re-mint before this elapses to stay connected.",
+                        "example": 900
+                    },
+                    "topic": {
+                        "type": "string",
+                        "description": "The only topic this credential may publish to: nizam/{organizationId}/operators/{operatorId}/location.",
+                        "example": "nizam/8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6/operators/c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f/location"
+                    },
+                    "object": {
+                        "type": "string",
+                        "example": "mqtt_token"
+                    }
+                }
+            },
             "Job": {
                 "description": "A long-running, retryable, operator-visible unit of work \u2014 bulk imports, exports, backfills, cache rebuilds. The job row is the persistent handle; the executing engine (Temporal workflow or lease worker, declared per kind) reports progress into it. Cancellation is cooperative: already-running work continues until the engine's next checkpoint.",
                 "properties": {
@@ -8465,6 +9134,299 @@
                         "format": "int32",
                         "description": "Page size that produced this response.",
                         "example": 20
+                    }
+                }
+            },
+            "ListResponsePosition": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Position"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "Position": {
+                "description": "One recorded GPS position of an operator.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Position id.",
+                        "example": "b7e6a2f0-3c4d-4e5f-8a9b-0c1d2e3f4a5b"
+                    },
+                    "operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Operator the fix belongs to.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Latitude (WGS84).",
+                        "example": 45.5017
+                    },
+                    "lng": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Longitude (WGS84).",
+                        "example": -73.5673
+                    },
+                    "heading": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Direction of travel, compass degrees [0,360).",
+                        "example": 182.5
+                    },
+                    "bearing": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Course over ground toward the destination, compass degrees [0,360).",
+                        "example": 190.0
+                    },
+                    "speed": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Ground speed, km/h.",
+                        "example": 42.3
+                    },
+                    "altitude": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Altitude above the WGS84 ellipsoid, metres.",
+                        "example": 35.2
+                    },
+                    "recorded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Device-time the fix was captured (authoritative).",
+                        "example": "2026-01-15T12:34:56Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "position"
+                        ],
+                        "example": "position"
+                    }
+                }
+            },
+            "HeatmapCell": {
+                "description": "Aggregated position count for one H3 hex cell.",
+                "properties": {
+                    "h3_cell": {
+                        "type": "string",
+                        "description": "H3 cell index, lowercase hex (string \u2014 H3 indexes exceed the JS safe-integer range).",
+                        "example": "892a1072cffffff"
+                    },
+                    "h3_res": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "H3 resolution of the cell (9 or 11).",
+                        "example": 9
+                    },
+                    "count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of positions recorded in the cell over the window.",
+                        "example": 17
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "heatmap_cell"
+                        ],
+                        "example": "heatmap_cell"
+                    }
+                }
+            },
+            "ListResponseHeatmapCell": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/HeatmapCell"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "ListResponseOperatorPosition": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/OperatorPosition"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "OperatorPosition": {
+                "description": "The current position of one operator.",
+                "properties": {
+                    "operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Operator id.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Latitude (WGS84).",
+                        "example": 45.5017
+                    },
+                    "lng": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Longitude (WGS84).",
+                        "example": -73.5673
+                    },
+                    "heading": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Direction of travel, compass degrees [0,360).",
+                        "example": 182.5
+                    },
+                    "bearing": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Course over ground, compass degrees [0,360).",
+                        "example": 190.0
+                    },
+                    "speed": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Ground speed, km/h.",
+                        "example": 42.3
+                    },
+                    "altitude": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Altitude above the WGS84 ellipsoid, metres.",
+                        "example": 35.2
+                    },
+                    "captured_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Device-time of the fix.",
+                        "example": "2026-01-15T12:34:56Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "operator_position"
+                        ],
+                        "example": "operator_position"
                     }
                 }
             },

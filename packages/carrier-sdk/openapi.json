@@ -1836,6 +1836,31 @@
                     }
                 }
             },
+            "MqttToken": {
+                "description": "A short-lived MQTT publish credential for the position ingest broker.",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "description": "JWT to present as the MQTT CONNECT password. The CONNECT username must be the operator id embedded in the token's operator_id claim.",
+                        "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJtcXR0In0.sig"
+                    },
+                    "expires_in": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Seconds until the token expires. Re-mint before this elapses to stay connected.",
+                        "example": 900
+                    },
+                    "topic": {
+                        "type": "string",
+                        "description": "The only topic this credential may publish to: nizam/{organizationId}/operators/{operatorId}/location.",
+                        "example": "nizam/8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6/operators/c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f/location"
+                    },
+                    "object": {
+                        "type": "string",
+                        "example": "mqtt_token"
+                    }
+                }
+            },
             "Job": {
                 "description": "A long-running, retryable, operator-visible unit of work \u2014 bulk imports, exports, backfills, cache rebuilds. The job row is the persistent handle; the executing engine (Temporal workflow or lease worker, declared per kind) reports progress into it. Cancellation is cooperative: already-running work continues until the engine's next checkpoint.",
                 "properties": {
@@ -3287,6 +3312,299 @@
                         "format": "int32",
                         "description": "Page size that produced this response.",
                         "example": 20
+                    }
+                }
+            },
+            "ListResponsePosition": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Position"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "Position": {
+                "description": "One recorded GPS position of an operator.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Position id.",
+                        "example": "b7e6a2f0-3c4d-4e5f-8a9b-0c1d2e3f4a5b"
+                    },
+                    "operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Operator the fix belongs to.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Latitude (WGS84).",
+                        "example": 45.5017
+                    },
+                    "lng": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Longitude (WGS84).",
+                        "example": -73.5673
+                    },
+                    "heading": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Direction of travel, compass degrees [0,360).",
+                        "example": 182.5
+                    },
+                    "bearing": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Course over ground toward the destination, compass degrees [0,360).",
+                        "example": 190.0
+                    },
+                    "speed": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Ground speed, km/h.",
+                        "example": 42.3
+                    },
+                    "altitude": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Altitude above the WGS84 ellipsoid, metres.",
+                        "example": 35.2
+                    },
+                    "recorded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Device-time the fix was captured (authoritative).",
+                        "example": "2026-01-15T12:34:56Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "position"
+                        ],
+                        "example": "position"
+                    }
+                }
+            },
+            "HeatmapCell": {
+                "description": "Aggregated position count for one H3 hex cell.",
+                "properties": {
+                    "h3_cell": {
+                        "type": "string",
+                        "description": "H3 cell index, lowercase hex (string \u2014 H3 indexes exceed the JS safe-integer range).",
+                        "example": "892a1072cffffff"
+                    },
+                    "h3_res": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "H3 resolution of the cell (9 or 11).",
+                        "example": 9
+                    },
+                    "count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of positions recorded in the cell over the window.",
+                        "example": 17
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "heatmap_cell"
+                        ],
+                        "example": "heatmap_cell"
+                    }
+                }
+            },
+            "ListResponseHeatmapCell": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/HeatmapCell"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "ListResponseOperatorPosition": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/OperatorPosition"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "OperatorPosition": {
+                "description": "The current position of one operator.",
+                "properties": {
+                    "operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Operator id.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Latitude (WGS84).",
+                        "example": 45.5017
+                    },
+                    "lng": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Longitude (WGS84).",
+                        "example": -73.5673
+                    },
+                    "heading": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Direction of travel, compass degrees [0,360).",
+                        "example": 182.5
+                    },
+                    "bearing": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Course over ground, compass degrees [0,360).",
+                        "example": 190.0
+                    },
+                    "speed": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Ground speed, km/h.",
+                        "example": 42.3
+                    },
+                    "altitude": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Altitude above the WGS84 ellipsoid, metres.",
+                        "example": 35.2
+                    },
+                    "captured_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Device-time of the fix.",
+                        "example": "2026-01-15T12:34:56Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "operator_position"
+                        ],
+                        "example": "operator_position"
                     }
                 }
             },

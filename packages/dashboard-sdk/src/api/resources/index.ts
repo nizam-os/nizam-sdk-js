@@ -17,6 +17,8 @@ export * from "./operators/client/requests/index.js";
 export * as operators from "./operators/index.js";
 export * from "./organizations/client/requests/index.js";
 export * as organizations from "./organizations/index.js";
+export * from "./positions/client/requests/index.js";
+export * as positions from "./positions/index.js";
 export * as realtime from "./realtime/index.js";
 export * from "./users/client/requests/index.js";
 export * as users from "./users/index.js";
