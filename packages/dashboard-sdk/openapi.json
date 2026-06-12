@@ -53,6 +53,10 @@
             "description": "Org-admin invites and recipient acceptance."
         },
         {
+            "name": "Jobs",
+            "description": "Async jobs \u2014 persistent handles for long-running, retryable work (imports, exports, backfills, cache rebuilds): status, progress, cooperative cancellation."
+        },
+        {
             "name": "Keycloak projections",
             "description": "Platform-staff control plane for the durable Keycloak projection state machine."
         },
@@ -241,14 +245,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -259,8 +257,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -533,14 +537,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -551,8 +549,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -784,14 +788,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -802,8 +800,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -959,14 +963,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -977,8 +975,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -1181,14 +1185,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -1199,8 +1197,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -1384,14 +1388,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -1402,8 +1400,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -1614,14 +1618,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -1632,8 +1630,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -1888,14 +1892,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -1906,8 +1904,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -2080,14 +2084,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2098,8 +2096,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -2234,6 +2238,682 @@
                 ]
             }
         },
+        "/v1/jobs": {
+            "get": {
+                "tags": [
+                    "Jobs"
+                ],
+                "summary": "List jobs (paginated)",
+                "description": "The active organization's jobs ordered by `created_at` descending (pass `sort=created_at` for ascending). Org-scoped: every member sees the org's backlog. `kind` / `status` accept comma-separated values. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.",
+                "operationId": "listJobs",
+                "parameters": [
+                    {
+                        "name": "kind",
+                        "in": "query",
+                        "description": "Filter by job kind. Comma-separated; values: `membership_cache_rebuild`, `service_account_api_key_regeneration`.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "<string>"
+                        ]
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by lifecycle status. Comma-separated; values: `pending`, `running`, `cancelling`, `completed`, `failed`, `cancelled`.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "<string>"
+                        ]
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort order. Allowed fields: `created_at`. Prefix a field with `-` for descending (e.g. `-created_at`); unknown fields are rejected with `400 validation_failed`.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": "<string>"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseJob"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                            "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                            "kind": "membership_cache_rebuild",
+                                            "status": "pending",
+                                            "requested_by_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                            "source_uri": "s3://nizam-imports/assets-2026-06.csv",
+                                            "report_uri": "s3://nizam-reports/assets-2026-06-result.csv",
+                                            "rows_total": 1200,
+                                            "rows_processed": 850,
+                                            "rows_failed": 3,
+                                            "error_summary": "upstream geocoding service returned 503 after 3 retries",
+                                            "workflow_id": "job-7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                            "run_id": "0190a1b2-c3d4-7e8f-9a0b-1c2d3e4f5a6b",
+                                            "attempt_count": 1,
+                                            "max_attempts": 3,
+                                            "started_at": "2026-06-11T12:00:05Z",
+                                            "finished_at": "2026-06-11T12:04:31Z",
+                                            "created_at": "2026-06-11T12:00:00Z",
+                                            "updated_at": "2026-06-11T12:04:31Z",
+                                            "object": "job"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/jobs",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/jobs",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/jobs",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/jobs",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing organization context \u00b7 Validation failed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/jobs",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "validation_failed": {
+                                        "summary": "Validation failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/validation_failed",
+                                            "title": "Validation failed",
+                                            "status": 400,
+                                            "detail": "Sort field is not supported on this endpoint.",
+                                            "instance": "/v1/jobs",
+                                            "code": "validation_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/jobs/{id}": {
+            "get": {
+                "tags": [
+                    "Jobs"
+                ],
+                "summary": "Get a job",
+                "description": "Single job view: status, progress counters, source/report handles, retry budget. Org-scoped: any member of the owning organization can read it.",
+                "operationId": "getJob",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The job.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Job"
+                                },
+                                "example": {
+                                    "id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "kind": "membership_cache_rebuild",
+                                    "status": "pending",
+                                    "requested_by_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                    "source_uri": "s3://nizam-imports/assets-2026-06.csv",
+                                    "report_uri": "s3://nizam-reports/assets-2026-06-result.csv",
+                                    "rows_total": 1200,
+                                    "rows_processed": 850,
+                                    "rows_failed": 3,
+                                    "error_summary": "upstream geocoding service returned 503 after 3 retries",
+                                    "workflow_id": "job-7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "run_id": "0190a1b2-c3d4-7e8f-9a0b-1c2d3e4f5a6b",
+                                    "attempt_count": 1,
+                                    "max_attempts": 3,
+                                    "started_at": "2026-06-11T12:00:05Z",
+                                    "finished_at": "2026-06-11T12:04:31Z",
+                                    "created_at": "2026-06-11T12:00:00Z",
+                                    "updated_at": "2026-06-11T12:04:31Z",
+                                    "object": "job"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/jobs/{id}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/jobs/{id}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/jobs/{id}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/jobs/{id}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Job not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "job.not_found": {
+                                        "summary": "Job not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/job/not_found",
+                                            "title": "Job not found",
+                                            "status": 404,
+                                            "detail": "No job matches the given id.",
+                                            "instance": "/v1/jobs/{id}",
+                                            "code": "job.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/jobs/{id}/cancel": {
+            "post": {
+                "tags": [
+                    "Jobs"
+                ],
+                "summary": "Cancel a job",
+                "description": "Requests cancellation. A `pending` job cancels immediately; a `running` job moves to `cancelling` and the engine winds down cooperatively at its next checkpoint \u2014 already-running work may still finish. Idempotent: cancelling an already- cancelling or cancelled job is a no-op returning the current state. A `completed` or `failed` job conflicts (409). Org admins can cancel any job; members only their own.",
+                "operationId": "cancelJob",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The job after the cancellation request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Job"
+                                },
+                                "example": {
+                                    "id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "kind": "membership_cache_rebuild",
+                                    "status": "pending",
+                                    "requested_by_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                    "source_uri": "s3://nizam-imports/assets-2026-06.csv",
+                                    "report_uri": "s3://nizam-reports/assets-2026-06-result.csv",
+                                    "rows_total": 1200,
+                                    "rows_processed": 850,
+                                    "rows_failed": 3,
+                                    "error_summary": "upstream geocoding service returned 503 after 3 retries",
+                                    "workflow_id": "job-7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "run_id": "0190a1b2-c3d4-7e8f-9a0b-1c2d3e4f5a6b",
+                                    "attempt_count": 1,
+                                    "max_attempts": 3,
+                                    "started_at": "2026-06-11T12:00:05Z",
+                                    "finished_at": "2026-06-11T12:04:31Z",
+                                    "created_at": "2026-06-11T12:00:00Z",
+                                    "updated_at": "2026-06-11T12:04:31Z",
+                                    "object": "job"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/jobs/{id}/cancel",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "job.cancellation_forbidden": {
+                                        "summary": "Cancellation forbidden",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/job/cancellation_forbidden",
+                                            "title": "Cancellation forbidden",
+                                            "status": 403,
+                                            "detail": "Only the requesting user or an organization admin can cancel this job.",
+                                            "instance": "/v1/jobs/{id}/cancel",
+                                            "code": "job.cancellation_forbidden",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/jobs/{id}/cancel",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/jobs/{id}/cancel",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Job not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "job.not_found": {
+                                        "summary": "Job not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/job/not_found",
+                                            "title": "Job not found",
+                                            "status": 404,
+                                            "detail": "No job matches the given id.",
+                                            "instance": "/v1/jobs/{id}/cancel",
+                                            "code": "job.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Job already finished",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "job.already_finished": {
+                                        "summary": "Job already finished",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/job/already_finished",
+                                            "title": "Job already finished",
+                                            "status": 409,
+                                            "detail": "The job has already finished and can no longer be cancelled.",
+                                            "instance": "/v1/jobs/{id}/cancel",
+                                            "code": "job.already_finished",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "platform_staff"
+                ]
+            }
+        },
         "/v1/lookups/business-categories": {
             "get": {
                 "tags": [
@@ -2289,14 +2969,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2307,8 +2981,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -2417,14 +3097,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2435,8 +3109,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -2541,14 +3221,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2559,8 +3233,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -2664,14 +3344,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2682,8 +3356,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -2787,14 +3467,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2805,8 +3479,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -2927,14 +3607,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -2945,8 +3619,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -3103,14 +3783,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -3121,8 +3795,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -3303,14 +3983,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -3321,8 +3995,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -3491,14 +4171,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -3509,8 +4183,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -3706,14 +4386,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -3724,8 +4398,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -3878,14 +4558,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -3896,8 +4570,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -4099,14 +4779,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -4117,8 +4791,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -4299,14 +4979,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -4317,8 +4991,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -4547,14 +5227,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -4565,8 +5239,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -4706,14 +5386,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -4724,8 +5398,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -4937,14 +5617,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -4955,8 +5629,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -5129,14 +5809,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -5147,8 +5821,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -5285,14 +5965,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -5303,8 +5977,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -5485,14 +6165,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -5503,8 +6177,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -5714,14 +6394,8 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
                                 "schema": {
                                     
                                 }
@@ -5732,8 +6406,14 @@
                                     
                                 }
                             },
-                            "RateLimit-Remaining": {
-                                "description": "Tokens remaining after this request.",
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
@@ -6334,6 +7014,135 @@
                     }
                 }
             },
+            "Job": {
+                "description": "A long-running, retryable, operator-visible unit of work \u2014 bulk imports, exports, backfills, cache rebuilds. The job row is the persistent handle; the executing engine (Temporal workflow or lease worker, declared per kind) reports progress into it. Cancellation is cooperative: already-running work continues until the engine's next checkpoint.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable job id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Owning organization.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "description": "What kind of work this job performs; the kind also fixes the executing engine.",
+                        "enum": [
+                            "membership_cache_rebuild",
+                            "service_account_api_key_regeneration"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status. Terminal states are `completed`, `failed`, `cancelled`.",
+                        "enum": [
+                            "pending",
+                            "running",
+                            "cancelling",
+                            "completed",
+                            "failed",
+                            "cancelled"
+                        ]
+                    },
+                    "requested_by_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "User who submitted the job. Null only if that user was since deleted.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "source_uri": {
+                        "type": "string",
+                        "description": "Input handle the job consumes (kind-specific), e.g. an uploaded import file.",
+                        "example": "s3://nizam-imports/assets-2026-06.csv"
+                    },
+                    "report_uri": {
+                        "type": "string",
+                        "description": "Artifact produced by a completed job (kind-specific), e.g. a result report.",
+                        "example": "s3://nizam-reports/assets-2026-06-result.csv"
+                    },
+                    "rows_total": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Total work items, once the engine has sized the work. Null while unknown.",
+                        "example": 1200
+                    },
+                    "rows_processed": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Work items processed so far (monotonic).",
+                        "example": 850
+                    },
+                    "rows_failed": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Work items that failed so far (monotonic).",
+                        "example": 3
+                    },
+                    "error_summary": {
+                        "type": "string",
+                        "description": "Operator-facing failure reason. Set only when status is `failed`.",
+                        "example": "upstream geocoding service returned 503 after 3 retries"
+                    },
+                    "workflow_id": {
+                        "type": "string",
+                        "description": "Temporal workflow id (Temporal-engine kinds only) \u2014 cross-reference into the Temporal UI.",
+                        "example": "job-7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "run_id": {
+                        "type": "string",
+                        "description": "Temporal run id of the latest attempt (changes across workflow retries).",
+                        "example": "0190a1b2-c3d4-7e8f-9a0b-1c2d3e4f5a6b"
+                    },
+                    "attempt_count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Engine execution attempts spent so far.",
+                        "example": 1
+                    },
+                    "max_attempts": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Retry budget: a failed job with attempt_count >= max_attempts is dead-lettered.",
+                        "example": 3
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the first engine attempt started. Null while pending (and for jobs cancelled before starting).",
+                        "example": "2026-06-11T12:00:05Z"
+                    },
+                    "finished_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the job reached a terminal status.",
+                        "example": "2026-06-11T12:04:31Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Submission time.",
+                        "example": "2026-06-11T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last state/progress change.",
+                        "example": "2026-06-11T12:04:31Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "job"
+                        ],
+                        "example": "job"
+                    }
+                }
+            },
             "CreateInviteRequest": {
                 "properties": {
                     "organization_id": {
@@ -6453,6 +7262,33 @@
                     "token"
                 ]
             },
+            "BulkJobSubmission": {
+                "description": "Acknowledgement of a bulk admin action that fanned out one job per work item.",
+                "properties": {
+                    "job_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Created job ids \u2014 poll/cancel each via /v1/jobs/{id}.",
+                            "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                        }
+                    },
+                    "count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of jobs created (one per matched service account).",
+                        "example": 12
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "bulk_job_submission"
+                        ],
+                        "example": "bulk_job_submission"
+                    }
+                }
+            },
             "MembershipDriftResponse": {
                 "description": "One org with divergent membership sets.",
                 "example": [
@@ -6543,6 +7379,24 @@
                             "keycloak_reconciliation"
                         ],
                         "example": "keycloak_reconciliation"
+                    }
+                }
+            },
+            "JobSubmission": {
+                "description": "Acknowledgement that a job was submitted to its engine.",
+                "properties": {
+                    "job_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The created job \u2014 poll/cancel it via /v1/jobs/{id}.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "job_submission"
+                        ],
+                        "example": "job_submission"
                     }
                 }
             },
@@ -7538,6 +8392,52 @@
                         "description": "Page of resources. Empty array when there are no matches.",
                         "items": {
                             "$ref": "#/components/schemas/BusinessCategory"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "ListResponseJob": {
+                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Job"
                         }
                     },
                     "has_more": {
