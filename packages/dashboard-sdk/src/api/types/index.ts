@@ -18,6 +18,8 @@ export * from "./FileUploadPart.js";
 export * from "./FileUploadPartReport.js";
 export * from "./FileUploadSession.js";
 export * from "./HeatmapCell.js";
+export * from "./ImportError.js";
+export * from "./ImportSubmission.js";
 export * from "./InternalUserUpdateRequest.js";
 export * from "./Invite.js";
 export * from "./Job.js";

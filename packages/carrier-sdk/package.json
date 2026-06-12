@@ -1,6 +1,6 @@
 {
   "name": "@nizam-os/carrier-sdk",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "description": "Nizam Carrier API SDK for TypeScript / JavaScript.",
   "license": "MIT",
   "private": false,

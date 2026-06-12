@@ -10,7 +10,7 @@ export class NizamCarrierTimeoutError extends Error {
             Error.captureStackTrace(this, this.constructor);
         }
 
-        this.name = this.constructor.name;
+        this.name = "NizamCarrierTimeoutError";
         if (opts?.cause != null) {
             this.cause = opts.cause;
         }

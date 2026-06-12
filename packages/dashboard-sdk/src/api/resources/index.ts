@@ -8,6 +8,8 @@ export * from "./assignments/client/requests/index.js";
 export * as assignments from "./assignments/index.js";
 export * from "./files/client/requests/index.js";
 export * as files from "./files/index.js";
+export * from "./imports/client/requests/index.js";
+export * as imports from "./imports/index.js";
 export * from "./invites/client/requests/index.js";
 export * as invites from "./invites/index.js";
 export * from "./jobs/client/requests/index.js";

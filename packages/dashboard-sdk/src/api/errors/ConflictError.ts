@@ -17,6 +17,6 @@ export class ConflictError extends errors.NizamDashboardError {
             Error.captureStackTrace(this, this.constructor);
         }
 
-        this.name = this.constructor.name;
+        this.name = "ConflictError";
     }
 }

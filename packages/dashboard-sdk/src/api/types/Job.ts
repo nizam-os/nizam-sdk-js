@@ -14,10 +14,10 @@ export interface Job {
     status?: Job.Status | undefined;
     /** User who submitted the job. Null only if that user was since deleted. */
     requested_by_id?: string | undefined;
-    /** Input handle the job consumes (kind-specific), e.g. an uploaded import file. */
-    source_uri?: string | undefined;
-    /** Artifact produced by a completed job (kind-specific), e.g. a result report. */
-    report_uri?: string | undefined;
+    /** File the job consumes (kind-specific), e.g. an uploaded import file. References a file id; download via the file's own endpoint. */
+    source_file_id?: string | undefined;
+    /** Artifact file produced by the job (kind-specific), e.g. an import's annotated result report. Present on a completed job, or a cancelled one that produced a partial report. */
+    report_file_id?: string | undefined;
     /** Total work items, once the engine has sized the work. Null while unknown. */
     rows_total?: number | undefined;
     /** Work items processed so far (monotonic). */
@@ -52,6 +52,7 @@ export namespace Job {
         ServiceAccountApiKeyRegeneration: "service_account_api_key_regeneration",
         FileVirusScan: "file_virus_scan",
         FileThumbnailGeneration: "file_thumbnail_generation",
+        ImportFleetAssetsXlsx: "import_fleet_assets_xlsx",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
     /** Lifecycle status. Terminal states are `completed`, `failed`, `cancelled`. */

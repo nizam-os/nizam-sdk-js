@@ -17,6 +17,6 @@ export class InternalServerError extends errors.NizamMerchantError {
             Error.captureStackTrace(this, this.constructor);
         }
 
-        this.name = this.constructor.name;
+        this.name = "InternalServerError";
     }
 }

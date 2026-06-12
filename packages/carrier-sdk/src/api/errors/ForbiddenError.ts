@@ -17,6 +17,6 @@ export class ForbiddenError extends errors.NizamCarrierError {
             Error.captureStackTrace(this, this.constructor);
         }
 
-        this.name = this.constructor.name;
+        this.name = "ForbiddenError";
     }
 }

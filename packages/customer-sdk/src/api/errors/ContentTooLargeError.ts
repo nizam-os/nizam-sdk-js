@@ -17,6 +17,6 @@ export class ContentTooLargeError extends errors.NizamCustomerError {
             Error.captureStackTrace(this, this.constructor);
         }
 
-        this.name = this.constructor.name;
+        this.name = "ContentTooLargeError";
     }
 }

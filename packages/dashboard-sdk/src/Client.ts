@@ -5,6 +5,7 @@ import { ActivityClient } from "./api/resources/activity/client/Client.js";
 import { AssetsClient } from "./api/resources/assets/client/Client.js";
 import { AssignmentsClient } from "./api/resources/assignments/client/Client.js";
 import { FilesClient } from "./api/resources/files/client/Client.js";
+import { ImportsClient } from "./api/resources/imports/client/Client.js";
 import { InvitesClient } from "./api/resources/invites/client/Client.js";
 import { JobsClient } from "./api/resources/jobs/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
@@ -32,6 +33,7 @@ export class NizamDashboardClient {
     protected _assignments: AssignmentsClient | undefined;
     protected _files: FilesClient | undefined;
     protected _positions: PositionsClient | undefined;
+    protected _imports: ImportsClient | undefined;
     protected _invites: InvitesClient | undefined;
     protected _jobs: JobsClient | undefined;
     protected _lookups: LookupsClient | undefined;
@@ -65,6 +67,10 @@ export class NizamDashboardClient {
 
     public get positions(): PositionsClient {
         return (this._positions ??= new PositionsClient(this._options));
+    }
+
+    public get imports(): ImportsClient {
+        return (this._imports ??= new ImportsClient(this._options));
     }
 
     public get invites(): InvitesClient {
