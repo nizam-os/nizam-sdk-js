@@ -50,6 +50,8 @@ export namespace Job {
     export const Kind = {
         MembershipCacheRebuild: "membership_cache_rebuild",
         ServiceAccountApiKeyRegeneration: "service_account_api_key_regeneration",
+        FileVirusScan: "file_virus_scan",
+        FileThumbnailGeneration: "file_thumbnail_generation",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
     /** Lifecycle status. Terminal states are `completed`, `failed`, `cancelled`. */

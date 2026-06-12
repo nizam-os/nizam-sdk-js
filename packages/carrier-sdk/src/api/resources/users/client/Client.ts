@@ -117,4 +117,221 @@ export class UsersClient {
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/me");
     }
+
+    /**
+     * Declares a profile-picture upload for the AUTHENTICATED user (the subject is pinned server-side) and returns presigned part URLs. PUT the bytes to the URLs, then complete via the generic file-uploads endpoint — completion re-points the profile and soft-deletes the replaced picture; thumbnails (256/128/64 px) render asynchronously. The reference upload flow of epic #151 (#166).
+     *
+     * @param {NizamCarrier.InitiateProfilePictureUploadRequest} request
+     * @param {UsersClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCarrier.BadRequestError}
+     * @throws {@link NizamCarrier.UnauthorizedError}
+     * @throws {@link NizamCarrier.ForbiddenError}
+     * @throws {@link NizamCarrier.ContentTooLargeError}
+     * @throws {@link NizamCarrier.UnprocessableEntityError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
+     * @throws {@link NizamCarrier.InternalServerError}
+     *
+     * @example
+     *     await client.users.initiateProfilePictureUpload({
+     *         filename: "avatar.png",
+     *         content_type: "image/png",
+     *         size_bytes: 204857,
+     *         checksum_sha256: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+     *     })
+     */
+    public initiateProfilePictureUpload(
+        request: NizamCarrier.InitiateProfilePictureUploadRequest,
+        requestOptions?: UsersClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamCarrier.UploadInitiation> {
+        return core.HttpResponsePromise.fromPromise(this.__initiateProfilePictureUpload(request, requestOptions));
+    }
+
+    private async __initiateProfilePictureUpload(
+        request: NizamCarrier.InitiateProfilePictureUploadRequest,
+        requestOptions?: UsersClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamCarrier.UploadInitiation>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCarrierEnvironment.Production,
+                "v1/me/profile-picture",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: request,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamCarrier.UploadInitiation, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamCarrier.BadRequestError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamCarrier.UnauthorizedError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamCarrier.ForbiddenError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 413:
+                    throw new NizamCarrier.ContentTooLargeError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamCarrier.UnprocessableEntityError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCarrier.InternalServerError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCarrierError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/me/profile-picture");
+    }
+
+    /**
+     * 302-redirects to a short-lived URL for the thumbnail variant nearest the requested `size` (smallest rendered variant that still covers it; the original while thumbnails are still rendering). Cross-tenant callers get 404: the picture's file row is only visible inside the organization it was uploaded in (RLS).
+     *
+     * @param {NizamCarrier.GetUserProfilePictureRequest} request
+     * @param {UsersClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCarrier.UnauthorizedError}
+     * @throws {@link NizamCarrier.ForbiddenError}
+     * @throws {@link NizamCarrier.NotFoundError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
+     * @throws {@link NizamCarrier.InternalServerError}
+     *
+     * @example
+     *     await client.users.getUserProfilePicture({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public getUserProfilePicture(
+        request: NizamCarrier.GetUserProfilePictureRequest,
+        requestOptions?: UsersClient.RequestOptions,
+    ): core.HttpResponsePromise<void> {
+        return core.HttpResponsePromise.fromPromise(this.__getUserProfilePicture(request, requestOptions));
+    }
+
+    private async __getUserProfilePicture(
+        request: NizamCarrier.GetUserProfilePictureRequest,
+        requestOptions?: UsersClient.RequestOptions,
+    ): Promise<core.WithRawResponse<void>> {
+        const { id, size } = request;
+        const _queryParams: Record<string, unknown> = {
+            size,
+        };
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCarrierEnvironment.Production,
+                `v1/users/${core.url.encodePathParam(id)}/profile-picture`,
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url
+                .queryBuilder()
+                .addMany(_queryParams)
+                .mergeAdditional(requestOptions?.queryParams)
+                .build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: undefined, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCarrier.UnauthorizedError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamCarrier.ForbiddenError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamCarrier.NotFoundError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCarrier.InternalServerError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCarrierError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "GET",
+            "/v1/users/{id}/profile-picture",
+        );
+    }
 }

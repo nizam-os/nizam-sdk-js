@@ -4,6 +4,7 @@ import { ActiveOrganizationClient } from "./api/resources/activeOrganization/cli
 import { ActivityClient } from "./api/resources/activity/client/Client.js";
 import { AssetsClient } from "./api/resources/assets/client/Client.js";
 import { AssignmentsClient } from "./api/resources/assignments/client/Client.js";
+import { FilesClient } from "./api/resources/files/client/Client.js";
 import { InvitesClient } from "./api/resources/invites/client/Client.js";
 import { JobsClient } from "./api/resources/jobs/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
@@ -12,6 +13,7 @@ import { OperatorsClient } from "./api/resources/operators/client/Client.js";
 import { OrganizationsClient } from "./api/resources/organizations/client/Client.js";
 import { PositionsClient } from "./api/resources/positions/client/Client.js";
 import { RealtimeClient } from "./api/resources/realtime/client/Client.js";
+import { TaskAttemptsClient } from "./api/resources/taskAttempts/client/Client.js";
 import { UsersClient } from "./api/resources/users/client/Client.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "./BaseClient.js";
@@ -28,6 +30,7 @@ export class NizamDashboardClient {
     protected _activity: ActivityClient | undefined;
     protected _assets: AssetsClient | undefined;
     protected _assignments: AssignmentsClient | undefined;
+    protected _files: FilesClient | undefined;
     protected _positions: PositionsClient | undefined;
     protected _invites: InvitesClient | undefined;
     protected _jobs: JobsClient | undefined;
@@ -38,6 +41,7 @@ export class NizamDashboardClient {
     protected _operators: OperatorsClient | undefined;
     protected _organizations: OrganizationsClient | undefined;
     protected _realtime: RealtimeClient | undefined;
+    protected _taskAttempts: TaskAttemptsClient | undefined;
 
     constructor(options: NizamDashboardClient.Options) {
         this._options = normalizeClientOptionsWithAuth(options);
@@ -53,6 +57,10 @@ export class NizamDashboardClient {
 
     public get assignments(): AssignmentsClient {
         return (this._assignments ??= new AssignmentsClient(this._options));
+    }
+
+    public get files(): FilesClient {
+        return (this._files ??= new FilesClient(this._options));
     }
 
     public get positions(): PositionsClient {
@@ -93,6 +101,10 @@ export class NizamDashboardClient {
 
     public get realtime(): RealtimeClient {
         return (this._realtime ??= new RealtimeClient(this._options));
+    }
+
+    public get taskAttempts(): TaskAttemptsClient {
+        return (this._taskAttempts ??= new TaskAttemptsClient(this._options));
     }
 
     /**
