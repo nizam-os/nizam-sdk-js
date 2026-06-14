@@ -10,12 +10,12 @@ export interface Timezone {
     display_name?: string | undefined;
     /** Current offset from UTC in minutes (DST-aware). */
     gmt_offset_minutes?: number | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: Timezone.Object_ | undefined;
 }
 
 export namespace Timezone {
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Timezone: "timezone",
     } as const;

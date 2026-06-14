@@ -24,7 +24,7 @@ export interface Asset {
     organization_id?: string | undefined;
     /** Current primary operator (active assignment, role=primary). */
     current_primary_operator_id?: string | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: Asset.Object_ | undefined;
 }
 
@@ -53,7 +53,7 @@ export namespace Asset {
         Lost: "lost",
     } as const;
     export type Status = (typeof Status)[keyof typeof Status];
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Asset: "asset",
     } as const;

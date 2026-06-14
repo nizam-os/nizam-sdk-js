@@ -24,7 +24,7 @@ export interface ActivityResource {
     log_name?: string | undefined;
     /** When the activity was recorded — the authoritative timestamp. */
     occurred_at?: string | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: ActivityResource.Object_ | undefined;
 }
 
@@ -50,7 +50,7 @@ export namespace ActivityResource {
         Custom: "custom",
     } as const;
     export type Event = (typeof Event)[keyof typeof Event];
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Activity: "activity",
     } as const;

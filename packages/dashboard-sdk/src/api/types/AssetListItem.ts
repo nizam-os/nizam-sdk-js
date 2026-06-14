@@ -30,7 +30,7 @@ export interface AssetListItem {
     rank?: number | undefined;
     /** Highlighted match fragment when the request carried `q&highlight=true`. Matched terms are wrapped in `<mark>…</mark>`. */
     snippet?: string | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: AssetListItem.Object_ | undefined;
 }
 
@@ -59,7 +59,7 @@ export namespace AssetListItem {
         Lost: "lost",
     } as const;
     export type Status = (typeof Status)[keyof typeof Status];
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Asset: "asset",
     } as const;

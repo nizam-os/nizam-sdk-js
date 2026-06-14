@@ -12,12 +12,12 @@ export interface ReconcileResponse {
     kc_has_nizam_missing?: string[] | undefined;
     /** Per-org membership-set divergences (KC vs Nizam). */
     membership_divergent?: NizamOperatorRuntime.MembershipDriftResponse[] | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: ReconcileResponse.Object_ | undefined;
 }
 
 export namespace ReconcileResponse {
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         KeycloakReconciliation: "keycloak_reconciliation",
     } as const;

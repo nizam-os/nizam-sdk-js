@@ -21,7 +21,7 @@ export interface User {
     login_count?: number | undefined;
     /** File id of the current profile picture (epic #151 / #166); null until one is uploaded. Request bytes via the files download-url endpoint, or let `GET /users/{id}/profile-picture` pick the nearest thumbnail. */
     profile_picture_file_id?: string | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: User.Object_ | undefined;
 }
 
@@ -37,7 +37,7 @@ export namespace User {
         Admin: "admin",
     } as const;
     export type Portal = (typeof Portal)[keyof typeof Portal];
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         User: "user",
     } as const;

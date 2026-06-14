@@ -16,7 +16,7 @@ export interface UserResource {
     last_login_at?: string | undefined;
     /** Total logins observed. */
     login_count?: number | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: UserResource.Object_ | undefined;
 }
 
@@ -29,7 +29,7 @@ export namespace UserResource {
         PendingVerification: "pending_verification",
     } as const;
     export type Status = (typeof Status)[keyof typeof Status];
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         User: "user",
     } as const;

@@ -9,7 +9,7 @@ export interface Membership {
     organization?: NizamMerchant.Organization | undefined;
     /** The user's role in this organization. */
     role?: Membership.Role | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: Membership.Object_ | undefined;
 }
 
@@ -24,7 +24,7 @@ export namespace Membership {
         BillingAdmin: "billing_admin",
     } as const;
     export type Role = (typeof Role)[keyof typeof Role];
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Membership: "membership",
     } as const;

@@ -8,12 +8,12 @@ export interface RealtimeTicket {
     ticket?: string | undefined;
     /** When the ticket expires (ISO-8601). Connect promptly; mint a fresh ticket for each new connection attempt. */
     expires_at?: string | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: RealtimeTicket.Object_ | undefined;
 }
 
 export namespace RealtimeTicket {
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         RealtimeTicket: "realtime_ticket",
     } as const;

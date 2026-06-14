@@ -18,7 +18,7 @@ export interface Assignment {
     valid_until?: string | undefined;
     /** Why the assignment was closed (null while active). */
     terminated_reason?: Assignment.TerminatedReason | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: Assignment.Object_ | undefined;
 }
 
@@ -44,7 +44,7 @@ export namespace Assignment {
         ManualClose: "manual_close",
     } as const;
     export type TerminatedReason = (typeof TerminatedReason)[keyof typeof TerminatedReason];
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Assignment: "assignment",
     } as const;

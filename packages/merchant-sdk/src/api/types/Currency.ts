@@ -12,12 +12,12 @@ export interface Currency {
     symbol?: string | undefined;
     /** Default number of fractional digits per ISO 4217. */
     fraction_digits?: number | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: Currency.Object_ | undefined;
 }
 
 export namespace Currency {
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Currency: "currency",
     } as const;

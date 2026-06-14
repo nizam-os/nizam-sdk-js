@@ -4,12 +4,15 @@ import { ActiveOrganizationClient } from "./api/resources/activeOrganization/cli
 import { ActivityClient } from "./api/resources/activity/client/Client.js";
 import { AssetsClient } from "./api/resources/assets/client/Client.js";
 import { AssignmentsClient } from "./api/resources/assignments/client/Client.js";
+import { DevicesClient } from "./api/resources/devices/client/Client.js";
 import { FilesClient } from "./api/resources/files/client/Client.js";
 import { ImportsClient } from "./api/resources/imports/client/Client.js";
 import { InvitesClient } from "./api/resources/invites/client/Client.js";
 import { JobsClient } from "./api/resources/jobs/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
 import { MembershipsClient } from "./api/resources/memberships/client/Client.js";
+import { NotificationPreferencesClient } from "./api/resources/notificationPreferences/client/Client.js";
+import { NotificationsClient } from "./api/resources/notifications/client/Client.js";
 import { OperatorsClient } from "./api/resources/operators/client/Client.js";
 import { OrganizationsClient } from "./api/resources/organizations/client/Client.js";
 import { PositionsClient } from "./api/resources/positions/client/Client.js";
@@ -39,7 +42,10 @@ export class NizamDashboardClient {
     protected _lookups: LookupsClient | undefined;
     protected _users: UsersClient | undefined;
     protected _activeOrganization: ActiveOrganizationClient | undefined;
+    protected _devices: DevicesClient | undefined;
     protected _memberships: MembershipsClient | undefined;
+    protected _notificationPreferences: NotificationPreferencesClient | undefined;
+    protected _notifications: NotificationsClient | undefined;
     protected _operators: OperatorsClient | undefined;
     protected _organizations: OrganizationsClient | undefined;
     protected _realtime: RealtimeClient | undefined;
@@ -93,8 +99,20 @@ export class NizamDashboardClient {
         return (this._activeOrganization ??= new ActiveOrganizationClient(this._options));
     }
 
+    public get devices(): DevicesClient {
+        return (this._devices ??= new DevicesClient(this._options));
+    }
+
     public get memberships(): MembershipsClient {
         return (this._memberships ??= new MembershipsClient(this._options));
+    }
+
+    public get notificationPreferences(): NotificationPreferencesClient {
+        return (this._notificationPreferences ??= new NotificationPreferencesClient(this._options));
+    }
+
+    public get notifications(): NotificationsClient {
+        return (this._notifications ??= new NotificationsClient(this._options));
     }
 
     public get operators(): OperatorsClient {

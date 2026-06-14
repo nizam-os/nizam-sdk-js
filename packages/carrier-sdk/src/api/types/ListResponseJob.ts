@@ -3,10 +3,10 @@
 import type * as NizamCarrier from "../index.js";
 
 /**
- * Envelope for paginated list responses (Stripe-style cursor pagination).
+ * Envelope for paginated list responses (opaque cursor pagination).
  */
 export interface ListResponseJob {
-    /** Object type discriminator (Stripe pattern). Always `list` for this envelope. */
+    /** Object type discriminator. Always `list` for this envelope. */
     object?: ListResponseJob.Object_ | undefined;
     /** Page of resources. Empty array when there are no matches. */
     data?: NizamCarrier.Job[] | undefined;
@@ -23,7 +23,7 @@ export interface ListResponseJob {
 }
 
 export namespace ListResponseJob {
-    /** Object type discriminator (Stripe pattern). Always `list` for this envelope. */
+    /** Object type discriminator. Always `list` for this envelope. */
     export const Object_ = {
         List: "list",
     } as const;

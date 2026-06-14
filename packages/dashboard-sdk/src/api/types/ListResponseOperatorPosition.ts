@@ -3,10 +3,10 @@
 import type * as NizamDashboard from "../index.js";
 
 /**
- * Envelope for paginated list responses (Stripe-style cursor pagination).
+ * Envelope for paginated list responses (opaque cursor pagination).
  */
 export interface ListResponseOperatorPosition {
-    /** Object type discriminator (Stripe pattern). Always `list` for this envelope. */
+    /** Object type discriminator. Always `list` for this envelope. */
     object?: ListResponseOperatorPosition.Object_ | undefined;
     /** Page of resources. Empty array when there are no matches. */
     data?: NizamDashboard.OperatorPosition[] | undefined;
@@ -23,7 +23,7 @@ export interface ListResponseOperatorPosition {
 }
 
 export namespace ListResponseOperatorPosition {
-    /** Object type discriminator (Stripe pattern). Always `list` for this envelope. */
+    /** Object type discriminator. Always `list` for this envelope. */
     export const Object_ = {
         List: "list",
     } as const;

@@ -8,12 +8,12 @@ export interface BusinessCategory {
     slug?: string | undefined;
     /** Human-readable label for picker UIs. */
     display_name?: string | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: BusinessCategory.Object_ | undefined;
 }
 
 export namespace BusinessCategory {
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         BusinessCategory: "business_category",
     } as const;

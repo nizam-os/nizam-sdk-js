@@ -10,12 +10,12 @@ export interface Language {
     name?: string | undefined;
     /** Name in the language itself, useful in language pickers. */
     native_name?: string | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: Language.Object_ | undefined;
 }
 
 export namespace Language {
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Language: "language",
     } as const;

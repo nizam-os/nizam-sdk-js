@@ -18,7 +18,7 @@ export interface Invite {
     expires_at?: string | undefined;
     /** Bearer secret used to redeem the invite. Returned only on POST /v1/invites; subsequent lookups omit it. */
     token?: string | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: Invite.Object_ | undefined;
 }
 
@@ -41,7 +41,7 @@ export namespace Invite {
         Revoked: "revoked",
     } as const;
     export type Status = (typeof Status)[keyof typeof Status];
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Invite: "invite",
     } as const;

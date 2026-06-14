@@ -10,12 +10,12 @@ export interface Country {
     name?: string | undefined;
     /** E.164 country calling code with `+` prefix, or null if not allocated. */
     calling_code?: string | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: Country.Object_ | undefined;
 }
 
 export namespace Country {
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Country: "country",
     } as const;

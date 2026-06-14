@@ -49,6 +49,10 @@
             "description": "Time-bound bindings between assets and operators in a role. Append a new row to reassign; never mutate in place."
         },
         {
+            "name": "Devices",
+            "description": "The authenticated user's registered push devices."
+        },
+        {
             "name": "Invites",
             "description": "Org-admin invites and recipient acceptance."
         },
@@ -75,6 +79,18 @@
         {
             "name": "Memberships",
             "description": "User \u2194 organization memberships \u2014 list, join, leave, role checks."
+        },
+        {
+            "name": "Notification deliveries",
+            "description": "Platform-staff dead-letter triage for the notification delivery ledger."
+        },
+        {
+            "name": "Notification preferences",
+            "description": "The authenticated user's per-kind \u00d7 channel delivery preferences."
+        },
+        {
+            "name": "Notifications",
+            "description": "The authenticated user's notification inbox."
         },
         {
             "name": "Operators",
@@ -7376,6 +7392,516 @@
                 ]
             }
         },
+        "/v1/me/devices": {
+            "get": {
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "List the current user's registered devices",
+                "description": "The caller's live push-device registrations, most-recently-registered first. Tokens are omitted \u2014 they are delivery secrets.",
+                "operationId": "listDevices",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Devices"
+                                },
+                                "example": {
+                                    "devices": [
+                                        
+                                    ],
+                                    "object": "device_list"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/me/devices",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/me/devices",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/me/devices",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/me/devices",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "Register or refresh a push device",
+                "description": "Registers the calling user's device for push delivery, or refreshes an existing registration of the same token. Idempotent on the (user, token) key: re-posting a token refreshes its row \u2014 reviving it if the user had logged out \u2014 instead of duplicating the delivery target. The token is a secret and is never echoed back.",
+                "operationId": "registerDevice",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterDevice"
+                            },
+                            "examples": {
+                                "default": {
+                                    "summary": "Register or refresh a push device",
+                                    "value": {
+                                        "platform": "android",
+                                        "token": "fcm-Aa1Bb2Cc3\u2026"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Device"
+                                },
+                                "example": {
+                                    "id": "8b1f0a2e-3c4d-4e5f-9a0b-1c2d3e4f5a6b",
+                                    "platform": "android",
+                                    "status": "active",
+                                    "registered_at": "2026-06-13T10:15:30Z",
+                                    "last_seen_at": "2026-06-13T14:22:05Z",
+                                    "object": "device"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/me/devices",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/me/devices",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed \u2014 request body didn't satisfy `@Valid` constraints.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/validation_failed",
+                                    "title": "Validation failed",
+                                    "status": 422,
+                                    "detail": "Request body failed validation.",
+                                    "instance": "/v1/me/devices",
+                                    "code": "validation_failed",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
+                                    "errors": [
+                                        {
+                                            "field": "email",
+                                            "code": "must_not_be_blank",
+                                            "message": "must not be blank"
+                                        },
+                                        {
+                                            "field": "dropoff.lat",
+                                            "code": "out_of_range",
+                                            "message": "latitude must be in [-90, 90]"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/me/devices",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/me/devices",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Device token claimed by another account",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "device.token_claimed_by_another_account": {
+                                        "summary": "Device token claimed by another account",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/device/token_claimed_by_another_account",
+                                            "title": "Device token claimed by another account",
+                                            "status": 409,
+                                            "detail": "This device's push token is registered to a different account. Sign out of that account on this device first.",
+                                            "instance": "/v1/me/devices",
+                                            "code": "device.token_claimed_by_another_account",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/me/devices/{deviceId}": {
+            "delete": {
+                "tags": [
+                    "Devices"
+                ],
+                "summary": "Deregister a device on logout",
+                "description": "Soft-deletes the caller's device so it stops receiving pushes (typically called on logout). Reversible: re-registering the same token revives the row.",
+                "operationId": "deregisterDevice",
+                "parameters": [
+                    {
+                        "name": "deviceId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "<string>"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/me/devices/{deviceId}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/me/devices/{deviceId}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/me/devices/{deviceId}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/me/devices/{deviceId}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Device not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "device.not_found": {
+                                        "summary": "Device not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/device/not_found",
+                                            "title": "Device not found",
+                                            "status": 404,
+                                            "detail": "No registered device matches the given id.",
+                                            "instance": "/v1/me/devices/{deviceId}",
+                                            "code": "device.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
         "/v1/me/memberships": {
             "get": {
                 "tags": [
@@ -7561,6 +8087,300 @@
                 },
                 "x-accessible-to": [
                     "dashboard"
+                ]
+            }
+        },
+        "/v1/me/notification-preferences": {
+            "get": {
+                "tags": [
+                    "Notification preferences"
+                ],
+                "summary": "Get the current user's notification preferences",
+                "description": "The user's explicit per-kind \u00d7 channel overrides. A (kind, channel) with no row uses the kind's coded default (so an empty list means 'all defaults').",
+                "operationId": "getNotificationPreferences",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotificationPreferences"
+                                },
+                                "example": {
+                                    "preferences": [
+                                        
+                                    ],
+                                    "object": "notification_preferences"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/me/notification-preferences",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/me/notification-preferences",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/me/notification-preferences",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/me/notification-preferences",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Notification preferences"
+                ],
+                "summary": "Update the current user's notification preferences",
+                "description": "Upserts the supplied overrides \u2014 each item fully declares the desired state of one (kind, channel). Unlisted preferences are untouched. Returns the full resulting set.",
+                "operationId": "updateNotificationPreferences",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateNotificationPreferences"
+                            },
+                            "examples": {
+                                "default": {
+                                    "summary": "Update the current user's notification preferences",
+                                    "value": {
+                                        "preferences": [
+                                            
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotificationPreferences"
+                                },
+                                "example": {
+                                    "preferences": [
+                                        
+                                    ],
+                                    "object": "notification_preferences"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/me/notification-preferences",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/me/notification-preferences",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/me/notification-preferences",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/me/notification-preferences",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
                 ]
             }
         },
@@ -7801,6 +8621,769 @@
                                             "detail": "Accepting this upload would exceed the organization's storage quota.",
                                             "instance": "/v1/me/profile-picture",
                                             "code": "file.quota_exceeded",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "List the current user's notifications (paginated)",
+                "description": "The caller's own notifications ordered by `created_at` descending (pass `sort=created_at` for ascending). `unread=true` restricts to unread; `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.",
+                "operationId": "listNotifications",
+                "parameters": [
+                    {
+                        "name": "unread",
+                        "in": "query",
+                        "description": "Restrict to unread notifications.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "example": false
+                    },
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "description": "Only notifications created at/after this RFC 3339 instant.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2026-05-20T14:00:00Z"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort order. Allowed fields: `created_at`. Prefix a field with `-` for descending (e.g. `-created_at`); unknown fields are rejected with `400 validation_failed`.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": "<string>"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseNotification"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "object": "notification",
+                                            "id": "9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f",
+                                            "kind": "membership.joined",
+                                            "category": "operational",
+                                            "priority": "normal",
+                                            "data": {
+                                                "orgName": "Acme"
+                                            },
+                                            "read": false,
+                                            "read_at": "2026-06-13T12:05:00Z",
+                                            "created_at": "2026-06-13T12:00:00Z"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/notifications",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/notifications",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/notifications",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/notifications",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing organization context \u00b7 Validation failed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/notifications",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "validation_failed": {
+                                        "summary": "Validation failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/validation_failed",
+                                            "title": "Validation failed",
+                                            "status": 400,
+                                            "detail": "Sort field is not supported on this endpoint.",
+                                            "instance": "/v1/notifications",
+                                            "code": "validation_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/notifications/read_all": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark all notifications read",
+                "description": "Flips every unread notification of the caller to read in one operation. Returns the number of notifications that were flipped (zero when the inbox was already clear).",
+                "operationId": "markAllNotificationsRead",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotificationsMarkedRead"
+                                },
+                                "example": {
+                                    "marked": 5,
+                                    "object": "notifications_marked_read"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/notifications/read_all",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/notifications/read_all",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/notifications/read_all",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/notifications/read_all",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing organization context",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/notifications/read_all",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/notifications/unread_count": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Count the current user's unread notifications",
+                "description": "The unread badge count for the active organization. Excludes dismissed (soft-deleted) notifications.",
+                "operationId": "getUnreadNotificationCount",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotificationUnreadCount"
+                                },
+                                "example": {
+                                    "count": 3,
+                                    "object": "notification_unread_count"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/notifications/unread_count",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/notifications/unread_count",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/notifications/unread_count",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/notifications/unread_count",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing organization context",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/notifications/unread_count",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/notifications/{id}/read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark a notification read",
+                "description": "Flips a single notification to read. Idempotent \u2014 a second call is a no-op that preserves the original read timestamp. 404 if the notification is not the caller's.",
+                "operationId": "markNotificationRead",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The notification after marking read.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Notification"
+                                },
+                                "example": {
+                                    "object": "notification",
+                                    "id": "9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f",
+                                    "kind": "membership.joined",
+                                    "category": "operational",
+                                    "priority": "normal",
+                                    "data": {
+                                        "orgName": "Acme"
+                                    },
+                                    "read": false,
+                                    "read_at": "2026-06-13T12:05:00Z",
+                                    "created_at": "2026-06-13T12:00:00Z"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/notifications/{id}/read",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/notifications/{id}/read",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/notifications/{id}/read",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/notifications/{id}/read",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Notification not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "notification.not_found": {
+                                        "summary": "Notification not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/notification/not_found",
+                                            "title": "Notification not found",
+                                            "status": 404,
+                                            "detail": "No notification matches the given id.",
+                                            "instance": "/v1/notifications/{id}/read",
+                                            "code": "notification.not_found",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -10934,7 +12517,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "user"
                         ],
@@ -11113,7 +12696,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "realtime_ticket"
                         ],
@@ -11231,7 +12814,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "organization"
                         ],
@@ -11459,11 +13042,109 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "operator"
                         ],
                         "example": "operator"
+                    }
+                }
+            },
+            "Notification": {
+                "description": "A single notification as it appears in a user's inbox.",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "notification"
+                        ],
+                        "example": "notification"
+                    },
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Notification id.",
+                        "example": "9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "description": "Notification kind (stable wire key).",
+                        "example": "membership.joined"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Opt-out / grouping category.",
+                        "enum": [
+                            "transactional",
+                            "operational",
+                            "alert",
+                            "marketing",
+                            "security",
+                            "system"
+                        ],
+                        "example": "operational"
+                    },
+                    "priority": {
+                        "type": "string",
+                        "description": "Delivery priority.",
+                        "enum": [
+                            "silent",
+                            "normal",
+                            "high",
+                            "urgent"
+                        ],
+                        "example": "normal"
+                    },
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "description": "Kind-specific render payload.",
+                            "example": {
+                                "orgName": "Acme"
+                            }
+                        },
+                        "description": "Kind-specific render payload.",
+                        "example": {
+                            "orgName": "Acme"
+                        }
+                    },
+                    "read": {
+                        "type": "boolean",
+                        "description": "Whether the recipient has read it.",
+                        "example": false
+                    },
+                    "read_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When it was read (RFC 3339); null while unread.",
+                        "example": "2026-06-13T12:05:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When it was raised (RFC 3339).",
+                        "example": "2026-06-13T12:00:00Z"
+                    }
+                }
+            },
+            "NotificationsMarkedRead": {
+                "description": "Result of a mark-all-read operation.",
+                "properties": {
+                    "marked": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of notifications flipped to read.",
+                        "example": 5
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "notifications_marked_read"
+                        ],
+                        "example": "notifications_marked_read"
                     }
                 }
             },
@@ -11527,6 +13208,72 @@
                     "object": {
                         "type": "string",
                         "example": "mqtt_token"
+                    }
+                }
+            },
+            "RegisterDevice": {
+                "description": "A push-device registration request.",
+                "properties": {
+                    "platform": {
+                        "type": "string",
+                        "description": "Push transport.",
+                        "enum": [
+                            "ios",
+                            "android",
+                            "web"
+                        ],
+                        "example": "android",
+                        "minLength": 1
+                    },
+                    "token": {
+                        "type": "string",
+                        "description": "The raw APNs/FCM/web-push token. Treated as a secret \u2014 never logged.",
+                        "example": "fcm-Aa1Bb2Cc3\u2026",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "platform",
+                    "token"
+                ]
+            },
+            "Device": {
+                "description": "A registered push device (the token is never returned).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Device id.",
+                        "example": "8b1f0a2e-3c4d-4e5f-9a0b-1c2d3e4f5a6b"
+                    },
+                    "platform": {
+                        "type": "string",
+                        "description": "Push transport.",
+                        "example": "android"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Registration lifecycle.",
+                        "example": "active"
+                    },
+                    "registered_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the device was first registered.",
+                        "example": "2026-06-13T10:15:30Z"
+                    },
+                    "last_seen_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the registration was last refreshed (last seen).",
+                        "example": "2026-06-13T14:22:05Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "device"
+                        ],
+                        "example": "device"
                     }
                 }
             },
@@ -11761,7 +13508,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "invite"
                         ],
@@ -11895,7 +13642,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "keycloak_reconciliation"
                         ],
@@ -12483,7 +14230,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "assignment"
                         ],
@@ -12626,7 +14373,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "asset"
                         ],
@@ -12680,6 +14427,116 @@
                     }
                 }
             },
+            "NotificationPreferenceItem": {
+                "description": "Desired state of one (kind, channel) preference.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "description": "Notification kind (wire key).",
+                        "example": "membership.joined"
+                    },
+                    "channel": {
+                        "type": "string",
+                        "description": "Delivery channel.",
+                        "example": "email"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Whether the user wants this kind on this channel.",
+                        "example": false
+                    },
+                    "quiet_hours": {
+                        "$ref": "#/components/schemas/QuietHours"
+                    }
+                }
+            },
+            "QuietHours": {
+                "description": "A do-not-disturb window in wall-clock time within a zone.",
+                "properties": {
+                    "start": {
+                        "type": "string",
+                        "description": "Window start (HH:mm, zone-local).",
+                        "example": "22:00"
+                    },
+                    "end": {
+                        "type": "string",
+                        "description": "Window end (HH:mm, zone-local).",
+                        "example": "07:00"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "description": "IANA zone id the wall-clock is read in.",
+                        "example": "America/Toronto"
+                    }
+                }
+            },
+            "UpdateNotificationPreferences": {
+                "description": "A batch of preference overrides to upsert.",
+                "properties": {
+                    "preferences": {
+                        "type": "array",
+                        "description": "The overrides to apply; each fully declares one (kind, channel).",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/NotificationPreferenceItem"
+                        }
+                    }
+                }
+            },
+            "NotificationPreference": {
+                "description": "A user's explicit per-kind \u00d7 channel override.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "description": "Notification kind (wire key).",
+                        "example": "membership.joined"
+                    },
+                    "channel": {
+                        "type": "string",
+                        "description": "Delivery channel.",
+                        "example": "email"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Whether the kind is enabled on this channel.",
+                        "example": false
+                    },
+                    "quiet_hours": {
+                        "$ref": "#/components/schemas/QuietHours"
+                    }
+                }
+            },
+            "NotificationPreferences": {
+                "description": "The current user's notification-preference settings.",
+                "properties": {
+                    "preferences": {
+                        "type": "array",
+                        "description": "The user's explicit per-kind \u00d7 channel overrides.",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/NotificationPreference"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "notification_preferences"
+                        ],
+                        "example": "notification_preferences"
+                    }
+                }
+            },
             "SetActiveOrganizationRequest": {
                 "description": "Request body for setting the caller's preferred active organization. The slug must name an organization the caller is currently an active member of.",
                 "properties": {
@@ -12726,7 +14583,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "active_organization"
                         ],
@@ -12805,11 +14662,11 @@
                 }
             },
             "ListResponseUserResource": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -12935,11 +14792,11 @@
                 }
             },
             "ListResponseOrganization": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -12977,6 +14834,71 @@
                         "format": "int32",
                         "description": "Page size that produced this response.",
                         "example": 20
+                    }
+                }
+            },
+            "ListResponseNotification": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Notification"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "NotificationUnreadCount": {
+                "description": "The caller's unread notification count.",
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of unread notifications.",
+                        "example": 3
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "notification_unread_count"
+                        ],
+                        "example": "notification_unread_count"
                     }
                 }
             },
@@ -13047,7 +14969,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "user"
                         ],
@@ -13056,11 +14978,11 @@
                 }
             },
             "ListResponseMembership": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -13122,7 +15044,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "membership"
                         ],
@@ -13130,12 +15052,35 @@
                     }
                 }
             },
+            "Devices": {
+                "description": "The current user's registered push devices.",
+                "properties": {
+                    "devices": {
+                        "type": "array",
+                        "description": "The caller's live device registrations.",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/Device"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "device_list"
+                        ],
+                        "example": "device_list"
+                    }
+                }
+            },
             "ListResponseTimezone": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -13197,7 +15142,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "timezone"
                         ],
@@ -13225,7 +15170,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "language"
                         ],
@@ -13234,11 +15179,11 @@
                 }
             },
             "ListResponseLanguage": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -13305,7 +15250,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "currency"
                         ],
@@ -13314,11 +15259,11 @@
                 }
             },
             "ListResponseCurrency": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -13379,7 +15324,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "country"
                         ],
@@ -13388,11 +15333,11 @@
                 }
             },
             "ListResponseCountry": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -13448,7 +15393,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "business_category"
                         ],
@@ -13457,11 +15402,11 @@
                 }
             },
             "ListResponseBusinessCategory": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -13503,11 +15448,11 @@
                 }
             },
             "ListResponseJob": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -13545,6 +15490,126 @@
                         "format": "int32",
                         "description": "Page size that produced this response.",
                         "example": 20
+                    }
+                }
+            },
+            "ListResponseNotificationDeadLetter": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/NotificationDeadLetter"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "NotificationDeadLetter": {
+                "description": "A notification delivery attempt that exhausted its retries.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Delivery attempt id.",
+                        "example": "3f2a1b0c-9d8e-4f6a-8b1c-2d3e4f5a6b7c"
+                    },
+                    "notification_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The notification this attempt belongs to.",
+                        "example": "9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f"
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Owning organization.",
+                        "example": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                    },
+                    "channel": {
+                        "type": "string",
+                        "description": "Channel.",
+                        "example": "push"
+                    },
+                    "provider": {
+                        "type": "string",
+                        "description": "Provider/gateway.",
+                        "example": "fcm"
+                    },
+                    "recipient_address": {
+                        "type": "string",
+                        "description": "Resolved recipient endpoint (device id, email, user id).",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "attempt_count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of send attempts made.",
+                        "example": 5
+                    },
+                    "error_code": {
+                        "type": "string",
+                        "description": "Machine error code from the last attempt.",
+                        "example": "UNREGISTERED"
+                    },
+                    "error_message": {
+                        "type": "string",
+                        "description": "Human-readable error from the last attempt.",
+                        "example": "Requested entity was not found."
+                    },
+                    "failed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When it dead-lettered (RFC 3339).",
+                        "example": "2026-06-13T12:30:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the attempt row was created (RFC 3339).",
+                        "example": "2026-06-13T12:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "notification_dead_letter"
+                        ],
+                        "example": "notification_dead_letter"
                     }
                 }
             },
@@ -13587,11 +15652,11 @@
                 }
             },
             "ListResponsePosition": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -13728,11 +15793,11 @@
                 }
             },
             "ListResponseHeatmapCell": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -13774,11 +15839,11 @@
                 }
             },
             "ListResponseOperatorPosition": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -13880,11 +15945,11 @@
                 }
             },
             "ListResponseFile": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -14019,7 +16084,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "asset"
                         ],
@@ -14028,11 +16093,11 @@
                 }
             },
             "ListResponseAssetListItem": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],
@@ -14152,7 +16217,7 @@
                     },
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern).",
+                        "description": "Object type discriminator.",
                         "enum": [
                             "activity"
                         ],
@@ -14161,11 +16226,11 @@
                 }
             },
             "ListResponseActivityResource": {
-                "description": "Envelope for paginated list responses (Stripe-style cursor pagination).",
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
                         "type": "string",
-                        "description": "Object type discriminator (Stripe pattern). Always `list` for this envelope.",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
                         "enum": [
                             "list"
                         ],

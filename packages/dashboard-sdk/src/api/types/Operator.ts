@@ -18,7 +18,7 @@ export interface Operator {
     responsible_party_id?: string | undefined;
     /** Owning organization id. */
     organization_id?: string | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: Operator.Object_ | undefined;
 }
 
@@ -40,7 +40,7 @@ export namespace Operator {
         Decommissioned: "decommissioned",
     } as const;
     export type Status = (typeof Status)[keyof typeof Status];
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         Operator: "operator",
     } as const;

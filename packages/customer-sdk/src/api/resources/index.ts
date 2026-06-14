@@ -1,6 +1,12 @@
+export * from "./devices/client/requests/index.js";
+export * as devices from "./devices/index.js";
 export * from "./files/client/requests/index.js";
 export * as files from "./files/index.js";
 export * as lookups from "./lookups/index.js";
+export * from "./notificationPreferences/client/requests/index.js";
+export * as notificationPreferences from "./notificationPreferences/index.js";
+export * from "./notifications/client/requests/index.js";
+export * as notifications from "./notifications/index.js";
 export * as realtime from "./realtime/index.js";
 export * from "./users/client/requests/index.js";
 export * as users from "./users/index.js";

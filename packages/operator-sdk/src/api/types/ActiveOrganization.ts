@@ -12,12 +12,12 @@ export interface ActiveOrganization {
     preferred_organization_id?: string | undefined;
     /** All active memberships for the picker UI. */
     memberships?: NizamOperatorRuntime.MembershipChoice[] | undefined;
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     object?: ActiveOrganization.Object_ | undefined;
 }
 
 export namespace ActiveOrganization {
-    /** Object type discriminator (Stripe pattern). */
+    /** Object type discriminator. */
     export const Object_ = {
         ActiveOrganization: "active_organization",
     } as const;
