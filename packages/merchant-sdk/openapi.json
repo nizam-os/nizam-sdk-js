@@ -311,26 +311,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -552,26 +552,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -776,26 +776,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -983,26 +983,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -1221,26 +1221,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -1496,26 +1496,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -1655,26 +1655,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -1857,26 +1857,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -2102,26 +2102,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -2311,26 +2311,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -2439,26 +2439,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -2563,26 +2563,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -2686,26 +2686,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -2809,26 +2809,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -2950,26 +2950,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -3119,26 +3119,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -3307,26 +3307,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -3467,26 +3467,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -3629,26 +3629,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -3785,26 +3785,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -3980,26 +3980,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -4118,19 +4118,60 @@
                     "Notifications"
                 ],
                 "summary": "List the current user's notifications (paginated)",
-                "description": "The caller's own notifications ordered by `created_at` descending (pass `sort=created_at` for ascending). `unread=true` restricts to unread; `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.",
+                "description": "The caller's own notifications ordered by `created_at` descending (pass `sort=created_at` for ascending). `status` selects the segment \u2014 `all` (default; the active inbox, non-archived), `unread`, `read`, or `archived`. `category` and `kind` accept comma-separated values and AND on top of the segment; `q` matches the notification title/body. `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.",
                 "operationId": "listNotifications",
                 "parameters": [
                     {
-                        "name": "unread",
+                        "name": "status",
                         "in": "query",
-                        "description": "Restrict to unread notifications.",
+                        "description": "Inbox segment. One of: `all` (default \u2014 active, non-archived), `unread`, `read`, `archived`.",
                         "required": false,
                         "schema": {
-                            "type": "boolean",
-                            "default": false
+                            "type": "string"
                         },
-                        "example": false
+                        "example": "<string>"
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Filter by category. Comma-separated; values: `transactional`, `operational`, `alert`, `marketing`, `security`, `system`.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "<string>"
+                        ]
+                    },
+                    {
+                        "name": "kind",
+                        "in": "query",
+                        "description": "Filter by notification kind (wire key). Comma-separated; e.g. `membership.joined`.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "<string>"
+                        ]
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Free-text search over the notification title/body (max 200 chars).",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 200,
+                            "minLength": 0
+                        },
+                        "example": "<string>"
                     },
                     {
                         "name": "since",
@@ -4213,6 +4254,8 @@
                                             },
                                             "read": false,
                                             "read_at": "2026-06-13T12:05:00Z",
+                                            "archived": false,
+                                            "archived_at": "2026-06-13T12:10:00Z",
                                             "created_at": "2026-06-13T12:00:00Z"
                                         }
                                     ],
@@ -4266,26 +4309,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -4374,6 +4417,331 @@
                 ]
             }
         },
+        "/v1/notifications/archive_all": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Archive all notifications",
+                "description": "Archives every active notification of the caller in one operation. Returns the number archived (zero when the active inbox was already empty).",
+                "operationId": "archiveAllNotifications",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotificationsArchived"
+                                },
+                                "example": {
+                                    "archived": 5,
+                                    "object": "notifications_archived"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/notifications/archive_all",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/notifications/archive_all",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/notifications/archive_all",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/notifications/archive_all",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing organization context",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/notifications/archive_all",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/notifications/counts": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Count the current user's notifications by segment",
+                "description": "The segment-badge roll-up for the active organization: total + unread (active, non-archived), archived, and per-category active total/unread. Computed server-side in one pass so segment badges stay accurate across cursor pages (never inferred from the loaded page). Excludes dismissed (soft-deleted) notifications.",
+                "operationId": "getNotificationCounts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotificationCounts"
+                                },
+                                "example": {
+                                    "total": 12,
+                                    "unread": 3,
+                                    "archived": 5,
+                                    "categories": [
+                                        
+                                    ],
+                                    "object": "notification_counts"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/notifications/counts",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/notifications/counts",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/notifications/counts",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/notifications/counts",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing organization context",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/notifications/counts",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
         "/v1/notifications/read_all": {
             "post": {
                 "tags": [
@@ -4438,26 +4806,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -4540,7 +4908,7 @@
                     "Notifications"
                 ],
                 "summary": "Count the current user's unread notifications",
-                "description": "The unread badge count for the active organization. Excludes dismissed (soft-deleted) notifications.",
+                "description": "The unread badge count for the active organization. Counts active (non-archived) unread notifications; excludes dismissed (soft-deleted) and archived ones.",
                 "operationId": "getUnreadNotificationCount",
                 "responses": {
                     "200": {
@@ -4598,26 +4966,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -4694,6 +5062,189 @@
                 ]
             }
         },
+        "/v1/notifications/{id}/archive": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Archive a notification",
+                "description": "Moves a single notification to the archive (\"Done\") \u2014 reversible, not a delete: it leaves the active inbox but stays listable under `status=archived`. Idempotent. 404 if the notification is not the caller's.",
+                "operationId": "archiveNotification",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The notification after archiving.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Notification"
+                                },
+                                "example": {
+                                    "object": "notification",
+                                    "id": "9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f",
+                                    "kind": "membership.joined",
+                                    "category": "operational",
+                                    "priority": "normal",
+                                    "data": {
+                                        "orgName": "Acme"
+                                    },
+                                    "read": false,
+                                    "read_at": "2026-06-13T12:05:00Z",
+                                    "archived": false,
+                                    "archived_at": "2026-06-13T12:10:00Z",
+                                    "created_at": "2026-06-13T12:00:00Z"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/notifications/{id}/archive",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/notifications/{id}/archive",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/notifications/{id}/archive",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/notifications/{id}/archive",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Notification not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "notification.not_found": {
+                                        "summary": "Notification not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/notification/not_found",
+                                            "title": "Notification not found",
+                                            "status": 404,
+                                            "detail": "No notification matches the given id.",
+                                            "instance": "/v1/notifications/{id}/archive",
+                                            "code": "notification.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
         "/v1/notifications/{id}/read": {
             "post": {
                 "tags": [
@@ -4733,6 +5284,8 @@
                                     },
                                     "read": false,
                                     "read_at": "2026-06-13T12:05:00Z",
+                                    "archived": false,
+                                    "archived_at": "2026-06-13T12:10:00Z",
                                     "created_at": "2026-06-13T12:00:00Z"
                                 }
                             }
@@ -4779,26 +5332,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -4856,6 +5409,372 @@
                                             "status": 404,
                                             "detail": "No notification matches the given id.",
                                             "instance": "/v1/notifications/{id}/read",
+                                            "code": "notification.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/notifications/{id}/unarchive": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Unarchive a notification",
+                "description": "Restores an archived notification to the active inbox \u2014 the inverse of archive. Idempotent. 404 if the notification is not the caller's.",
+                "operationId": "unarchiveNotification",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The notification after unarchiving.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Notification"
+                                },
+                                "example": {
+                                    "object": "notification",
+                                    "id": "9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f",
+                                    "kind": "membership.joined",
+                                    "category": "operational",
+                                    "priority": "normal",
+                                    "data": {
+                                        "orgName": "Acme"
+                                    },
+                                    "read": false,
+                                    "read_at": "2026-06-13T12:05:00Z",
+                                    "archived": false,
+                                    "archived_at": "2026-06-13T12:10:00Z",
+                                    "created_at": "2026-06-13T12:00:00Z"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/notifications/{id}/unarchive",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/notifications/{id}/unarchive",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/notifications/{id}/unarchive",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/notifications/{id}/unarchive",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Notification not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "notification.not_found": {
+                                        "summary": "Notification not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/notification/not_found",
+                                            "title": "Notification not found",
+                                            "status": 404,
+                                            "detail": "No notification matches the given id.",
+                                            "instance": "/v1/notifications/{id}/unarchive",
+                                            "code": "notification.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator",
+                    "platform_staff"
+                ]
+            }
+        },
+        "/v1/notifications/{id}/unread": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark a notification unread",
+                "description": "Flips a single notification back to unread \u2014 the inverse of mark-read. Idempotent. 404 if the notification is not the caller's.",
+                "operationId": "markNotificationUnread",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The notification after marking unread.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Notification"
+                                },
+                                "example": {
+                                    "object": "notification",
+                                    "id": "9f1c2d3e-4a5b-6c7d-8e9f-0a1b2c3d4e5f",
+                                    "kind": "membership.joined",
+                                    "category": "operational",
+                                    "priority": "normal",
+                                    "data": {
+                                        "orgName": "Acme"
+                                    },
+                                    "read": false,
+                                    "read_at": "2026-06-13T12:05:00Z",
+                                    "archived": false,
+                                    "archived_at": "2026-06-13T12:10:00Z",
+                                    "created_at": "2026-06-13T12:00:00Z"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/notifications/{id}/unread",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/notifications/{id}/unread",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/notifications/{id}/unread",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/notifications/{id}/unread",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Notification not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "notification.not_found": {
+                                        "summary": "Notification not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/notification/not_found",
+                                            "title": "Notification not found",
+                                            "status": 404,
+                                            "detail": "No notification matches the given id.",
+                                            "instance": "/v1/notifications/{id}/unread",
                                             "code": "notification.not_found",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
@@ -4940,26 +5859,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -5135,26 +6054,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -5331,26 +6250,26 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "RateLimit-Limit": {
-                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
-                                "schema": {
-                                    
-                                }
-                            },
                             "Retry-After": {
                                 "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
                             },
-                            "RateLimit-Reset": {
-                                "description": "Seconds until the bucket refills to capacity.",
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
                                     
                                 }
                             },
                             "RateLimit-Remaining": {
                                 "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
                                 "schema": {
                                     
                                 }
@@ -6187,6 +7106,17 @@
                         "description": "When it was read (RFC 3339); null while unread.",
                         "example": "2026-06-13T12:05:00Z"
                     },
+                    "archived": {
+                        "type": "boolean",
+                        "description": "Whether the recipient has archived (\"Done\") it.",
+                        "example": false
+                    },
+                    "archived_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When it was archived (RFC 3339); null while in the active inbox.",
+                        "example": "2026-06-13T12:10:00Z"
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -6196,7 +7126,7 @@
                 }
             },
             "NotificationsMarkedRead": {
-                "description": "Result of a mark-all-read operation.",
+                "description": "Result of a mark-read operation.",
                 "properties": {
                     "marked": {
                         "type": "integer",
@@ -6211,6 +7141,25 @@
                             "notifications_marked_read"
                         ],
                         "example": "notifications_marked_read"
+                    }
+                }
+            },
+            "NotificationsArchived": {
+                "description": "Result of an archive-all operation.",
+                "properties": {
+                    "archived": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of notifications archived.",
+                        "example": 5
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "notifications_archived"
+                        ],
+                        "example": "notifications_archived"
                     }
                 }
             },
@@ -7965,6 +8914,80 @@
                             "notification_unread_count"
                         ],
                         "example": "notification_unread_count"
+                    }
+                }
+            },
+            "NotificationCategoryCount": {
+                "description": "Active total/unread for one category.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "description": "Category.",
+                        "enum": [
+                            "transactional",
+                            "operational",
+                            "alert",
+                            "marketing",
+                            "security",
+                            "system"
+                        ],
+                        "example": "operational"
+                    },
+                    "total": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Active notifications in this category.",
+                        "example": 8
+                    },
+                    "unread": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Active unread notifications in this category.",
+                        "example": 2
+                    }
+                }
+            },
+            "NotificationCounts": {
+                "description": "Inbox segment-badge counts (server-derived).",
+                "properties": {
+                    "total": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Active (non-archived) notifications.",
+                        "example": 12
+                    },
+                    "unread": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Active unread notifications.",
+                        "example": 3
+                    },
+                    "archived": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Archived (\"Done\") notifications.",
+                        "example": 5
+                    },
+                    "categories": {
+                        "type": "array",
+                        "description": "Per-category active counts; categories with no active row are omitted.",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/NotificationCategoryCount"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "notification_counts"
+                        ],
+                        "example": "notification_counts"
                     }
                 }
             },

@@ -20,6 +20,10 @@ export interface Notification {
     read?: boolean | undefined;
     /** When it was read (RFC 3339); null while unread. */
     read_at?: string | undefined;
+    /** Whether the recipient has archived ("Done") it. */
+    archived?: boolean | undefined;
+    /** When it was archived (RFC 3339); null while in the active inbox. */
+    archived_at?: string | undefined;
     /** When it was raised (RFC 3339). */
     created_at?: string | undefined;
 }

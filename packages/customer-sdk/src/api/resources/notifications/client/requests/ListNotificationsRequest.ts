@@ -3,14 +3,22 @@
 /**
  * @example
  *     {
+ *         status: "<string>",
+ *         q: "<string>",
  *         since: "2026-05-20T14:00:00Z",
  *         starting_after: "Y3Vyc29yX25leHRfMDFKNVE=",
  *         ending_before: "Y3Vyc29yX25leHRfMDFKNVE="
  *     }
  */
 export interface ListNotificationsRequest {
-    /** Restrict to unread notifications. */
-    unread?: boolean;
+    /** Inbox segment. One of: `all` (default — active, non-archived), `unread`, `read`, `archived`. */
+    status?: string;
+    /** Filter by category. Comma-separated; values: `transactional`, `operational`, `alert`, `marketing`, `security`, `system`. */
+    category?: string | string[];
+    /** Filter by notification kind (wire key). Comma-separated; e.g. `membership.joined`. */
+    kind?: string | string[];
+    /** Free-text search over the notification title/body (max 200 chars). */
+    q?: string;
     /** Only notifications created at/after this RFC 3339 instant. */
     since?: string;
     /** Sort order. Allowed fields: `created_at`. Prefix a field with `-` for descending (e.g. `-created_at`); unknown fields are rejected with `400 validation_failed`. */

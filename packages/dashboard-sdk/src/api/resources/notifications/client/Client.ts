@@ -26,7 +26,7 @@ export class NotificationsClient {
     }
 
     /**
-     * The caller's own notifications ordered by `created_at` descending (pass `sort=created_at` for ascending). `unread=true` restricts to unread; `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.
+     * The caller's own notifications ordered by `created_at` descending (pass `sort=created_at` for ascending). `status` selects the segment — `all` (default; the active inbox, non-archived), `unread`, `read`, or `archived`. `category` and `kind` accept comma-separated values and AND on top of the segment; `q` matches the notification title/body. `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.
      *
      * @param {NizamDashboard.ListNotificationsRequest} request
      * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -39,6 +39,8 @@ export class NotificationsClient {
      *
      * @example
      *     await client.notifications.listNotifications({
+     *         status: "<string>",
+     *         q: "<string>",
      *         since: "2026-05-20T14:00:00Z",
      *         starting_after: "Y3Vyc29yX25leHRfMDFKNVE=",
      *         ending_before: "Y3Vyc29yX25leHRfMDFKNVE="
@@ -55,9 +57,22 @@ export class NotificationsClient {
         request: NizamDashboard.ListNotificationsRequest = {},
         requestOptions?: NotificationsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.ListResponseNotification>> {
-        const { unread, since, sort, limit, starting_after: startingAfter, ending_before: endingBefore } = request;
+        const {
+            status,
+            category,
+            kind,
+            q,
+            since,
+            sort,
+            limit,
+            starting_after: startingAfter,
+            ending_before: endingBefore,
+        } = request;
         const _queryParams: Record<string, unknown> = {
-            unread,
+            status,
+            category,
+            kind,
+            q,
             since: since != null ? since : undefined,
             sort,
             limit,
@@ -134,6 +149,187 @@ export class NotificationsClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/notifications");
+    }
+
+    /**
+     * Archives every active notification of the caller in one operation. Returns the number archived (zero when the active inbox was already empty).
+     *
+     * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.notifications.archiveAllNotifications()
+     */
+    public archiveAllNotifications(
+        requestOptions?: NotificationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.NotificationsArchived> {
+        return core.HttpResponsePromise.fromPromise(this.__archiveAllNotifications(requestOptions));
+    }
+
+    private async __archiveAllNotifications(
+        requestOptions?: NotificationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.NotificationsArchived>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/notifications/archive_all",
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.NotificationsArchived, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/notifications/archive_all",
+        );
+    }
+
+    /**
+     * The segment-badge roll-up for the active organization: total + unread (active, non-archived), archived, and per-category active total/unread. Computed server-side in one pass so segment badges stay accurate across cursor pages (never inferred from the loaded page). Excludes dismissed (soft-deleted) notifications.
+     *
+     * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.notifications.getNotificationCounts()
+     */
+    public getNotificationCounts(
+        requestOptions?: NotificationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.NotificationCounts> {
+        return core.HttpResponsePromise.fromPromise(this.__getNotificationCounts(requestOptions));
+    }
+
+    private async __getNotificationCounts(
+        requestOptions?: NotificationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.NotificationCounts>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/notifications/counts",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.NotificationCounts, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/notifications/counts");
     }
 
     /**
@@ -228,7 +424,7 @@ export class NotificationsClient {
     }
 
     /**
-     * The unread badge count for the active organization. Excludes dismissed (soft-deleted) notifications.
+     * The unread badge count for the active organization. Counts active (non-archived) unread notifications; excludes dismissed (soft-deleted) and archived ones.
      *
      * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -324,6 +520,105 @@ export class NotificationsClient {
     }
 
     /**
+     * Moves a single notification to the archive ("Done") — reversible, not a delete: it leaves the active inbox but stays listable under `status=archived`. Idempotent. 404 if the notification is not the caller's.
+     *
+     * @param {NizamDashboard.ArchiveNotificationRequest} request
+     * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.notifications.archiveNotification({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public archiveNotification(
+        request: NizamDashboard.ArchiveNotificationRequest,
+        requestOptions?: NotificationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Notification> {
+        return core.HttpResponsePromise.fromPromise(this.__archiveNotification(request, requestOptions));
+    }
+
+    private async __archiveNotification(
+        request: NizamDashboard.ArchiveNotificationRequest,
+        requestOptions?: NotificationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Notification>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/notifications/${core.url.encodePathParam(id)}/archive`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Notification, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/notifications/{id}/archive",
+        );
+    }
+
+    /**
      * Flips a single notification to read. Idempotent — a second call is a no-op that preserves the original read timestamp. 404 if the notification is not the caller's.
      *
      * @param {NizamDashboard.MarkNotificationReadRequest} request
@@ -415,5 +710,203 @@ export class NotificationsClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/notifications/{id}/read");
+    }
+
+    /**
+     * Restores an archived notification to the active inbox — the inverse of archive. Idempotent. 404 if the notification is not the caller's.
+     *
+     * @param {NizamDashboard.UnarchiveNotificationRequest} request
+     * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.notifications.unarchiveNotification({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public unarchiveNotification(
+        request: NizamDashboard.UnarchiveNotificationRequest,
+        requestOptions?: NotificationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Notification> {
+        return core.HttpResponsePromise.fromPromise(this.__unarchiveNotification(request, requestOptions));
+    }
+
+    private async __unarchiveNotification(
+        request: NizamDashboard.UnarchiveNotificationRequest,
+        requestOptions?: NotificationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Notification>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/notifications/${core.url.encodePathParam(id)}/unarchive`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Notification, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/notifications/{id}/unarchive",
+        );
+    }
+
+    /**
+     * Flips a single notification back to unread — the inverse of mark-read. Idempotent. 404 if the notification is not the caller's.
+     *
+     * @param {NizamDashboard.MarkNotificationUnreadRequest} request
+     * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.notifications.markNotificationUnread({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public markNotificationUnread(
+        request: NizamDashboard.MarkNotificationUnreadRequest,
+        requestOptions?: NotificationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Notification> {
+        return core.HttpResponsePromise.fromPromise(this.__markNotificationUnread(request, requestOptions));
+    }
+
+    private async __markNotificationUnread(
+        request: NizamDashboard.MarkNotificationUnreadRequest,
+        requestOptions?: NotificationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Notification>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/notifications/${core.url.encodePathParam(id)}/unread`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Notification, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/notifications/{id}/unread",
+        );
     }
 }
