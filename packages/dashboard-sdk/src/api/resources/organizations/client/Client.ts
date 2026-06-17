@@ -2,7 +2,7 @@
 
 import type { BaseClientOptions, BaseRequestOptions } from "../../../../BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "../../../../BaseClient.js";
-import { mergeHeaders } from "../../../../core/headers.js";
+import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as core from "../../../../core/index.js";
 import * as environments from "../../../../environments.js";
 import { handleNonStatusCodeError } from "../../../../errors/handleNonStatusCodeError.js";
@@ -130,8 +130,6 @@ export class OrganizationsClient {
     /**
      * Creates a brand-new tenant with the calling user as the founding admin. The id is assigned by Keycloak so the same value identifies the organization in both systems. Slug is derived from the name when not supplied.
      *
-     * Supports the standard `Idempotency-Key` header — submit a UUID (v4 recommended) per logical attempt (same value on retry); malformed keys are rejected with 400 `idempotency.invalid_key`. Successful responses and 4xx domain rejections replay for matching request bodies; transient 5xx responses are never cached, so retrying with the same key re-executes. Mismatching fingerprints surface as 409 `idempotency.key_conflict`.
-     *
      * @param {NizamDashboard.CreateOrganizationRequest} request
      * @param {OrganizationsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -145,11 +143,13 @@ export class OrganizationsClient {
      *
      * @example
      *     await client.organizations.createOrganization({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         name: "Acme Logistics"
      *     })
      *
      * @example
      *     await client.organizations.createOrganization({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         name: "Acme Logistics",
      *         slug: "acme-logistics",
      *         primary_domain: "acme.com",
@@ -170,10 +170,12 @@ export class OrganizationsClient {
         request: NizamDashboard.CreateOrganizationRequest,
         requestOptions?: OrganizationsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.Organization>> {
+        const { "Idempotency-Key": idempotencyKey, ..._body } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -188,7 +190,7 @@ export class OrganizationsClient {
             contentType: "application/json",
             queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
             maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
             abortSignal: requestOptions?.abortSignal,

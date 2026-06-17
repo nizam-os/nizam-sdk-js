@@ -7,9 +7,9 @@ export interface Device {
     /** Device id. */
     id?: string | undefined;
     /** Push transport. */
-    platform?: string | undefined;
+    platform?: Device.Platform | undefined;
     /** Registration lifecycle. */
-    status?: string | undefined;
+    status?: Device.Status | undefined;
     /** When the device was first registered. */
     registered_at?: string | undefined;
     /** When the registration was last refreshed (last seen). */
@@ -19,6 +19,21 @@ export interface Device {
 }
 
 export namespace Device {
+    /** Push transport. */
+    export const Platform = {
+        Ios: "ios",
+        Android: "android",
+        Web: "web",
+    } as const;
+    export type Platform = (typeof Platform)[keyof typeof Platform];
+    /** Registration lifecycle. */
+    export const Status = {
+        Active: "active",
+        Suspended: "suspended",
+        Inactive: "inactive",
+        Expired: "expired",
+    } as const;
+    export type Status = (typeof Status)[keyof typeof Status];
     /** Object type discriminator. */
     export const Object_ = {
         Device: "device",

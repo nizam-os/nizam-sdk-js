@@ -2,7 +2,7 @@
 
 import type { BaseClientOptions, BaseRequestOptions } from "../../../../BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "../../../../BaseClient.js";
-import { mergeHeaders } from "../../../../core/headers.js";
+import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as core from "../../../../core/index.js";
 import * as environments from "../../../../environments.js";
 import { handleNonStatusCodeError } from "../../../../errors/handleNonStatusCodeError.js";
@@ -31,14 +31,17 @@ export class InvitesClient {
      * @param {NizamDashboard.CreateInviteRequest} request
      * @param {InvitesClient.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.ConflictError}
      * @throws {@link NizamDashboard.UnprocessableEntityError}
      * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
      *     await client.invites.createInvite({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         organization_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
      *         email: "ali@nizam.ai",
      *         role: "admin"
@@ -46,6 +49,7 @@ export class InvitesClient {
      *
      * @example
      *     await client.invites.createInvite({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         organization_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
      *         email: "jordan@example.com",
      *         role: "dispatcher",
@@ -54,6 +58,7 @@ export class InvitesClient {
      *
      * @example
      *     await client.invites.createInvite({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         organization_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
      *         email: "auditor@partner.example",
      *         role: "viewer",
@@ -71,10 +76,12 @@ export class InvitesClient {
         request: NizamDashboard.CreateInviteRequest,
         requestOptions?: InvitesClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.Invite>> {
+        const { "Idempotency-Key": idempotencyKey, ..._body } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -89,7 +96,7 @@ export class InvitesClient {
             contentType: "application/json",
             queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
             maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
@@ -102,6 +109,11 @@ export class InvitesClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -109,6 +121,11 @@ export class InvitesClient {
                     );
                 case 403:
                     throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );

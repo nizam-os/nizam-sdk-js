@@ -2,7 +2,7 @@
 
 import type { BaseClientOptions, BaseRequestOptions } from "../../../../BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "../../../../BaseClient.js";
-import { mergeHeaders } from "../../../../core/headers.js";
+import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as core from "../../../../core/index.js";
 import * as environments from "../../../../environments.js";
 import { handleNonStatusCodeError } from "../../../../errors/handleNonStatusCodeError.js";
@@ -156,12 +156,14 @@ export class AssetsClient {
      * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.ConflictError}
      * @throws {@link NizamDashboard.UnprocessableEntityError}
      * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
      *     await client.assets.createAsset({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         kind: "ground_vehicle",
      *         name: "Truck 7",
      *         autonomy_level: 0
@@ -169,6 +171,7 @@ export class AssetsClient {
      *
      * @example
      *     await client.assets.createAsset({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         kind: "aerial_vehicle",
      *         name: "Delivery Drone D-12",
      *         autonomy_level: 4
@@ -176,6 +179,7 @@ export class AssetsClient {
      *
      * @example
      *     await client.assets.createAsset({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         kind: "robot",
      *         name: "Picker Bot 3",
      *         autonomy_level: 5
@@ -183,6 +187,7 @@ export class AssetsClient {
      *
      * @example
      *     await client.assets.createAsset({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         kind: "container"
      *     })
      */
@@ -197,10 +202,12 @@ export class AssetsClient {
         request: NizamDashboard.CreateAssetRequest,
         requestOptions?: AssetsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.Asset>> {
+        const { "Idempotency-Key": idempotencyKey, ..._body } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -215,7 +222,7 @@ export class AssetsClient {
             contentType: "application/json",
             queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
             maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
@@ -240,6 +247,11 @@ export class AssetsClient {
                     );
                 case 403:
                     throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );

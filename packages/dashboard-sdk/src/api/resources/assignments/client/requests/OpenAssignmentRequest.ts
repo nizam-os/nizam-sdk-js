@@ -3,6 +3,7 @@
 /**
  * @example
  *     {
+ *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
  *         asset_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
  *         operator_id: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
  *         role: "primary"
@@ -10,12 +11,15 @@
  *
  * @example
  *     {
+ *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
  *         asset_id: "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
  *         operator_id: "d2e3f4a5-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
  *         role: "safety_monitor"
  *     }
  */
 export interface OpenAssignmentRequest {
+    /** Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write. */
+    "Idempotency-Key"?: string;
     /** Asset id. */
     asset_id: string;
     /** Operator id. */

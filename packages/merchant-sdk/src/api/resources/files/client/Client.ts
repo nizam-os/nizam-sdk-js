@@ -2,7 +2,7 @@
 
 import type { BaseClientOptions, BaseRequestOptions } from "../../../../BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "../../../../BaseClient.js";
-import { mergeHeaders } from "../../../../core/headers.js";
+import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as core from "../../../../core/index.js";
 import * as environments from "../../../../environments.js";
 import { handleNonStatusCodeError } from "../../../../errors/handleNonStatusCodeError.js";
@@ -151,6 +151,7 @@ export class FilesClient {
      * @throws {@link NizamMerchant.BadRequestError}
      * @throws {@link NizamMerchant.UnauthorizedError}
      * @throws {@link NizamMerchant.ForbiddenError}
+     * @throws {@link NizamMerchant.ConflictError}
      * @throws {@link NizamMerchant.ContentTooLargeError}
      * @throws {@link NizamMerchant.UnprocessableEntityError}
      * @throws {@link NizamMerchant.TooManyRequestsError}
@@ -158,6 +159,7 @@ export class FilesClient {
      *
      * @example
      *     await client.files.initiateFileUpload({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         kind: "profile_picture",
      *         subject_type: "task_attempt",
      *         subject_id: "b3c4d5e6-7f8a-9b0c-1d2e-3f4a5b6c7d8e",
@@ -178,10 +180,12 @@ export class FilesClient {
         request: NizamMerchant.InitiateFileUploadRequest,
         requestOptions?: FilesClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamMerchant.FileUploadSession>> {
+        const { "Idempotency-Key": idempotencyKey, ..._body } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -196,7 +200,7 @@ export class FilesClient {
             contentType: "application/json",
             queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
             maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
@@ -221,6 +225,11 @@ export class FilesClient {
                     );
                 case 403:
                     throw new NizamMerchant.ForbiddenError(
+                        _response.error.body as NizamMerchant.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamMerchant.ConflictError(
                         _response.error.body as NizamMerchant.ProblemDetail,
                         _response.rawResponse,
                     );

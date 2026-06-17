@@ -2,7 +2,7 @@
 
 import type { BaseClientOptions, BaseRequestOptions } from "../../../../BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "../../../../BaseClient.js";
-import { mergeHeaders } from "../../../../core/headers.js";
+import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as core from "../../../../core/index.js";
 import * as environments from "../../../../environments.js";
 import { handleNonStatusCodeError } from "../../../../errors/handleNonStatusCodeError.js";
@@ -28,52 +28,64 @@ export class OperatorsClient {
     /**
      * Creates a new operator (human, autonomous software, or teleoperated). The `kind` discriminator selects the variant.
      *
-     * @param {NizamDashboard.CreateOperatorRequest} request
+     * @param {NizamDashboard.CreateOperatorBody} request
      * @param {OperatorsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.ConflictError}
      * @throws {@link NizamDashboard.UnprocessableEntityError}
      * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
      * @example
      *     await client.operators.createOperator({
-     *         kind: "human"
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
+     *         body: {
+     *             kind: "human"
+     *         }
      *     })
      *
      * @example
      *     await client.operators.createOperator({
-     *         kind: "autonomous",
-     *         vendor: "Waymo",
-     *         product: "Waymo Driver",
-     *         version: "7.3",
-     *         responsible_party: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
+     *         body: {
+     *             kind: "autonomous",
+     *             vendor: "Waymo",
+     *             product: "Waymo Driver",
+     *             version: "7.3",
+     *             responsible_party: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+     *         }
      *     })
      *
      * @example
      *     await client.operators.createOperator({
-     *         kind: "teleoperated",
-     *         controller_user_id: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
-     *         responsible_party: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
+     *         body: {
+     *             kind: "teleoperated",
+     *             controller_user_id: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+     *             responsible_party: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+     *         }
      *     })
      */
     public createOperator(
-        request: NizamDashboard.CreateOperatorRequest,
+        request: NizamDashboard.CreateOperatorBody,
         requestOptions?: OperatorsClient.RequestOptions,
     ): core.HttpResponsePromise<NizamDashboard.Operator> {
         return core.HttpResponsePromise.fromPromise(this.__createOperator(request, requestOptions));
     }
 
     private async __createOperator(
-        request: NizamDashboard.CreateOperatorRequest,
+        request: NizamDashboard.CreateOperatorBody,
         requestOptions?: OperatorsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.Operator>> {
+        const { "Idempotency-Key": idempotencyKey, body: _body } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -88,7 +100,7 @@ export class OperatorsClient {
             contentType: "application/json",
             queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
             maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
@@ -113,6 +125,11 @@ export class OperatorsClient {
                     );
                 case 403:
                     throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );

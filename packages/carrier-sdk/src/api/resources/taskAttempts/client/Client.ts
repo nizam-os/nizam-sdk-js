@@ -2,7 +2,7 @@
 
 import type { BaseClientOptions, BaseRequestOptions } from "../../../../BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "../../../../BaseClient.js";
-import { mergeHeaders } from "../../../../core/headers.js";
+import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as core from "../../../../core/index.js";
 import * as environments from "../../../../environments.js";
 import { handleNonStatusCodeError } from "../../../../errors/handleNonStatusCodeError.js";
@@ -148,6 +148,7 @@ export class TaskAttemptsClient {
      * @throws {@link NizamCarrier.UnauthorizedError}
      * @throws {@link NizamCarrier.ForbiddenError}
      * @throws {@link NizamCarrier.NotFoundError}
+     * @throws {@link NizamCarrier.ConflictError}
      * @throws {@link NizamCarrier.ContentTooLargeError}
      * @throws {@link NizamCarrier.UnprocessableEntityError}
      * @throws {@link NizamCarrier.TooManyRequestsError}
@@ -155,6 +156,7 @@ export class TaskAttemptsClient {
      *
      * @example
      *     await client.taskAttempts.captureTaskAttemptPhoto({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         attemptId: "00000000-0000-0000-0000-000000000000",
      *         filename: "delivery-door.jpg",
      *         content_type: "image/jpeg",
@@ -177,11 +179,12 @@ export class TaskAttemptsClient {
         request: NizamCarrier.CaptureTaskAttemptPhotoRequest,
         requestOptions?: TaskAttemptsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamCarrier.UploadInitiation>> {
-        const { attemptId, ..._body } = request;
+        const { attemptId, "Idempotency-Key": idempotencyKey, ..._body } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -226,6 +229,11 @@ export class TaskAttemptsClient {
                     );
                 case 404:
                     throw new NizamCarrier.NotFoundError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamCarrier.ConflictError(
                         _response.error.body as NizamCarrier.ProblemDetail,
                         _response.rawResponse,
                     );

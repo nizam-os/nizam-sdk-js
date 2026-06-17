@@ -311,12 +311,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -331,6 +325,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -427,6 +427,19 @@
                 "summary": "Initiate a resumable upload",
                 "description": "Validates the declaration against the kind's policy (allowed portals, content types, size ceiling, organization quota), pre-reserves the final file id, and returns presigned part URLs. PUT each part's bytes directly to its URL (repeating the part's `headers` verbatim) and keep each response's `ETag` for completion. Sessions expire after 24h; the part URLs sooner \u2014 re-issue them via the resume endpoint.",
                 "operationId": "initiateFileUpload",
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -552,12 +565,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -572,6 +579,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -614,13 +627,25 @@
                         }
                     },
                     "400": {
-                        "description": "Missing organization context",
+                        "description": "Invalid Idempotency-Key header",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
                                 "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/files/uploads",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
                                     "auth.missing_organization": {
                                         "summary": "Missing organization context",
                                         "value": {
@@ -630,6 +655,42 @@
                                             "detail": "This endpoint requires an active organization claim on the JWT.",
                                             "instance": "/v1/files/uploads",
                                             "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/files/uploads",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/files/uploads",
+                                            "code": "idempotency.in_progress",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -776,12 +837,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -796,6 +851,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -983,12 +1044,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -1003,6 +1058,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -1221,12 +1282,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -1241,6 +1296,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -1496,12 +1557,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -1516,6 +1571,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -1655,12 +1716,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -1675,6 +1730,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -1857,12 +1918,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -1877,6 +1932,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2102,12 +2163,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -2122,6 +2177,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2311,12 +2372,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -2331,6 +2386,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2439,12 +2500,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -2459,6 +2514,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2563,12 +2624,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -2583,6 +2638,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2686,12 +2747,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -2706,6 +2761,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2809,12 +2870,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -2829,6 +2884,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -2950,12 +3011,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -2970,6 +3025,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -3119,12 +3180,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -3139,6 +3194,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -3307,12 +3368,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -3327,6 +3382,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -3467,12 +3528,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -3487,6 +3542,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -3629,12 +3690,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -3649,6 +3704,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -3785,12 +3846,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -3805,6 +3860,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -3980,12 +4041,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -4000,6 +4055,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -4309,12 +4370,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -4329,6 +4384,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -4481,12 +4542,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -4501,6 +4556,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -4646,12 +4707,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -4666,6 +4721,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -4806,12 +4867,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -4826,6 +4881,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -4966,12 +5027,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -4986,6 +5041,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -5149,12 +5210,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -5169,6 +5224,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -5332,12 +5393,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -5352,6 +5407,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -5515,12 +5576,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -5535,6 +5590,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -5698,12 +5759,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -5718,6 +5773,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -5859,12 +5920,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -5879,6 +5934,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -6054,12 +6115,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -6074,6 +6129,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -6189,6 +6250,17 @@
                             "format": "uuid"
                         },
                         "example": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
                     }
                 ],
                 "requestBody": {
@@ -6310,12 +6382,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -6330,6 +6396,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -6372,13 +6444,25 @@
                         }
                     },
                     "400": {
-                        "description": "Missing organization context",
+                        "description": "Invalid Idempotency-Key header",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
                                 "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/task-attempts/{attemptId}/photos",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
                                     "auth.missing_organization": {
                                         "summary": "Missing organization context",
                                         "value": {
@@ -6388,6 +6472,42 @@
                                             "detail": "This endpoint requires an active organization claim on the JWT.",
                                             "instance": "/v1/task-attempts/{attemptId}/photos",
                                             "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/task-attempts/{attemptId}/photos",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/task-attempts/{attemptId}/photos",
+                                            "code": "idempotency.in_progress",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -6540,12 +6660,6 @@
                     "429": {
                         "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
                         "headers": {
-                            "Retry-After": {
-                                "description": "Seconds until at least one token is available (always \u2265 1).",
-                                "schema": {
-                                    
-                                }
-                            },
                             "RateLimit-Limit": {
                                 "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
                                 "schema": {
@@ -6560,6 +6674,12 @@
                             },
                             "RateLimit-Reset": {
                                 "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
                                 "schema": {
                                     
                                 }
@@ -6685,7 +6805,7 @@
                     "trace_id": {
                         "type": "string",
                         "description": "OpenTelemetry trace id from the request \u2014 match to logs for support.",
-                        "example": "00-4bf92f3577b34da6a3ce929d0e0e4736-\u2026"
+                        "example": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                     },
                     "errors": {
                         "type": "array",
@@ -7553,11 +7673,22 @@
                     "platform": {
                         "type": "string",
                         "description": "Push transport.",
+                        "enum": [
+                            "ios",
+                            "android",
+                            "web"
+                        ],
                         "example": "android"
                     },
                     "status": {
                         "type": "string",
                         "description": "Registration lifecycle.",
+                        "enum": [
+                            "active",
+                            "suspended",
+                            "inactive",
+                            "expired"
+                        ],
                         "example": "active"
                     },
                     "registered_at": {
