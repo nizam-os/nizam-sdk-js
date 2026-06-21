@@ -4,10 +4,10 @@
  * Acknowledgement of a bulk admin action that fanned out one job per work item.
  */
 export interface BulkJobSubmission {
-    job_ids?: string[] | undefined;
+    job_ids: string[];
     /** Number of jobs created (one per matched service account). */
-    count?: number | undefined;
-    object?: BulkJobSubmission.Object_ | undefined;
+    count: number;
+    object: BulkJobSubmission.Object_;
 }
 
 export namespace BulkJobSubmission {

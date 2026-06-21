@@ -5,10 +5,10 @@
  */
 export interface MqttToken {
     /** JWT to present as the MQTT CONNECT password. The CONNECT username must be the operator id embedded in the token's operator_id claim. */
-    token?: string | undefined;
+    token: string;
     /** Seconds until the token expires. Re-mint before this elapses to stay connected. */
-    expires_in?: number | undefined;
+    expires_in: number;
     /** The only topic this credential may publish to: nizam/{organizationId}/operators/{operatorId}/location. */
-    topic?: string | undefined;
-    object?: string | undefined;
+    topic: string;
+    object: string;
 }

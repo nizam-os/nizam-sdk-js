@@ -23,7 +23,7 @@ export class FilesClient {
     }
 
     /**
-     * The active organization's files ordered by `created_at` descending (pass `sort=created_at` for ascending). `kind` / `status` accept comma-separated values; `subject_type` + `subject_id` narrow to the files documenting one business entity. Pagination is bidirectional (`starting_after` / `ending_before`).
+     * The active organization's files ordered by `created_at` descending by default. `kind` / `status` accept comma-separated values; `subject_type` + `subject_id` narrow to the files documenting one business entity. Pagination is bidirectional (`starting_after` / `ending_before`).
      *
      * @param {NizamCarrier.ListFilesRequest} request
      * @param {FilesClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -64,11 +64,11 @@ export class FilesClient {
             ending_before: endingBefore,
         } = request;
         const _queryParams: Record<string, unknown> = {
-            kind,
-            status,
+            kind: Array.isArray(kind) ? kind.map((item) => item) : kind != null ? kind : undefined,
+            status: Array.isArray(status) ? status.map((item) => item) : status != null ? status : undefined,
             subject_type: subjectType,
             subject_id: subjectId,
-            sort,
+            sort: Array.isArray(sort) ? sort.map((item) => item) : sort != null ? sort : undefined,
             limit,
             starting_after: startingAfter,
             ending_before: endingBefore,

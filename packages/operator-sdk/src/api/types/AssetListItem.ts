@@ -5,21 +5,27 @@
  */
 export interface AssetListItem {
     /** Stable UUID. */
-    id?: string | undefined;
+    id: string;
     /** Top-level kind. */
-    kind?: AssetListItem.Kind | undefined;
+    kind: AssetListItem.Kind;
     /** Sub-kind within the kind (free-form). */
     sub_kind?: string | undefined;
     /** SAE J3016 autonomy level 0..5. */
     autonomy_level?: number | undefined;
     /** Lifecycle status. */
-    status?: AssetListItem.Status | undefined;
+    status: AssetListItem.Status;
     /** Display name. */
     name?: string | undefined;
     /** Vehicle Identification Number. */
     vin?: string | undefined;
     /** License plate. */
     plate_number?: string | undefined;
+    /** Manufacturer. */
+    make?: string | undefined;
+    /** Model designation. */
+    model?: string | undefined;
+    /** Model year. */
+    year?: number | undefined;
     /** Owning organization id. */
     organization_id?: string | undefined;
     /** Current primary operator (active assignment, role=primary). */
@@ -27,11 +33,11 @@ export interface AssetListItem {
     /** Creation timestamp (ISO-8601 UTC). */
     created_at?: string | undefined;
     /** Relevance score (descending) when the request carried `q`; 0 for plain listings. Scores are only comparable within a single response. */
-    rank?: number | undefined;
+    rank: number;
     /** Highlighted match fragment when the request carried `q&highlight=true`. Matched terms are wrapped in `<mark>…</mark>`. */
     snippet?: string | undefined;
     /** Object type discriminator. */
-    object?: AssetListItem.Object_ | undefined;
+    object: AssetListItem.Object_;
 }
 
 export namespace AssetListItem {

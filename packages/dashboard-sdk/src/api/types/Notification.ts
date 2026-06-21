@@ -5,27 +5,27 @@
  */
 export interface Notification {
     /** Object type discriminator. */
-    object?: Notification.Object_ | undefined;
+    object: Notification.Object_;
     /** Notification id. */
-    id?: string | undefined;
+    id: string;
     /** Notification kind (stable wire key). */
-    kind?: string | undefined;
+    kind: string;
     /** Opt-out / grouping category. */
-    category?: Notification.Category | undefined;
+    category: Notification.Category;
     /** Delivery priority. */
-    priority?: Notification.Priority | undefined;
+    priority: Notification.Priority;
     /** Kind-specific render payload. */
-    data?: Record<string, Record<string, unknown>> | undefined;
+    data: Record<string, Record<string, unknown>>;
     /** Whether the recipient has read it. */
-    read?: boolean | undefined;
+    read: boolean;
     /** When it was read (RFC 3339); null while unread. */
     read_at?: string | undefined;
     /** Whether the recipient has archived ("Done") it. */
-    archived?: boolean | undefined;
+    archived: boolean;
     /** When it was archived (RFC 3339); null while in the active inbox. */
     archived_at?: string | undefined;
     /** When it was raised (RFC 3339). */
-    created_at?: string | undefined;
+    created_at: string;
 }
 
 export namespace Notification {

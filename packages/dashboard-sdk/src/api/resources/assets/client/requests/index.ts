@@ -1,3 +1,14 @@
+export type { ActivateAssetRequest } from "./ActivateAssetRequest.js";
+export type { AllowedTransitionsRequest } from "./AllowedTransitionsRequest.js";
 export { CreateAssetRequest } from "./CreateAssetRequest.js";
+export type { DeactivateAssetRequest } from "./DeactivateAssetRequest.js";
+export type { DeleteAssetRequest } from "./DeleteAssetRequest.js";
+export type { EnterAssetMaintenanceRequest } from "./EnterAssetMaintenanceRequest.js";
+export { ExportAssetsRequest } from "./ExportAssetsRequest.js";
 export type { GetAssetRequest } from "./GetAssetRequest.js";
 export type { ListAssetsRequest } from "./ListAssetsRequest.js";
+export type { ReportAssetLostRequest } from "./ReportAssetLostRequest.js";
+export type { RetireAssetRequest } from "./RetireAssetRequest.js";
+export type { SellAssetRequest } from "./SellAssetRequest.js";
+export type { TakeAssetOutOfServiceRequest } from "./TakeAssetOutOfServiceRequest.js";
+export type { UpdateAssetRequest } from "./UpdateAssetRequest.js";

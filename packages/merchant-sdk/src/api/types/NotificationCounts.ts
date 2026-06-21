@@ -7,15 +7,15 @@ import type * as NizamMerchant from "../index.js";
  */
 export interface NotificationCounts {
     /** Active (non-archived) notifications. */
-    total?: number | undefined;
+    total: number;
     /** Active unread notifications. */
-    unread?: number | undefined;
+    unread: number;
     /** Archived ("Done") notifications. */
-    archived?: number | undefined;
+    archived: number;
     /** Per-category active counts; categories with no active row are omitted. */
-    categories?: NizamMerchant.NotificationCategoryCount[] | undefined;
+    categories: NizamMerchant.NotificationCategoryCount[];
     /** Object type discriminator. */
-    object?: NotificationCounts.Object_ | undefined;
+    object: NotificationCounts.Object_;
 }
 
 export namespace NotificationCounts {

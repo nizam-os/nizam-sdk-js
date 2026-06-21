@@ -1,5 +1,6 @@
 export * from "./ActiveOrganization.js";
 export * from "./ActivityResource.js";
+export * from "./AllowedTransitions.js";
 export * from "./ApiFieldError.js";
 export * from "./Asset.js";
 export * from "./AssetListItem.js";

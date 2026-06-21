@@ -124,37 +124,52 @@
                     "Files"
                 ],
                 "summary": "List files (paginated)",
-                "description": "The active organization's files ordered by `created_at` descending (pass `sort=created_at` for ascending). `kind` / `status` accept comma-separated values; `subject_type` + `subject_id` narrow to the files documenting one business entity. Pagination is bidirectional (`starting_after` / `ending_before`).",
+                "description": "The active organization's files ordered by `created_at` descending by default. `kind` / `status` accept comma-separated values; `subject_type` + `subject_id` narrow to the files documenting one business entity. Pagination is bidirectional (`starting_after` / `ending_before`).",
                 "operationId": "listFiles",
                 "parameters": [
                     {
                         "name": "kind",
                         "in": "query",
-                        "description": "Filter by file kind. Comma-separated; values: `profile_picture`, `chat_attachment`, `task_pod_photo`, `import_source`, `import_report`, `signed_document`, `product_image`.",
+                        "description": "Filter by file kind. Comma-separated; matched case-insensitively.",
                         "required": false,
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "type": "string",
+                                "enum": [
+                                    "profile_picture",
+                                    "chat_attachment",
+                                    "task_pod_photo",
+                                    "import_source",
+                                    "import_report",
+                                    "signed_document",
+                                    "product_image",
+                                    "data_export"
+                                ]
                             }
                         },
                         "example": [
-                            "<string>"
+                            "profile_picture"
                         ]
                     },
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Filter by lifecycle status. Comma-separated; values: `active`, `quarantined`, `deleted`.",
+                        "description": "Filter by lifecycle status. Comma-separated; matched case-insensitively.",
                         "required": false,
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "type": "string",
+                                "enum": [
+                                    "active",
+                                    "quarantined",
+                                    "deleted"
+                                ]
                             }
                         },
                         "example": [
-                            "<string>"
+                            "active"
                         ]
                     },
                     {
@@ -181,12 +196,16 @@
                     {
                         "name": "sort",
                         "in": "query",
-                        "description": "Sort order. Allowed fields: `created_at`. Prefix a field with `-` for descending (e.g. `-created_at`); unknown fields are rejected with `400 validation_failed`.",
+                        "description": "Sort order. Allowed fields: `created_at`. Append `:asc` or `:desc` to each field (direction required, e.g. `created_at:desc`), comma-separated for multi-sort; unknown fields or directions are rejected with `400 validation_failed`.",
                         "required": false,
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "type": "string",
+                                "enum": [
+                                    "created_at:asc",
+                                    "created_at:desc"
+                                ]
                             }
                         },
                         "example": "<string>"
@@ -4389,7 +4408,7 @@
                     "Notifications"
                 ],
                 "summary": "List the current user's notifications (paginated)",
-                "description": "The caller's own notifications ordered by `created_at` descending (pass `sort=created_at` for ascending). `status` selects the segment \u2014 `all` (default; the active inbox, non-archived), `unread`, `read`, or `archived`. `category` and `kind` accept comma-separated values and AND on top of the segment; `q` matches the notification title/body. `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.",
+                "description": "The caller's own notifications ordered by `created_at` descending by default. `status` selects the segment \u2014 `all` (default; the active inbox, non-archived), `unread`, `read`, or `archived`. `category` and `kind` accept comma-separated values and AND on top of the segment; `q` matches the notification title/body. `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.",
                 "operationId": "listNotifications",
                 "parameters": [
                     {
@@ -4458,12 +4477,16 @@
                     {
                         "name": "sort",
                         "in": "query",
-                        "description": "Sort order. Allowed fields: `created_at`. Prefix a field with `-` for descending (e.g. `-created_at`); unknown fields are rejected with `400 validation_failed`.",
+                        "description": "Sort order. Allowed fields: `created_at`. Append `:asc` or `:desc` to each field (direction required, e.g. `created_at:desc`), comma-separated for multi-sort; unknown fields or directions are rejected with `400 validation_failed`.",
                         "required": false,
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "type": "string",
+                                "enum": [
+                                    "created_at:asc",
+                                    "created_at:desc"
+                                ]
                             }
                         },
                         "example": "<string>"
@@ -7019,7 +7042,7 @@
                     },
                     "errors": {
                         "type": "array",
-                        "description": "Per-field validation errors. Populated only when status=422.",
+                        "description": "Per-field errors keyed to the offending input. Present on 422 bean-validation failures AND on field-level 409 conflicts (e.g. a duplicate unique value such as a VIN) \u2014 bind each entry to its `field`; do not gate handling on `status == 422`.",
                         "items": {
                             "$ref": "#/components/schemas/ApiFieldError"
                         }
@@ -7033,7 +7056,7 @@
                 ]
             },
             "ApiFieldError": {
-                "description": "One field-level entry inside a 422 validation problem.",
+                "description": "One field-level error entry \u2014 present on 422 validation failures and on field-level 409 conflicts.",
                 "properties": {
                     "field": {
                         "type": "string",
@@ -7128,7 +7151,13 @@
                         ],
                         "example": "user"
                     }
-                }
+                },
+                "required": [
+                    "id",
+                    "login_count",
+                    "object",
+                    "status"
+                ]
             },
             "UploadInitiation": {
                 "description": "A freshly initiated upload: the session handle, the pre-reserved file id and the presigned part URLs. Resume/complete/cancel go through the generic file-uploads endpoints.",
@@ -7170,7 +7199,15 @@
                         ],
                         "example": "file_upload_initiation"
                     }
-                }
+                },
+                "required": [
+                    "expires_at",
+                    "file_id",
+                    "object",
+                    "part_size_bytes",
+                    "parts",
+                    "upload_session_id"
+                ]
             },
             "UploadInitiationPart": {
                 "description": "One presigned part PUT.",
@@ -7307,7 +7344,12 @@
                         ],
                         "example": "realtime_ticket"
                     }
-                }
+                },
+                "required": [
+                    "expires_at",
+                    "object",
+                    "ticket"
+                ]
             },
             "CreateOrganizationRequest": {
                 "properties": {
@@ -7425,7 +7467,16 @@
                         ],
                         "example": "organization"
                     }
-                }
+                },
+                "required": [
+                    "created_at",
+                    "founder_user_id",
+                    "id",
+                    "name",
+                    "object",
+                    "slug",
+                    "status"
+                ]
             },
             "CreateAutonomousOperatorRequest": {
                 "description": "Create an autonomous (software-agent) operator.",
@@ -7653,7 +7704,13 @@
                         ],
                         "example": "operator"
                     }
-                }
+                },
+                "required": [
+                    "id",
+                    "kind",
+                    "object",
+                    "status"
+                ]
             },
             "Notification": {
                 "description": "A single notification as it appears in a user's inbox.",
@@ -7743,7 +7800,18 @@
                         "description": "When it was raised (RFC 3339).",
                         "example": "2026-06-13T12:00:00Z"
                     }
-                }
+                },
+                "required": [
+                    "archived",
+                    "category",
+                    "created_at",
+                    "data",
+                    "id",
+                    "kind",
+                    "object",
+                    "priority",
+                    "read"
+                ]
             },
             "NotificationsMarkedRead": {
                 "description": "Result of a mark-read operation.",
@@ -7762,7 +7830,11 @@
                         ],
                         "example": "notifications_marked_read"
                     }
-                }
+                },
+                "required": [
+                    "marked",
+                    "object"
+                ]
             },
             "NotificationsArchived": {
                 "description": "Result of an archive-all operation.",
@@ -7781,7 +7853,11 @@
                         ],
                         "example": "notifications_archived"
                     }
-                }
+                },
+                "required": [
+                    "archived",
+                    "object"
+                ]
             },
             "InitiateProfilePictureUploadRequest": {
                 "description": "Declares a profile-picture upload and requests presigned part URLs.",
@@ -7844,7 +7920,13 @@
                         "type": "string",
                         "example": "mqtt_token"
                     }
-                }
+                },
+                "required": [
+                    "expires_in",
+                    "object",
+                    "token",
+                    "topic"
+                ]
             },
             "RegisterDevice": {
                 "description": "A push-device registration request.",
@@ -7921,7 +8003,15 @@
                         ],
                         "example": "device"
                     }
-                }
+                },
+                "required": [
+                    "id",
+                    "last_seen_at",
+                    "object",
+                    "platform",
+                    "registered_at",
+                    "status"
+                ]
             },
             "Job": {
                 "description": "A long-running, retryable, operator-visible unit of work \u2014 bulk imports, exports, backfills, cache rebuilds. The job row is the persistent handle; the executing engine (Temporal workflow or lease worker, declared per kind) reports progress into it. Cancellation is cooperative: already-running work continues until the engine's next checkpoint.",
@@ -8055,7 +8145,20 @@
                         ],
                         "example": "job"
                     }
-                }
+                },
+                "required": [
+                    "attempt_count",
+                    "created_at",
+                    "id",
+                    "kind",
+                    "max_attempts",
+                    "object",
+                    "organization_id",
+                    "rows_failed",
+                    "rows_processed",
+                    "status",
+                    "updated_at"
+                ]
             },
             "CreateInviteRequest": {
                 "properties": {
@@ -8160,7 +8263,17 @@
                         ],
                         "example": "invite"
                     }
-                }
+                },
+                "required": [
+                    "expires_at",
+                    "id",
+                    "invited_email",
+                    "object",
+                    "organization_id",
+                    "role",
+                    "status",
+                    "token"
+                ]
             },
             "AcceptInviteRequest": {
                 "properties": {
@@ -8201,7 +8314,12 @@
                         ],
                         "example": "bulk_job_submission"
                     }
-                }
+                },
+                "required": [
+                    "count",
+                    "job_ids",
+                    "object"
+                ]
             },
             "MembershipDriftResponse": {
                 "description": "One org with divergent membership sets.",
@@ -8294,7 +8412,13 @@
                         ],
                         "example": "keycloak_reconciliation"
                     }
-                }
+                },
+                "required": [
+                    "kc_has_nizam_missing",
+                    "membership_divergent",
+                    "nizam_has_kc_missing",
+                    "object"
+                ]
             },
             "JobSubmission": {
                 "description": "Acknowledgement that a job was submitted to its engine.",
@@ -8312,7 +8436,11 @@
                         ],
                         "example": "job_submission"
                     }
-                }
+                },
+                "required": [
+                    "job_id",
+                    "object"
+                ]
             },
             "FileUploadPart": {
                 "description": "A presigned PUT for one part. Send the raw part bytes; repeat `headers` verbatim; keep the response's `ETag` header for completion.",
@@ -8377,7 +8505,8 @@
                             "import_source",
                             "import_report",
                             "signed_document",
-                            "product_image"
+                            "product_image",
+                            "data_export"
                         ]
                     },
                     "status": {
@@ -8437,7 +8566,20 @@
                         ],
                         "example": "file_upload_session"
                     }
-                }
+                },
+                "required": [
+                    "bytes_uploaded",
+                    "completed_part_numbers",
+                    "expires_at",
+                    "file_id",
+                    "id",
+                    "kind",
+                    "object",
+                    "part_count",
+                    "part_size_bytes",
+                    "parts",
+                    "status"
+                ]
             },
             "ImportSubmission": {
                 "description": "Acknowledgement that an import was submitted: the job handle, the reserved source-file id, and the presigned upload session to push the file's bytes through.",
@@ -8464,7 +8606,13 @@
                         ],
                         "example": "import_submission"
                     }
-                }
+                },
+                "required": [
+                    "file_id",
+                    "job_id",
+                    "object",
+                    "upload"
+                ]
             },
             "CreateImportRequest": {
                 "description": "Initiates a bulk import: the import kind plus the source file's upload declaration. Returns a job handle and a presigned upload session.",
@@ -8508,7 +8656,7 @@
                 ]
             },
             "FileDownloadUrl": {
-                "description": "A short-lived URL granting read access to the file's bytes. Fetch it promptly \u2014 request a fresh grant after expiry.",
+                "description": "A short-lived URL granting read access to a file's bytes. Fetch it promptly \u2014 request a fresh grant after expiry.",
                 "properties": {
                     "url": {
                         "type": "string",
@@ -8528,7 +8676,12 @@
                         ],
                         "example": "file_download_url"
                     }
-                }
+                },
+                "required": [
+                    "expires_at",
+                    "object",
+                    "url"
+                ]
             },
             "InitiateFileUploadRequest": {
                 "description": "Declares an upload and requests presigned part URLs.",
@@ -8543,7 +8696,8 @@
                             "import_source",
                             "import_report",
                             "signed_document",
-                            "product_image"
+                            "product_image",
+                            "data_export"
                         ]
                     },
                     "subject_type": {
@@ -8626,7 +8780,8 @@
                             "import_source",
                             "import_report",
                             "signed_document",
-                            "product_image"
+                            "product_image",
+                            "data_export"
                         ]
                     },
                     "subject_type": {
@@ -8738,7 +8893,22 @@
                         ],
                         "example": "file"
                     }
-                }
+                },
+                "required": [
+                    "checksum_sha256",
+                    "created_at",
+                    "declared_content_type",
+                    "id",
+                    "kind",
+                    "object",
+                    "organization_id",
+                    "original_filename",
+                    "size_bytes",
+                    "status",
+                    "updated_at",
+                    "virus_scan_status",
+                    "visibility"
+                ]
             },
             "CompleteFileUploadRequest": {
                 "description": "Confirms every uploaded part to assemble the file.",
@@ -8882,7 +9052,15 @@
                         ],
                         "example": "assignment"
                     }
-                }
+                },
+                "required": [
+                    "asset_id",
+                    "id",
+                    "object",
+                    "operator_id",
+                    "role",
+                    "valid_from"
+                ]
             },
             "CloseAssignmentRequest": {
                 "description": "Close an active assignment.",
@@ -8924,10 +9102,32 @@
                             "equipment"
                         ]
                     },
+                    "status": {
+                        "type": "string",
+                        "description": "Initial lifecycle status \u2014 the asset's birth state. Optional; defaults to `active`. Subsequent changes go through the status-transition endpoint.",
+                        "enum": [
+                            "active",
+                            "maintenance",
+                            "out_of_service",
+                            "retired",
+                            "sold",
+                            "inactive",
+                            "lost"
+                        ]
+                    },
                     "name": {
                         "type": "string",
                         "description": "Display name.",
-                        "example": "Truck 7"
+                        "example": "Truck 7",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "sub_kind": {
+                        "type": "string",
+                        "description": "Sub-kind within the kind (free-form).",
+                        "example": "van",
+                        "maxLength": 64,
+                        "minLength": 0
                     },
                     "autonomy_level": {
                         "type": "integer",
@@ -8936,6 +9136,39 @@
                         "example": 0,
                         "maximum": 5,
                         "minimum": 0
+                    },
+                    "vin": {
+                        "type": "string",
+                        "description": "Vehicle Identification Number \u2014 17 chars of A-Z (no I, O, Q) and 0-9, uppercase. Unique per organization.",
+                        "example": "1HGCM82633A004352",
+                        "pattern": "^[A-HJ-NPR-Z0-9]{17}$"
+                    },
+                    "plate_number": {
+                        "type": "string",
+                        "description": "License plate.",
+                        "example": "AB-123-CD",
+                        "pattern": "^[A-Z0-9 -]{2,32}$"
+                    },
+                    "make": {
+                        "type": "string",
+                        "description": "Manufacturer.",
+                        "example": "Volvo",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Model designation.",
+                        "example": "FH16",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "year": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Model year \u2014 1900 or later, and no later than next year.",
+                        "example": 2024,
+                        "minimum": 1900
                     }
                 },
                 "required": [
@@ -9005,6 +9238,22 @@
                         "description": "License plate.",
                         "example": "AB-123-CD"
                     },
+                    "make": {
+                        "type": "string",
+                        "description": "Manufacturer.",
+                        "example": "Volvo"
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Model designation.",
+                        "example": "FH16"
+                    },
+                    "year": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Model year.",
+                        "example": 2024
+                    },
                     "organization_id": {
                         "type": "string",
                         "format": "uuid",
@@ -9017,6 +9266,30 @@
                         "description": "Current primary operator (active assignment, role=primary).",
                         "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
                     },
+                    "allowed_transitions": {
+                        "type": "array",
+                        "description": "Lifecycle statuses this asset may move to next \u2014 the wire projection of the server-side transition matrix, derived from `status`. The status picker offers exactly these; empty for a terminal status (sold, lost).",
+                        "example": [
+                            "maintenance",
+                            "out_of_service",
+                            "retired",
+                            "inactive"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "A legal next status.",
+                            "enum": [
+                                "active",
+                                "maintenance",
+                                "out_of_service",
+                                "retired",
+                                "sold",
+                                "inactive",
+                                "lost"
+                            ],
+                            "example": "maintenance"
+                        }
+                    },
                     "object": {
                         "type": "string",
                         "description": "Object type discriminator.",
@@ -9025,7 +9298,138 @@
                         ],
                         "example": "asset"
                     }
-                }
+                },
+                "required": [
+                    "allowed_transitions",
+                    "id",
+                    "kind",
+                    "object",
+                    "status"
+                ]
+            },
+            "ExportAssetsRequest": {
+                "properties": {
+                    "format": {
+                        "type": "string",
+                        "description": "Output format.",
+                        "enum": [
+                            "csv",
+                            "xlsx",
+                            "json"
+                        ],
+                        "example": "xlsx",
+                        "minLength": 1
+                    },
+                    "fields": {
+                        "type": "array",
+                        "description": "Columns to export, in display order. `id` is a UUID \u2014 the safe, stable re-import/audit key; `kind`/`status` carry their stored code, not the tenant's display label.",
+                        "example": [
+                            "id",
+                            "name",
+                            "status"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "An exportable asset column key (mirrors the list columns).",
+                            "enum": [
+                                "id",
+                                "name",
+                                "kind",
+                                "sub_kind",
+                                "autonomy_level",
+                                "status",
+                                "make",
+                                "model",
+                                "year",
+                                "plate_number",
+                                "vin",
+                                "created_at"
+                            ],
+                            "example": "name",
+                            "minLength": 1
+                        },
+                        "minItems": 1
+                    },
+                    "ids": {
+                        "type": "array",
+                        "description": "Asset ids to export (the current selection). Capped at 10000.",
+                        "example": [
+                            "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Asset ids to export (the current selection). Capped at 10000."
+                        },
+                        "maxItems": 10000,
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "fields",
+                    "format",
+                    "ids"
+                ]
+            },
+            "AllowedTransitions": {
+                "description": "The lifecycle status transitions legal for an entire asset selection.",
+                "properties": {
+                    "allowed_transitions": {
+                        "type": "array",
+                        "description": "Statuses every selected asset may move to next (the intersection of their legal-transition sets); empty if they share none.",
+                        "example": [
+                            "sold",
+                            "lost"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "A legal next status.",
+                            "enum": [
+                                "active",
+                                "maintenance",
+                                "out_of_service",
+                                "retired",
+                                "sold",
+                                "inactive",
+                                "lost"
+                            ],
+                            "example": "sold"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "allowed_transitions"
+                        ],
+                        "example": "allowed_transitions"
+                    }
+                },
+                "required": [
+                    "allowed_transitions",
+                    "object"
+                ]
+            },
+            "AllowedTransitionsRequest": {
+                "description": "Asset ids whose common legal status transitions to compute.",
+                "properties": {
+                    "ids": {
+                        "type": "array",
+                        "description": "The selected asset ids.",
+                        "example": [
+                            "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                        },
+                        "maxItems": 100,
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "ids"
+                ]
             },
             "UpdateOrganizationRequest": {
                 "properties": {
@@ -9181,7 +9585,11 @@
                         ],
                         "example": "notification_preferences"
                     }
-                }
+                },
+                "required": [
+                    "object",
+                    "preferences"
+                ]
             },
             "SetActiveOrganizationRequest": {
                 "description": "Request body for setting the caller's preferred active organization. The slug must name an organization the caller is currently an active member of.",
@@ -9235,7 +9643,11 @@
                         ],
                         "example": "active_organization"
                     }
-                }
+                },
+                "required": [
+                    "memberships",
+                    "object"
+                ]
             },
             "MembershipChoice": {
                 "description": "One of the caller's active memberships \u2014 surfaced in the organization.select_required picker body.",
@@ -9304,6 +9716,66 @@
                         ],
                         "example": "suspended",
                         "pattern": "active|suspended|deactivated|pending_verification"
+                    }
+                }
+            },
+            "UpdateAssetRequest": {
+                "description": "Update mutable fields on an asset (set-only partial update).",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "New display name. Omit to leave unchanged.",
+                        "example": "Truck 7",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "sub_kind": {
+                        "type": "string",
+                        "description": "New sub-kind. Omit to leave unchanged.",
+                        "example": "van",
+                        "maxLength": 64,
+                        "minLength": 0
+                    },
+                    "autonomy_level": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "New SAE J3016 autonomy level 0..5. Omit to leave unchanged.",
+                        "example": 2,
+                        "maximum": 5,
+                        "minimum": 0
+                    },
+                    "vin": {
+                        "type": "string",
+                        "description": "New VIN \u2014 17 chars of A-Z (no I, O, Q) and 0-9, uppercase. Unique per organization. Omit to leave unchanged.",
+                        "example": "1HGCM82633A004352",
+                        "pattern": "^[A-HJ-NPR-Z0-9]{17}$"
+                    },
+                    "plate_number": {
+                        "type": "string",
+                        "description": "New license plate. Omit to leave unchanged.",
+                        "example": "AB-123-CD",
+                        "pattern": "^[A-Z0-9 -]{2,32}$"
+                    },
+                    "make": {
+                        "type": "string",
+                        "description": "New manufacturer. Omit to leave unchanged.",
+                        "example": "Volvo",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "New model designation. Omit to leave unchanged.",
+                        "example": "FH16",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "year": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "New model year \u2014 1900 or later, no later than next year. Omit to leave unchanged.",
+                        "example": 2024,
+                        "minimum": 1900
                     }
                 }
             },
@@ -9414,7 +9886,16 @@
                         ],
                         "example": "task_attempt_photo"
                     }
-                }
+                },
+                "required": [
+                    "created_at",
+                    "downloadable",
+                    "file_id",
+                    "id",
+                    "object",
+                    "sequence",
+                    "thumbnails"
+                ]
             },
             "TaskAttemptPhotoThumbnail": {
                 "description": "One rendered thumbnail variant.",
@@ -9546,7 +10027,11 @@
                         ],
                         "example": "notification_unread_count"
                     }
-                }
+                },
+                "required": [
+                    "count",
+                    "object"
+                ]
             },
             "NotificationCategoryCount": {
                 "description": "Active total/unread for one category.",
@@ -9620,7 +10105,14 @@
                         ],
                         "example": "notification_counts"
                     }
-                }
+                },
+                "required": [
+                    "archived",
+                    "categories",
+                    "object",
+                    "total",
+                    "unread"
+                ]
             },
             "User": {
                 "description": "The current authenticated user \u2014 identity + portal context + login activity.",
@@ -9695,7 +10187,14 @@
                         ],
                         "example": "user"
                     }
-                }
+                },
+                "required": [
+                    "id",
+                    "login_count",
+                    "object",
+                    "portal",
+                    "roles"
+                ]
             },
             "ListResponseMembership": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -9770,7 +10269,12 @@
                         ],
                         "example": "membership"
                     }
-                }
+                },
+                "required": [
+                    "object",
+                    "organization",
+                    "role"
+                ]
             },
             "Devices": {
                 "description": "The current user's registered push devices.",
@@ -9793,7 +10297,11 @@
                         ],
                         "example": "device_list"
                     }
-                }
+                },
+                "required": [
+                    "devices",
+                    "object"
+                ]
             },
             "ListResponseTimezone": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -9868,7 +10376,13 @@
                         ],
                         "example": "timezone"
                     }
-                }
+                },
+                "required": [
+                    "display_name",
+                    "gmt_offset_minutes",
+                    "id",
+                    "object"
+                ]
             },
             "Language": {
                 "description": "ISO 639-1 language with localized + native names.",
@@ -9896,7 +10410,13 @@
                         ],
                         "example": "language"
                     }
-                }
+                },
+                "required": [
+                    "code",
+                    "name",
+                    "native_name",
+                    "object"
+                ]
             },
             "ListResponseLanguage": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -9976,7 +10496,14 @@
                         ],
                         "example": "currency"
                     }
-                }
+                },
+                "required": [
+                    "code",
+                    "fraction_digits",
+                    "name",
+                    "object",
+                    "symbol"
+                ]
             },
             "ListResponseCurrency": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -10050,7 +10577,12 @@
                         ],
                         "example": "country"
                     }
-                }
+                },
+                "required": [
+                    "code",
+                    "name",
+                    "object"
+                ]
             },
             "ListResponseCountry": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -10119,7 +10651,12 @@
                         ],
                         "example": "business_category"
                     }
-                }
+                },
+                "required": [
+                    "display_name",
+                    "object",
+                    "slug"
+                ]
             },
             "ListResponseBusinessCategory": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -10331,7 +10868,18 @@
                         ],
                         "example": "notification_dead_letter"
                     }
-                }
+                },
+                "required": [
+                    "attempt_count",
+                    "channel",
+                    "created_at",
+                    "id",
+                    "notification_id",
+                    "object",
+                    "organization_id",
+                    "provider",
+                    "recipient_address"
+                ]
             },
             "ImportError": {
                 "description": "One validation error against one import row: the row number, the offending field (null for a whole-row error), the stable code/message and the raw value.",
@@ -10369,7 +10917,13 @@
                         ],
                         "example": "import_error"
                     }
-                }
+                },
+                "required": [
+                    "error_code",
+                    "error_message",
+                    "object",
+                    "row_number"
+                ]
             },
             "ListResponsePosition": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -10481,7 +11035,15 @@
                         ],
                         "example": "position"
                     }
-                }
+                },
+                "required": [
+                    "id",
+                    "lat",
+                    "lng",
+                    "object",
+                    "operator_id",
+                    "recorded_at"
+                ]
             },
             "HeatmapCell": {
                 "description": "Aggregated position count for one H3 hex cell.",
@@ -10510,7 +11072,13 @@
                         ],
                         "example": "heatmap_cell"
                     }
-                }
+                },
+                "required": [
+                    "count",
+                    "h3_cell",
+                    "h3_res",
+                    "object"
+                ]
             },
             "ListResponseHeatmapCell": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -10662,7 +11230,14 @@
                         ],
                         "example": "operator_position"
                     }
-                }
+                },
+                "required": [
+                    "captured_at",
+                    "lat",
+                    "lng",
+                    "object",
+                    "operator_id"
+                ]
             },
             "ListResponseFile": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -10773,6 +11348,22 @@
                         "description": "License plate.",
                         "example": "AB-123-CD"
                     },
+                    "make": {
+                        "type": "string",
+                        "description": "Manufacturer.",
+                        "example": "Volvo"
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Model designation.",
+                        "example": "FH16"
+                    },
+                    "year": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Model year.",
+                        "example": 2024
+                    },
                     "organization_id": {
                         "type": "string",
                         "format": "uuid",
@@ -10810,7 +11401,14 @@
                         ],
                         "example": "asset"
                     }
-                }
+                },
+                "required": [
+                    "id",
+                    "kind",
+                    "object",
+                    "rank",
+                    "status"
+                ]
             },
             "ListResponseAssetListItem": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -10943,7 +11541,13 @@
                         ],
                         "example": "activity"
                     }
-                }
+                },
+                "required": [
+                    "description",
+                    "id",
+                    "object",
+                    "occurred_at"
+                ]
             },
             "ListResponseActivityResource": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",

@@ -7,9 +7,9 @@ import type * as NizamDashboard from "../index.js";
  */
 export interface Devices {
     /** The caller's live device registrations. */
-    devices?: NizamDashboard.Device[] | undefined;
+    devices: NizamDashboard.Device[];
     /** Object type discriminator. */
-    object?: Devices.Object_ | undefined;
+    object: Devices.Object_;
 }
 
 export namespace Devices {

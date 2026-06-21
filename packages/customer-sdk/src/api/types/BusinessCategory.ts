@@ -5,11 +5,11 @@
  */
 export interface BusinessCategory {
     /** Stable slug — matches the DB CHECK constraint on `organizations.business_category`. */
-    slug?: string | undefined;
+    slug: string;
     /** Human-readable label for picker UIs. */
-    display_name?: string | undefined;
+    display_name: string;
     /** Object type discriminator. */
-    object?: BusinessCategory.Object_ | undefined;
+    object: BusinessCategory.Object_;
 }
 
 export namespace BusinessCategory {

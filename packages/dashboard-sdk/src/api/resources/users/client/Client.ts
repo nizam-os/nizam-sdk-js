@@ -232,7 +232,7 @@ export class UsersClient {
     }
 
     /**
-     * Dashboard sees co-members of the caller's active organization (tenant-scoped via the organization_users join). Platform staff bypass RLS and see across tenants. Allowed sort fields: `created_at`, `name` (prefix with `-` for descending). RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.
+     * Dashboard sees co-members of the caller's active organization (tenant-scoped via the organization_users join). Platform staff bypass RLS and see across tenants. The sortable fields and direction grammar are on the `sort` parameter. RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.
      *
      * @param {NizamDashboard.ListUsersRequest} request
      * @param {UsersClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -262,7 +262,7 @@ export class UsersClient {
     ): Promise<core.WithRawResponse<NizamDashboard.ListResponseUserResource>> {
         const { sort, limit, starting_after: startingAfter, ending_before: endingBefore } = request;
         const _queryParams: Record<string, unknown> = {
-            sort,
+            sort: Array.isArray(sort) ? sort.map((item) => item) : sort != null ? sort : undefined,
             limit,
             starting_after: startingAfter,
             ending_before: endingBefore,

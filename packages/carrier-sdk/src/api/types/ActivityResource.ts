@@ -5,13 +5,13 @@
  */
 export interface ActivityResource {
     /** Stable UUID of this activity row — the resource id and pagination key. */
-    id?: string | undefined;
+    id: string;
     /** Per-publication idempotency key — equal to the realtime ActivityFeedItem's `id` for the same event, so a client can dedupe realtime against REST. Null for directly-written audit rows. */
     event_id?: string | undefined;
     /** Canonical event verb. */
     event?: ActivityResource.Event | undefined;
     /** Human-readable narrative shown in the feed UI. */
-    description?: string | undefined;
+    description: string;
     /** Type of the entity the action targeted (polymorphic subject). */
     subject_type?: string | undefined;
     /** Id of the entity the action targeted. */
@@ -23,9 +23,9 @@ export interface ActivityResource {
     /** Optional UI filtering bucket. */
     log_name?: string | undefined;
     /** When the activity was recorded — the authoritative timestamp. */
-    occurred_at?: string | undefined;
+    occurred_at: string;
     /** Object type discriminator. */
-    object?: ActivityResource.Object_ | undefined;
+    object: ActivityResource.Object_;
 }
 
 export namespace ActivityResource {

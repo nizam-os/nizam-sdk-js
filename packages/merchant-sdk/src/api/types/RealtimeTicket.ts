@@ -5,11 +5,11 @@
  */
 export interface RealtimeTicket {
     /** The signed ticket. Send it as `Authorization: Bearer <ticket>` on the STOMP CONNECT frame to /ws. Opaque to the client; do not parse or store it. */
-    ticket?: string | undefined;
+    ticket: string;
     /** When the ticket expires (ISO-8601). Connect promptly; mint a fresh ticket for each new connection attempt. */
-    expires_at?: string | undefined;
+    expires_at: string;
     /** Object type discriminator. */
-    object?: RealtimeTicket.Object_ | undefined;
+    object: RealtimeTicket.Object_;
 }
 
 export namespace RealtimeTicket {

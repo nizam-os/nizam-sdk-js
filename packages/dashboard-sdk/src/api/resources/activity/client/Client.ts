@@ -26,7 +26,7 @@ export class ActivityClient {
     }
 
     /**
-     * Newest-first feed of audited events for the caller's active organization (dashboard; tenant-scoped). Platform staff see across tenants. This is the durable, REST source of truth behind the realtime `/topic/organization.<id>.activity` STOMP stream: on reconnect, a client passes `since=<last_seen>` to catch up missed items, then resumes realtime. Each item's `event_id` correlates with the realtime ActivityFeedItem's `id` for deduplication. Sortable: `created_at` (default `-created_at`). Bidirectional opaque cursors via `starting_after` / `ending_before`.
+     * Newest-first feed of audited events for the caller's active organization (dashboard; tenant-scoped). Platform staff see across tenants. This is the durable, REST source of truth behind the realtime `/topic/organization.<id>.activity` STOMP stream: on reconnect, a client passes `since=<last_seen>` to catch up missed items, then resumes realtime. Each item's `event_id` correlates with the realtime ActivityFeedItem's `id` for deduplication. Sortable: `created_at` (default `created_at:desc`). Bidirectional opaque cursors via `starting_after` / `ending_before`.
      *
      * @param {NizamDashboard.ListActivityRequest} request
      * @param {ActivityClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -58,7 +58,7 @@ export class ActivityClient {
         const { since, sort, limit, starting_after: startingAfter, ending_before: endingBefore } = request;
         const _queryParams: Record<string, unknown> = {
             since: since != null ? since : undefined,
-            sort,
+            sort: Array.isArray(sort) ? sort.map((item) => item) : sort != null ? sort : undefined,
             limit,
             starting_after: startingAfter,
             ending_before: endingBefore,

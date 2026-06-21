@@ -7,9 +7,9 @@ import type * as NizamOperatorRuntime from "../index.js";
  */
 export interface Devices {
     /** The caller's live device registrations. */
-    devices?: NizamOperatorRuntime.Device[] | undefined;
+    devices: NizamOperatorRuntime.Device[];
     /** Object type discriminator. */
-    object?: Devices.Object_ | undefined;
+    object: Devices.Object_;
 }
 
 export namespace Devices {

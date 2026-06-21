@@ -5,9 +5,9 @@
  */
 export interface NotificationUnreadCount {
     /** Number of unread notifications. */
-    count?: number | undefined;
+    count: number;
     /** Object type discriminator. */
-    object?: NotificationUnreadCount.Object_ | undefined;
+    object: NotificationUnreadCount.Object_;
 }
 
 export namespace NotificationUnreadCount {

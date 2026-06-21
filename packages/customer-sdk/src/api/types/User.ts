@@ -5,12 +5,12 @@
  */
 export interface User {
     /** Stable UUID. Equal to the Keycloak `sub` claim. */
-    id?: string | undefined;
+    id: string;
     /** Which portal issued the bearer token used for this request. */
-    portal?: User.Portal | undefined;
+    portal: User.Portal;
     /** Keycloak Organization id the user belongs to. Null for cross-tenant platform admins. */
     organization_id?: string | undefined;
-    roles?: string[] | undefined;
+    roles: string[];
     /** Email shadowed from Keycloak. Null until the user completes a profile. */
     email?: string | undefined;
     /** Display name shadowed from Keycloak. */
@@ -18,11 +18,11 @@ export interface User {
     /** Timestamp of this login. Null only on the very first call before provisioning completes. */
     last_login_at?: string | undefined;
     /** Total logins observed by this service. */
-    login_count?: number | undefined;
+    login_count: number;
     /** File id of the current profile picture (epic #151 / #166); null until one is uploaded. Request bytes via the files download-url endpoint, or let `GET /users/{id}/profile-picture` pick the nearest thumbnail. */
     profile_picture_file_id?: string | undefined;
     /** Object type discriminator. */
-    object?: User.Object_ | undefined;
+    object: User.Object_;
 }
 
 export namespace User {

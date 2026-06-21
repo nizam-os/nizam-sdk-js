@@ -6,11 +6,11 @@ import type * as NizamMerchant from "../index.js";
  * An organization the current user belongs to, with their role inside it.
  */
 export interface Membership {
-    organization?: NizamMerchant.Organization | undefined;
+    organization: NizamMerchant.Organization;
     /** The user's role in this organization. */
-    role?: Membership.Role | undefined;
+    role: Membership.Role;
     /** Object type discriminator. */
-    object?: Membership.Object_ | undefined;
+    object: Membership.Object_;
 }
 
 export namespace Membership {

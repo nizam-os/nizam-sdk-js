@@ -5,8 +5,8 @@
  */
 export interface JobSubmission {
     /** The created job — poll/cancel it via /v1/jobs/{id}. */
-    job_id?: string | undefined;
-    object?: JobSubmission.Object_ | undefined;
+    job_id: string;
+    object: JobSubmission.Object_;
 }
 
 export namespace JobSubmission {

@@ -5,13 +5,13 @@
  */
 export interface File_ {
     /** Stable file id (pre-reserved at upload initiation). */
-    id?: string | undefined;
+    id: string;
     /** Owning organization. */
-    organization_id?: string | undefined;
+    organization_id: string;
     /** Uploading user. Null for system-generated artifacts. */
     uploader_id?: string | undefined;
     /** What the bytes are for the platform — fixes the size/type/visibility/scan/retention policy applied to this file. */
-    kind?: File_.Kind | undefined;
+    kind: File_.Kind;
     /** Type of the business entity this file documents. */
     subject_type?: string | undefined;
     /** Id of the business entity this file documents. */
@@ -19,21 +19,21 @@ export interface File_ {
     /** For derived files (thumbnails): the original this one was rendered from. */
     parent_file_id?: string | undefined;
     /** Client-supplied filename, served back via Content-Disposition on download. */
-    original_filename?: string | undefined;
+    original_filename: string;
     /** MIME type declared by the uploader at initiation. */
-    declared_content_type?: string | undefined;
+    declared_content_type: string;
     /** MIME type detected server-side from the bytes (Tika). Null when detection was inconclusive. */
     sniffed_content_type?: string | undefined;
     /** Object size in bytes, storage-confirmed at completion. */
-    size_bytes?: number | undefined;
+    size_bytes: number;
     /** SHA-256 of the content, 64 lowercase hex characters. */
-    checksum_sha256?: string | undefined;
+    checksum_sha256: string;
     /** Lifecycle: `active` (serving), `quarantined` (malware-positive), `deleted` (bytes purged, row retained under regulatory hold). */
-    status?: File_.Status | undefined;
+    status: File_.Status;
     /** Access posture of the bytes, fixed by the kind's policy. */
-    visibility?: File_.Visibility | undefined;
+    visibility: File_.Visibility;
     /** Malware-scan verdict. Bytes are downloadable only on `clean` or `skipped`. */
-    virus_scan_status?: File_.VirusScanStatus | undefined;
+    virus_scan_status: File_.VirusScanStatus;
     /** When the scan verdict was produced. */
     virus_scanned_at?: string | undefined;
     /** When this file becomes eligible for the lifecycle sweep (TTL kinds). */
@@ -41,10 +41,10 @@ export interface File_ {
     /** Regulatory hold: the file cannot be deleted before this instant. */
     retention_until?: string | undefined;
     /** Upload completion time. */
-    created_at?: string | undefined;
+    created_at: string;
     /** Last lifecycle/scan change. */
-    updated_at?: string | undefined;
-    object?: File_.Object_ | undefined;
+    updated_at: string;
+    object: File_.Object_;
 }
 
 export namespace File_ {
@@ -57,6 +57,7 @@ export namespace File_ {
         ImportReport: "import_report",
         SignedDocument: "signed_document",
         ProductImage: "product_image",
+        DataExport: "data_export",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
     /** Lifecycle: `active` (serving), `quarantined` (malware-positive), `deleted` (bytes purged, row retained under regulatory hold). */

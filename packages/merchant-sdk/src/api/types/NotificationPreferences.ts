@@ -7,9 +7,9 @@ import type * as NizamMerchant from "../index.js";
  */
 export interface NotificationPreferences {
     /** The user's explicit per-kind × channel overrides. */
-    preferences?: NizamMerchant.NotificationPreference[] | undefined;
+    preferences: NizamMerchant.NotificationPreference[];
     /** Object type discriminator. */
-    object?: NotificationPreferences.Object_ | undefined;
+    object: NotificationPreferences.Object_;
 }
 
 export namespace NotificationPreferences {

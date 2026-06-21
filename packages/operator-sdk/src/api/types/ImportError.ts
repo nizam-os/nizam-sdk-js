@@ -5,16 +5,16 @@
  */
 export interface ImportError {
     /** The 1-based data-row index that failed (header excluded). */
-    row_number?: number | undefined;
+    row_number: number;
     /** The offending column header, or null for a whole-row error. */
     field?: string | undefined;
     /** Stable machine-readable error code. */
-    error_code?: string | undefined;
+    error_code: string;
     /** Human-readable explanation of the error. */
-    error_message?: string | undefined;
+    error_message: string;
     /** The raw cell value that failed (truncated), when relevant. */
     raw_value?: string | undefined;
-    object?: ImportError.Object_ | undefined;
+    object: ImportError.Object_;
 }
 
 export namespace ImportError {

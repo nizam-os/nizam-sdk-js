@@ -7,11 +7,11 @@ import type * as NizamCarrier from "../index.js";
  */
 export interface ImportSubmission {
     /** The created import job — poll/cancel it via /v1/jobs/{id}. */
-    job_id?: string | undefined;
+    job_id: string;
     /** The id the uploaded source file will carry. */
-    file_id?: string | undefined;
-    upload?: NizamCarrier.FileUploadSession | undefined;
-    object?: ImportSubmission.Object_ | undefined;
+    file_id: string;
+    upload: NizamCarrier.FileUploadSession;
+    object: ImportSubmission.Object_;
 }
 
 export namespace ImportSubmission {

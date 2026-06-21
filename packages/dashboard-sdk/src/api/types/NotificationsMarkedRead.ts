@@ -5,9 +5,9 @@
  */
 export interface NotificationsMarkedRead {
     /** Number of notifications flipped to read. */
-    marked?: number | undefined;
+    marked: number;
     /** Object type discriminator. */
-    object?: NotificationsMarkedRead.Object_ | undefined;
+    object: NotificationsMarkedRead.Object_;
 }
 
 export namespace NotificationsMarkedRead {

@@ -5,13 +5,13 @@
  */
 export interface Timezone {
     /** IANA timezone id (e.g. `America/New_York`). */
-    id?: string | undefined;
+    id: string;
     /** Long display name in the Accept-Language locale. */
-    display_name?: string | undefined;
+    display_name: string;
     /** Current offset from UTC in minutes (DST-aware). */
-    gmt_offset_minutes?: number | undefined;
+    gmt_offset_minutes: number;
     /** Object type discriminator. */
-    object?: Timezone.Object_ | undefined;
+    object: Timezone.Object_;
 }
 
 export namespace Timezone {

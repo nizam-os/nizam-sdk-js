@@ -5,13 +5,13 @@
  */
 export interface Language {
     /** ISO 639-1 two-letter code. */
-    code?: string | undefined;
+    code: string;
     /** Display name in the Accept-Language locale. */
-    name?: string | undefined;
+    name: string;
     /** Name in the language itself, useful in language pickers. */
-    native_name?: string | undefined;
+    native_name: string;
     /** Object type discriminator. */
-    object?: Language.Object_ | undefined;
+    object: Language.Object_;
 }
 
 export namespace Language {

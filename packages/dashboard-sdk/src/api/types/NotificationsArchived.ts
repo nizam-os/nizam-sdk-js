@@ -5,9 +5,9 @@
  */
 export interface NotificationsArchived {
     /** Number of notifications archived. */
-    archived?: number | undefined;
+    archived: number;
     /** Object type discriminator. */
-    object?: NotificationsArchived.Object_ | undefined;
+    object: NotificationsArchived.Object_;
 }
 
 export namespace NotificationsArchived {

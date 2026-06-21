@@ -26,7 +26,7 @@ export class AssetsClient {
     }
 
     /**
-     * Without `q`: the org's assets ordered by `created_at` descending (or an explicit `sort`). With `q`: ranked search across name, VIN, code, plate, serial, call sign, make, model and sub-kind — accent-insensitive and language-agnostic (epic #97). Matching is hybrid: whole words and word-prefixes (type-ahead — `pick` finds `Picker Bot 3`) plus substrings and typos (`ick`, or a misspelled `sprintr`, still match). `q` results are ordered by relevance unless `sort` is given, in which case the search narrows the rows and `sort` orders them. Allowed sort fields: `created_at`, `name`, `plate_number` — a single field, `-` prefix for descending. `status` / `kind` accept comma-separated values and narrow every mode. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort that minted them — switching sorts restarts from the first page. `highlight=true` adds a `<mark>`-wrapped match snippet (relevance mode only).
+     * Without `q`: the org's assets ordered by `created_at` descending (or an explicit `sort`). With `q`: ranked search across name, VIN, code, plate, serial, call sign, make, model and sub-kind — accent-insensitive and language-agnostic (epic #97). Matching is hybrid: whole words and word-prefixes (type-ahead — `pick` finds `Picker Bot 3`) plus substrings and typos (`ick`, or a misspelled `sprintr`, still match). `q` results are ordered by relevance unless `sort` is given, in which case the search narrows the rows and `sort` orders them. Sort by a single column — the allowed fields and direction grammar are enumerated on the `sort` parameter; `status` and `kind` sort by their domain order (status lifecycle, kind grouping), not the stored code or the tenant-relabeled display string. As filters, `status` / `kind` accept comma-separated values and narrow every mode. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort that minted them — switching sorts restarts from the first page. `highlight=true` adds a `<mark>`-wrapped match snippet (relevance mode only).
      *
      * @param {NizamDashboard.ListAssetsRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -40,6 +40,8 @@ export class AssetsClient {
      * @example
      *     await client.assets.listAssets({
      *         q: "<string>",
+     *         created_on_or_after: "2026-05-20",
+     *         created_on_or_before: "2026-05-20",
      *         starting_after: "Y3Vyc29yX25leHRfMDFKNVE=",
      *         ending_before: "Y3Vyc29yX25leHRfMDFKNVE="
      *     })
@@ -60,6 +62,8 @@ export class AssetsClient {
             highlight,
             status,
             kind,
+            created_on_or_after: createdOnOrAfter,
+            created_on_or_before: createdOnOrBefore,
             sort,
             limit,
             starting_after: startingAfter,
@@ -68,9 +72,11 @@ export class AssetsClient {
         const _queryParams: Record<string, unknown> = {
             q,
             highlight,
-            status,
-            kind,
-            sort,
+            status: Array.isArray(status) ? status.map((item) => item) : status != null ? status : undefined,
+            kind: Array.isArray(kind) ? kind.map((item) => item) : kind != null ? kind : undefined,
+            created_on_or_after: createdOnOrAfter != null ? createdOnOrAfter : undefined,
+            created_on_or_before: createdOnOrBefore != null ? createdOnOrBefore : undefined,
+            sort: Array.isArray(sort) ? sort.map((item) => item) : sort != null ? sort : undefined,
             limit,
             starting_after: startingAfter,
             ending_before: endingBefore,
@@ -283,6 +289,217 @@ export class AssetsClient {
     }
 
     /**
+     * Returns the lifecycle statuses EVERY asset in the selection may legally move to next — the intersection of each asset's legal-transition set (the same matrix the per-asset `allowed_transitions` field and the transition verbs enforce). The status picker calls this so a bulk change offers only moves legal for the WHOLE selection, instead of offering every status and relying on per-row 409s. Ids that don't resolve to a live asset in your organization are ignored; a selection that shares no common next status (e.g. it includes a terminal sold/lost asset) returns an empty list. It is a read — re-asserting it is free.
+     *
+     * @param {NizamDashboard.AllowedTransitionsRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.assetAllowedTransitions({
+     *         ids: ["8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"]
+     *     })
+     */
+    public assetAllowedTransitions(
+        request: NizamDashboard.AllowedTransitionsRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.AllowedTransitions> {
+        return core.HttpResponsePromise.fromPromise(this.__assetAllowedTransitions(request, requestOptions));
+    }
+
+    private async __assetAllowedTransitions(
+        request: NizamDashboard.AllowedTransitionsRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.AllowedTransitions>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/assets/allowed-transitions",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: request,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.AllowedTransitions, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/assets/allowed-transitions",
+        );
+    }
+
+    /**
+     * Generates a CSV / XLSX / JSON file of the selected assets with the chosen columns and returns a short-lived download URL the browser follows to download it. Columns are emitted in the requested order; `kind` and `status` carry their stored code (re-importable), not the tenant's display label. The id count is capped — this exports an explicit selection. POST because generating + storing the file and logging the egress is an audited action, not a cacheable read.
+     *
+     * @param {NizamDashboard.ExportAssetsRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.exportAssets({
+     *         format: "xlsx",
+     *         fields: ["id", "name", "status"],
+     *         ids: ["8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"]
+     *     })
+     */
+    public exportAssets(
+        request: NizamDashboard.ExportAssetsRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.FileDownloadUrl> {
+        return core.HttpResponsePromise.fromPromise(this.__exportAssets(request, requestOptions));
+    }
+
+    private async __exportAssets(
+        request: NizamDashboard.ExportAssetsRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.FileDownloadUrl>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/assets/export",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: request,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.FileDownloadUrl, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/assets/export");
+    }
+
+    /**
      * Returns a correctly-shaped XLSX template (header row + one example row) for the bulk asset import. Fill it in and upload it via POST /v1/imports to import assets in bulk.
      *
      * @throws {@link NizamDashboard.UnauthorizedError}
@@ -450,5 +667,929 @@ export class AssetsClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/assets/{id}");
+    }
+
+    /**
+     * Soft-deletes the asset: it disappears from listings immediately and frees its VIN for re-registration. Assignments and historical records are left untouched. There is no synchronous bulk-delete endpoint — delete a selection by fanning out per-id requests (each is naturally idempotent).
+     *
+     * @param {NizamDashboard.DeleteAssetRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.deleteAsset({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public deleteAsset(
+        request: NizamDashboard.DeleteAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<void> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteAsset(request, requestOptions));
+    }
+
+    private async __deleteAsset(
+        request: NizamDashboard.DeleteAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<void>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/assets/${core.url.encodePathParam(id)}`,
+            ),
+            method: "DELETE",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: undefined, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "DELETE", "/v1/assets/{id}");
+    }
+
+    /**
+     * Set-only partial update of an asset's mutable fields — display name, sub-kind, autonomy level, and the vehicle identity (VIN, plate, make, model, year). Omitted or null fields are left unchanged. An asset's `kind` is immutable and lifecycle `status` moves through dedicated transitions, so neither is editable here.
+     *
+     * @param {NizamDashboard.UpdateAssetRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.updateAsset({
+     *         id: "00000000-0000-0000-0000-000000000000",
+     *         name: "Truck 7B"
+     *     })
+     *
+     * @example
+     *     await client.assets.updateAsset({
+     *         id: "00000000-0000-0000-0000-000000000000",
+     *         vin: "1HGCM82633A004352",
+     *         plate_number: "AB-123-CD",
+     *         make: "Volvo",
+     *         model: "FH16",
+     *         year: 2024
+     *     })
+     */
+    public updateAsset(
+        request: NizamDashboard.UpdateAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Asset> {
+        return core.HttpResponsePromise.fromPromise(this.__updateAsset(request, requestOptions));
+    }
+
+    private async __updateAsset(
+        request: NizamDashboard.UpdateAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Asset>> {
+        const { id, ..._body } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/assets/${core.url.encodePathParam(id)}`,
+            ),
+            method: "PATCH",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: _body,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Asset, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "PATCH", "/v1/assets/{id}");
+    }
+
+    /**
+     * Returns the asset to `active` service. Idempotent no-op if already active; an illegal edge (e.g. from a terminal sold/lost asset) → 409 `asset.invalid_transition`. No body — fan out per id for a bulk change.
+     *
+     * @param {NizamDashboard.ActivateAssetRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.activateAsset({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public activateAsset(
+        request: NizamDashboard.ActivateAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Asset> {
+        return core.HttpResponsePromise.fromPromise(this.__activateAsset(request, requestOptions));
+    }
+
+    private async __activateAsset(
+        request: NizamDashboard.ActivateAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Asset>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/assets/${core.url.encodePathParam(id)}/activate`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Asset, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/assets/{id}/activate");
+    }
+
+    /**
+     * Marks the asset `inactive` (idle but still in-fleet). Idempotent no-op if already inactive; an illegal edge → 409 `asset.invalid_transition`. No body.
+     *
+     * @param {NizamDashboard.DeactivateAssetRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.deactivateAsset({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public deactivateAsset(
+        request: NizamDashboard.DeactivateAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Asset> {
+        return core.HttpResponsePromise.fromPromise(this.__deactivateAsset(request, requestOptions));
+    }
+
+    private async __deactivateAsset(
+        request: NizamDashboard.DeactivateAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Asset>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/assets/${core.url.encodePathParam(id)}/deactivate`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Asset, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/assets/{id}/deactivate");
+    }
+
+    /**
+     * Moves the asset into `maintenance`. Idempotent no-op if already in maintenance; an illegal edge → 409 `asset.invalid_transition`. No body.
+     *
+     * @param {NizamDashboard.EnterAssetMaintenanceRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.enterAssetMaintenance({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public enterAssetMaintenance(
+        request: NizamDashboard.EnterAssetMaintenanceRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Asset> {
+        return core.HttpResponsePromise.fromPromise(this.__enterAssetMaintenance(request, requestOptions));
+    }
+
+    private async __enterAssetMaintenance(
+        request: NizamDashboard.EnterAssetMaintenanceRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Asset>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/assets/${core.url.encodePathParam(id)}/enter-maintenance`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Asset, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/assets/{id}/enter-maintenance",
+        );
+    }
+
+    /**
+     * Marks the asset `lost` — a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already lost; an illegal edge → 409 `asset.invalid_transition`. No body.
+     *
+     * @param {NizamDashboard.ReportAssetLostRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.reportAssetLost({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public reportAssetLost(
+        request: NizamDashboard.ReportAssetLostRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Asset> {
+        return core.HttpResponsePromise.fromPromise(this.__reportAssetLost(request, requestOptions));
+    }
+
+    private async __reportAssetLost(
+        request: NizamDashboard.ReportAssetLostRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Asset>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/assets/${core.url.encodePathParam(id)}/report-lost`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Asset, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/assets/{id}/report-lost");
+    }
+
+    /**
+     * Retires the asset (`retired`) — decommissioned but still owned; it may later be reactivated, sold, or reported lost. Idempotent no-op if already retired; an illegal edge → 409 `asset.invalid_transition`. No body.
+     *
+     * @param {NizamDashboard.RetireAssetRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.retireAsset({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public retireAsset(
+        request: NizamDashboard.RetireAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Asset> {
+        return core.HttpResponsePromise.fromPromise(this.__retireAsset(request, requestOptions));
+    }
+
+    private async __retireAsset(
+        request: NizamDashboard.RetireAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Asset>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/assets/${core.url.encodePathParam(id)}/retire`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Asset, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/assets/{id}/retire");
+    }
+
+    /**
+     * Marks the asset `sold` — a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already sold; an illegal edge → 409 `asset.invalid_transition`. No body.
+     *
+     * @param {NizamDashboard.SellAssetRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.sellAsset({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public sellAsset(
+        request: NizamDashboard.SellAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Asset> {
+        return core.HttpResponsePromise.fromPromise(this.__sellAsset(request, requestOptions));
+    }
+
+    private async __sellAsset(
+        request: NizamDashboard.SellAssetRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Asset>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/assets/${core.url.encodePathParam(id)}/sell`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Asset, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/assets/{id}/sell");
+    }
+
+    /**
+     * Moves the asset `out_of_service`. Idempotent no-op if already out of service; an illegal edge → 409 `asset.invalid_transition`. No body.
+     *
+     * @param {NizamDashboard.TakeAssetOutOfServiceRequest} request
+     * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assets.takeAssetOutOfService({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public takeAssetOutOfService(
+        request: NizamDashboard.TakeAssetOutOfServiceRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Asset> {
+        return core.HttpResponsePromise.fromPromise(this.__takeAssetOutOfService(request, requestOptions));
+    }
+
+    private async __takeAssetOutOfService(
+        request: NizamDashboard.TakeAssetOutOfServiceRequest,
+        requestOptions?: AssetsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Asset>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/assets/${core.url.encodePathParam(id)}/take-out-of-service`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Asset, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/assets/{id}/take-out-of-service",
+        );
     }
 }

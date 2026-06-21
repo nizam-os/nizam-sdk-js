@@ -7,24 +7,24 @@ import type * as NizamCarrier from "../index.js";
  */
 export interface FileUploadSession {
     /** Session id — the handle for resume / complete / cancel. */
-    id?: string | undefined;
+    id: string;
     /** Pre-reserved id of the file this upload will become. */
-    file_id?: string | undefined;
+    file_id: string;
     /** The kind declared at initiation. */
-    kind?: FileUploadSession.Kind | undefined;
+    kind: FileUploadSession.Kind;
     /** Session lifecycle. */
-    status?: FileUploadSession.Status | undefined;
+    status: FileUploadSession.Status;
     /** Nominal part size; every part except the last must be exactly this size. */
-    part_size_bytes?: number | undefined;
+    part_size_bytes: number;
     /** Total parts in the layout. */
-    part_count?: number | undefined;
+    part_count: number;
     /** Bytes confirmed so far (client-reported, re-verified at completion). */
-    bytes_uploaded?: number | undefined;
-    completed_part_numbers?: number[] | undefined;
-    parts?: NizamCarrier.FileUploadPart[] | undefined;
+    bytes_uploaded: number;
+    completed_part_numbers: number[];
+    parts: NizamCarrier.FileUploadPart[];
     /** Deadline: the session expires and is swept if not completed by then. */
-    expires_at?: string | undefined;
-    object?: FileUploadSession.Object_ | undefined;
+    expires_at: string;
+    object: FileUploadSession.Object_;
 }
 
 export namespace FileUploadSession {
@@ -37,6 +37,7 @@ export namespace FileUploadSession {
         ImportReport: "import_report",
         SignedDocument: "signed_document",
         ProductImage: "product_image",
+        DataExport: "data_export",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
     /** Session lifecycle. */

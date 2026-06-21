@@ -11,9 +11,9 @@ export interface ActiveOrganization {
     /** Stored preference (users.last_active_organization_id). Null when the user has never picked. */
     preferred_organization_id?: string | undefined;
     /** All active memberships for the picker UI. */
-    memberships?: NizamDashboard.MembershipChoice[] | undefined;
+    memberships: NizamDashboard.MembershipChoice[];
     /** Object type discriminator. */
-    object?: ActiveOrganization.Object_ | undefined;
+    object: ActiveOrganization.Object_;
 }
 
 export namespace ActiveOrganization {

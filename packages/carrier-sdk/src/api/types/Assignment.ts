@@ -5,21 +5,21 @@
  */
 export interface Assignment {
     /** Stable UUID. */
-    id?: string | undefined;
+    id: string;
     /** Asset id. */
-    asset_id?: string | undefined;
+    asset_id: string;
     /** Operator id. */
-    operator_id?: string | undefined;
+    operator_id: string;
     /** Role discriminator for concurrent assignments on the same asset. */
-    role?: Assignment.Role | undefined;
+    role: Assignment.Role;
     /** Start of validity. */
-    valid_from?: string | undefined;
+    valid_from: string;
     /** End of validity (null = still active). */
     valid_until?: string | undefined;
     /** Why the assignment was closed (null while active). */
     terminated_reason?: Assignment.TerminatedReason | undefined;
     /** Object type discriminator. */
-    object?: Assignment.Object_ | undefined;
+    object: Assignment.Object_;
 }
 
 export namespace Assignment {

@@ -5,9 +5,9 @@
  */
 export interface UserResource {
     /** Stable UUID. */
-    id?: string | undefined;
+    id: string;
     /** Lifecycle status. */
-    status?: UserResource.Status | undefined;
+    status: UserResource.Status;
     /** Email shadowed from Keycloak. */
     email?: string | undefined;
     /** Display name. */
@@ -15,9 +15,9 @@ export interface UserResource {
     /** Timestamp of the last login. */
     last_login_at?: string | undefined;
     /** Total logins observed. */
-    login_count?: number | undefined;
+    login_count: number;
     /** Object type discriminator. */
-    object?: UserResource.Object_ | undefined;
+    object: UserResource.Object_;
 }
 
 export namespace UserResource {

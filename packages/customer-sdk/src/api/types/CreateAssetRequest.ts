@@ -6,10 +6,24 @@
 export interface CreateAssetRequest {
     /** Top-level kind. */
     kind: CreateAssetRequest.Kind;
+    /** Initial lifecycle status — the asset's birth state. Optional; defaults to `active`. Subsequent changes go through the status-transition endpoint. */
+    status?: CreateAssetRequest.Status | undefined;
     /** Display name. */
     name?: string | undefined;
+    /** Sub-kind within the kind (free-form). */
+    sub_kind?: string | undefined;
     /** SAE J3016 autonomy level 0..5. */
     autonomy_level?: number | undefined;
+    /** Vehicle Identification Number — 17 chars of A-Z (no I, O, Q) and 0-9, uppercase. Unique per organization. */
+    vin?: string | undefined;
+    /** License plate. */
+    plate_number?: string | undefined;
+    /** Manufacturer. */
+    make?: string | undefined;
+    /** Model designation. */
+    model?: string | undefined;
+    /** Model year — 1900 or later, and no later than next year. */
+    year?: number | undefined;
 }
 
 export namespace CreateAssetRequest {
@@ -26,4 +40,15 @@ export namespace CreateAssetRequest {
         Equipment: "equipment",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
+    /** Initial lifecycle status — the asset's birth state. Optional; defaults to `active`. Subsequent changes go through the status-transition endpoint. */
+    export const Status = {
+        Active: "active",
+        Maintenance: "maintenance",
+        OutOfService: "out_of_service",
+        Retired: "retired",
+        Sold: "sold",
+        Inactive: "inactive",
+        Lost: "lost",
+    } as const;
+    export type Status = (typeof Status)[keyof typeof Status];
 }

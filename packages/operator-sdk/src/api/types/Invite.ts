@@ -5,21 +5,21 @@
  */
 export interface Invite {
     /** Stable UUID of this invite. */
-    id?: string | undefined;
+    id: string;
     /** Organization the invite confers membership in. */
-    organization_id?: string | undefined;
+    organization_id: string;
     /** Recipient email — canonical lowercase form. */
-    invited_email?: string | undefined;
+    invited_email: string;
     /** Role the recipient will hold after acceptance. */
-    role?: Invite.Role | undefined;
+    role: Invite.Role;
     /** Lifecycle status. */
-    status?: Invite.Status | undefined;
+    status: Invite.Status;
     /** When the invite expires. Recipients must accept before then. */
-    expires_at?: string | undefined;
+    expires_at: string;
     /** Bearer secret used to redeem the invite. Returned only on POST /v1/invites; subsequent lookups omit it. */
-    token?: string | undefined;
+    token: string;
     /** Object type discriminator. */
-    object?: Invite.Object_ | undefined;
+    object: Invite.Object_;
 }
 
 export namespace Invite {

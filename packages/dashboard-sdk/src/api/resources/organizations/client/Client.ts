@@ -26,7 +26,7 @@ export class OrganizationsClient {
     }
 
     /**
-     * Dashboard callers see exactly the organizations they can read — their own memberships plus any cross-tenant read grants (3PL / delegated), resolved via SpiceDB `lookupResources(read)`. Platform staff see every tenant. Allowed sort field: `created_at` (prefix with `-` for descending). RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.
+     * Dashboard callers see exactly the organizations they can read — their own memberships plus any cross-tenant read grants (3PL / delegated), resolved via SpiceDB `lookupResources(read)`. Platform staff see every tenant. The sortable fields and direction grammar are on the `sort` parameter. RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.
      *
      * @param {NizamDashboard.ListOrganizationsRequest} request
      * @param {OrganizationsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -55,7 +55,7 @@ export class OrganizationsClient {
     ): Promise<core.WithRawResponse<NizamDashboard.ListResponseOrganization>> {
         const { sort, limit, starting_after: startingAfter, ending_before: endingBefore } = request;
         const _queryParams: Record<string, unknown> = {
-            sort,
+            sort: Array.isArray(sort) ? sort.map((item) => item) : sort != null ? sort : undefined,
             limit,
             starting_after: startingAfter,
             ending_before: endingBefore,

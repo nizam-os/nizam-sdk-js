@@ -26,7 +26,7 @@ export class JobsClient {
     }
 
     /**
-     * The active organization's jobs ordered by `created_at` descending (pass `sort=created_at` for ascending). Org-scoped: every member sees the org's backlog. `kind` / `status` accept comma-separated values. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.
+     * The active organization's jobs ordered by `created_at` descending by default. Org-scoped: every member sees the org's backlog. `kind` / `status` accept comma-separated values. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.
      *
      * @param {NizamDashboard.ListJobsRequest} request
      * @param {JobsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -58,7 +58,7 @@ export class JobsClient {
         const _queryParams: Record<string, unknown> = {
             kind,
             status,
-            sort,
+            sort: Array.isArray(sort) ? sort.map((item) => item) : sort != null ? sort : undefined,
             limit,
             starting_after: startingAfter,
             ending_before: endingBefore,

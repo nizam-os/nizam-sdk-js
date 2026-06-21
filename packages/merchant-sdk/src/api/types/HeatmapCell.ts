@@ -5,12 +5,12 @@
  */
 export interface HeatmapCell {
     /** H3 cell index, lowercase hex (string — H3 indexes exceed the JS safe-integer range). */
-    h3_cell?: string | undefined;
+    h3_cell: string;
     /** H3 resolution of the cell (9 or 11). */
-    h3_res?: number | undefined;
+    h3_res: number;
     /** Number of positions recorded in the cell over the window. */
-    count?: number | undefined;
-    object?: HeatmapCell.Object_ | undefined;
+    count: number;
+    object: HeatmapCell.Object_;
 }
 
 export namespace HeatmapCell {

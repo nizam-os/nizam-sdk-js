@@ -5,19 +5,19 @@
  */
 export interface NotificationDeadLetter {
     /** Delivery attempt id. */
-    id?: string | undefined;
+    id: string;
     /** The notification this attempt belongs to. */
-    notification_id?: string | undefined;
+    notification_id: string;
     /** Owning organization. */
-    organization_id?: string | undefined;
+    organization_id: string;
     /** Channel. */
-    channel?: string | undefined;
+    channel: string;
     /** Provider/gateway. */
-    provider?: string | undefined;
+    provider: string;
     /** Resolved recipient endpoint (device id, email, user id). */
-    recipient_address?: string | undefined;
+    recipient_address: string;
     /** Number of send attempts made. */
-    attempt_count?: number | undefined;
+    attempt_count: number;
     /** Machine error code from the last attempt. */
     error_code?: string | undefined;
     /** Human-readable error from the last attempt. */
@@ -25,9 +25,9 @@ export interface NotificationDeadLetter {
     /** When it dead-lettered (RFC 3339). */
     failed_at?: string | undefined;
     /** When the attempt row was created (RFC 3339). */
-    created_at?: string | undefined;
+    created_at: string;
     /** Object type discriminator. */
-    object?: NotificationDeadLetter.Object_ | undefined;
+    object: NotificationDeadLetter.Object_;
 }
 
 export namespace NotificationDeadLetter {

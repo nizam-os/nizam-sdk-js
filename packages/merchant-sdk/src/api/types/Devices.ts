@@ -7,9 +7,9 @@ import type * as NizamMerchant from "../index.js";
  */
 export interface Devices {
     /** The caller's live device registrations. */
-    devices?: NizamMerchant.Device[] | undefined;
+    devices: NizamMerchant.Device[];
     /** Object type discriminator. */
-    object?: Devices.Object_ | undefined;
+    object: Devices.Object_;
 }
 
 export namespace Devices {

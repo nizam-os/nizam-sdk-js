@@ -7,11 +7,11 @@ import type * as NizamMerchant from "../index.js";
  */
 export interface TaskAttemptPhoto {
     /** Photo record id. */
-    id?: string | undefined;
+    id: string;
     /** Central file id — request bytes via the files download-url endpoint. */
-    file_id?: string | undefined;
+    file_id: string;
     /** Display order within the attempt. */
-    sequence?: number | undefined;
+    sequence: number;
     /** Photo category, when categorised. */
     photo_type?: string | undefined;
     /** Operator-entered caption. */
@@ -19,11 +19,11 @@ export interface TaskAttemptPhoto {
     /** Device capture time (EXIF), when reported. */
     taken_at?: string | undefined;
     /** May the bytes be served right now (scan verdict + lifecycle)? */
-    downloadable?: boolean | undefined;
-    thumbnails?: NizamMerchant.TaskAttemptPhotoThumbnail[] | undefined;
+    downloadable: boolean;
+    thumbnails: NizamMerchant.TaskAttemptPhotoThumbnail[];
     /** When the photo row was recorded. */
-    created_at?: string | undefined;
-    object?: TaskAttemptPhoto.Object_ | undefined;
+    created_at: string;
+    object: TaskAttemptPhoto.Object_;
 }
 
 export namespace TaskAttemptPhoto {

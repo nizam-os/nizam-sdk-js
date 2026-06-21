@@ -5,27 +5,35 @@
  */
 export interface Asset {
     /** Stable UUID. */
-    id?: string | undefined;
+    id: string;
     /** Top-level kind. */
-    kind?: Asset.Kind | undefined;
+    kind: Asset.Kind;
     /** Sub-kind within the kind (free-form). */
     sub_kind?: string | undefined;
     /** SAE J3016 autonomy level 0..5. */
     autonomy_level?: number | undefined;
     /** Lifecycle status. */
-    status?: Asset.Status | undefined;
+    status: Asset.Status;
     /** Display name. */
     name?: string | undefined;
     /** Vehicle Identification Number. */
     vin?: string | undefined;
     /** License plate. */
     plate_number?: string | undefined;
+    /** Manufacturer. */
+    make?: string | undefined;
+    /** Model designation. */
+    model?: string | undefined;
+    /** Model year. */
+    year?: number | undefined;
     /** Owning organization id. */
     organization_id?: string | undefined;
     /** Current primary operator (active assignment, role=primary). */
     current_primary_operator_id?: string | undefined;
+    /** Lifecycle statuses this asset may move to next — the wire projection of the server-side transition matrix, derived from `status`. The status picker offers exactly these; empty for a terminal status (sold, lost). */
+    allowed_transitions: Asset.AllowedTransitions.Item[];
     /** Object type discriminator. */
-    object?: Asset.Object_ | undefined;
+    object: Asset.Object_;
 }
 
 export namespace Asset {
@@ -53,6 +61,22 @@ export namespace Asset {
         Lost: "lost",
     } as const;
     export type Status = (typeof Status)[keyof typeof Status];
+    export type AllowedTransitions = AllowedTransitions.Item[];
+
+    export namespace AllowedTransitions {
+        /** A legal next status. */
+        export const Item = {
+            Active: "active",
+            Maintenance: "maintenance",
+            OutOfService: "out_of_service",
+            Retired: "retired",
+            Sold: "sold",
+            Inactive: "inactive",
+            Lost: "lost",
+        } as const;
+        export type Item = (typeof Item)[keyof typeof Item];
+    }
+
     /** Object type discriminator. */
     export const Object_ = {
         Asset: "asset",

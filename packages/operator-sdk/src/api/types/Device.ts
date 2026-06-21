@@ -5,17 +5,17 @@
  */
 export interface Device {
     /** Device id. */
-    id?: string | undefined;
+    id: string;
     /** Push transport. */
-    platform?: Device.Platform | undefined;
+    platform: Device.Platform;
     /** Registration lifecycle. */
-    status?: Device.Status | undefined;
+    status: Device.Status;
     /** When the device was first registered. */
-    registered_at?: string | undefined;
+    registered_at: string;
     /** When the registration was last refreshed (last seen). */
-    last_seen_at?: string | undefined;
+    last_seen_at: string;
     /** Object type discriminator. */
-    object?: Device.Object_ | undefined;
+    object: Device.Object_;
 }
 
 export namespace Device {

@@ -5,13 +5,13 @@
  */
 export interface Job {
     /** Stable job id. */
-    id?: string | undefined;
+    id: string;
     /** Owning organization. */
-    organization_id?: string | undefined;
+    organization_id: string;
     /** What kind of work this job performs; the kind also fixes the executing engine. */
-    kind?: Job.Kind | undefined;
+    kind: Job.Kind;
     /** Lifecycle status. Terminal states are `completed`, `failed`, `cancelled`. */
-    status?: Job.Status | undefined;
+    status: Job.Status;
     /** User who submitted the job. Null only if that user was since deleted. */
     requested_by_id?: string | undefined;
     /** File the job consumes (kind-specific), e.g. an uploaded import file. References a file id; download via the file's own endpoint. */
@@ -21,9 +21,9 @@ export interface Job {
     /** Total work items, once the engine has sized the work. Null while unknown. */
     rows_total?: number | undefined;
     /** Work items processed so far (monotonic). */
-    rows_processed?: number | undefined;
+    rows_processed: number;
     /** Work items that failed so far (monotonic). */
-    rows_failed?: number | undefined;
+    rows_failed: number;
     /** Operator-facing failure reason. Set only when status is `failed`. */
     error_summary?: string | undefined;
     /** Temporal workflow id (Temporal-engine kinds only) — cross-reference into the Temporal UI. */
@@ -31,18 +31,18 @@ export interface Job {
     /** Temporal run id of the latest attempt (changes across workflow retries). */
     run_id?: string | undefined;
     /** Engine execution attempts spent so far. */
-    attempt_count?: number | undefined;
+    attempt_count: number;
     /** Retry budget: a failed job with attempt_count >= max_attempts is dead-lettered. */
-    max_attempts?: number | undefined;
+    max_attempts: number;
     /** When the first engine attempt started. Null while pending (and for jobs cancelled before starting). */
     started_at?: string | undefined;
     /** When the job reached a terminal status. */
     finished_at?: string | undefined;
     /** Submission time. */
-    created_at?: string | undefined;
+    created_at: string;
     /** Last state/progress change. */
-    updated_at?: string | undefined;
-    object?: Job.Object_ | undefined;
+    updated_at: string;
+    object: Job.Object_;
 }
 
 export namespace Job {

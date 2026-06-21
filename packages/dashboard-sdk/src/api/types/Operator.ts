@@ -5,11 +5,11 @@
  */
 export interface Operator {
     /** Stable UUID. */
-    id?: string | undefined;
+    id: string;
     /** Kind discriminator. */
-    kind?: Operator.Kind | undefined;
+    kind: Operator.Kind;
     /** Lifecycle status. */
-    status?: Operator.Status | undefined;
+    status: Operator.Status;
     /** Display name. */
     display_name?: string | undefined;
     /** Linked user id (humans with a Nizam login). Null for software agents. */
@@ -19,7 +19,7 @@ export interface Operator {
     /** Owning organization id. */
     organization_id?: string | undefined;
     /** Object type discriminator. */
-    object?: Operator.Object_ | undefined;
+    object: Operator.Object_;
 }
 
 export namespace Operator {

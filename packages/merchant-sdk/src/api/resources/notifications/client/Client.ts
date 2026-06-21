@@ -26,7 +26,7 @@ export class NotificationsClient {
     }
 
     /**
-     * The caller's own notifications ordered by `created_at` descending (pass `sort=created_at` for ascending). `status` selects the segment — `all` (default; the active inbox, non-archived), `unread`, `read`, or `archived`. `category` and `kind` accept comma-separated values and AND on top of the segment; `q` matches the notification title/body. `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.
+     * The caller's own notifications ordered by `created_at` descending by default. `status` selects the segment — `all` (default; the active inbox, non-archived), `unread`, `read`, or `archived`. `category` and `kind` accept comma-separated values and AND on top of the segment; `q` matches the notification title/body. `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.
      *
      * @param {NizamMerchant.ListNotificationsRequest} request
      * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -74,7 +74,7 @@ export class NotificationsClient {
             kind,
             q,
             since: since != null ? since : undefined,
-            sort,
+            sort: Array.isArray(sort) ? sort.map((item) => item) : sort != null ? sort : undefined,
             limit,
             starting_after: startingAfter,
             ending_before: endingBefore,

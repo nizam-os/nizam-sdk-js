@@ -5,23 +5,23 @@
  */
 export interface Organization {
     /** Stable UUID owned by Nizam. Pin this value in URLs and external integrations. The matching Keycloak Organization is tracked server-side via a separate keycloak_id bridge and is not exposed over the SDK; do not assume the two ids are equal. */
-    id?: string | undefined;
+    id: string;
     /** Display name. */
-    name?: string | undefined;
+    name: string;
     /** URL-safe identifier — used in deep links and admin tooling. */
-    slug?: string | undefined;
+    slug: string;
     /** Lifecycle status. */
-    status?: Organization.Status | undefined;
+    status: Organization.Status;
     /** User id of the human who originally created this organization. Immutable for the row's lifetime — does NOT change when ownership is transferred. */
-    founder_user_id?: string | undefined;
+    founder_user_id: string;
     /** User id of the current owner. Receives all admin notifications by default. Mutable; reassigned via ownership transfer. May be null transiently if the owner user has been hard-deleted. */
     owner_user_id?: string | undefined;
     /** When this organization was created. */
-    created_at?: string | undefined;
+    created_at: string;
     /** Populated ONLY on the POST /v1/organizations create response — the active organization id Nizam pinned for the founder as part of the same transaction that created the org. Null on every other endpoint (GET, list, membership embeds). Per issue #67 phase 1, the SPA writes its active-org cookie from this field instead of issuing a follow-up PATCH /v1/me/active-organization. */
     active_organization_id?: string | undefined;
     /** Object type discriminator. */
-    object?: Organization.Object_ | undefined;
+    object: Organization.Object_;
 }
 
 export namespace Organization {

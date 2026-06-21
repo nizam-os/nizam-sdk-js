@@ -5,15 +5,15 @@
  */
 export interface Currency {
     /** ISO 4217 code. */
-    code?: string | undefined;
+    code: string;
     /** Display name in the Accept-Language locale. */
-    name?: string | undefined;
+    name: string;
     /** Short symbol in the Accept-Language locale. */
-    symbol?: string | undefined;
+    symbol: string;
     /** Default number of fractional digits per ISO 4217. */
-    fraction_digits?: number | undefined;
+    fraction_digits: number;
     /** Object type discriminator. */
-    object?: Currency.Object_ | undefined;
+    object: Currency.Object_;
 }
 
 export namespace Currency {

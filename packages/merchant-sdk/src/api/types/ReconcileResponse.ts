@@ -7,13 +7,13 @@ import type * as NizamMerchant from "../index.js";
  */
 export interface ReconcileResponse {
     /** Nizam org ids whose stored keycloak_id no longer resolves on the KC side. */
-    nizam_has_kc_missing?: string[] | undefined;
+    nizam_has_kc_missing: string[];
     /** KC org ids with no matching Nizam organizations.keycloak_id row. */
-    kc_has_nizam_missing?: string[] | undefined;
+    kc_has_nizam_missing: string[];
     /** Per-org membership-set divergences (KC vs Nizam). */
-    membership_divergent?: NizamMerchant.MembershipDriftResponse[] | undefined;
+    membership_divergent: NizamMerchant.MembershipDriftResponse[];
     /** Object type discriminator. */
-    object?: ReconcileResponse.Object_ | undefined;
+    object: ReconcileResponse.Object_;
 }
 
 export namespace ReconcileResponse {

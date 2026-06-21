@@ -7,15 +7,15 @@ import type * as NizamOperatorRuntime from "../index.js";
  */
 export interface UploadInitiation {
     /** Upload session id — the handle for resume/complete/cancel. */
-    upload_session_id?: string | undefined;
+    upload_session_id: string;
     /** Pre-reserved file id — the id the completed file WILL carry. */
-    file_id?: string | undefined;
+    file_id: string;
     /** Fixed size of every part except the last. */
-    part_size_bytes?: number | undefined;
+    part_size_bytes: number;
     /** Session deadline; the sweep aborts the upload after this. */
-    expires_at?: string | undefined;
-    parts?: NizamOperatorRuntime.UploadInitiationPart[] | undefined;
-    object?: UploadInitiation.Object_ | undefined;
+    expires_at: string;
+    parts: NizamOperatorRuntime.UploadInitiationPart[];
+    object: UploadInitiation.Object_;
 }
 
 export namespace UploadInitiation {

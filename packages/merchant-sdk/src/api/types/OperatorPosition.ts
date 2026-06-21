@@ -5,11 +5,11 @@
  */
 export interface OperatorPosition {
     /** Operator id. */
-    operator_id?: string | undefined;
+    operator_id: string;
     /** Latitude (WGS84). */
-    lat?: number | undefined;
+    lat: number;
     /** Longitude (WGS84). */
-    lng?: number | undefined;
+    lng: number;
     /** Direction of travel, compass degrees [0,360). */
     heading?: number | undefined;
     /** Course over ground, compass degrees [0,360). */
@@ -19,8 +19,8 @@ export interface OperatorPosition {
     /** Altitude above the WGS84 ellipsoid, metres. */
     altitude?: number | undefined;
     /** Device-time of the fix. */
-    captured_at?: string | undefined;
-    object?: OperatorPosition.Object_ | undefined;
+    captured_at: string;
+    object: OperatorPosition.Object_;
 }
 
 export namespace OperatorPosition {

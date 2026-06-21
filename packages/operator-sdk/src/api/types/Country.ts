@@ -5,13 +5,13 @@
  */
 export interface Country {
     /** ISO 3166-1 alpha-2 code. */
-    code?: string | undefined;
+    code: string;
     /** Display name in the Accept-Language locale. */
-    name?: string | undefined;
+    name: string;
     /** E.164 country calling code with `+` prefix, or null if not allocated. */
     calling_code?: string | undefined;
     /** Object type discriminator. */
-    object?: Country.Object_ | undefined;
+    object: Country.Object_;
 }
 
 export namespace Country {
