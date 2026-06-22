@@ -345,7 +345,7 @@ export class OrganizationsClient {
     }
 
     /**
-     * Owner-only. Sets `deleted_at` on the organizations row; subsequent reads filter it out. The Keycloak Organization is intentionally left in place — restore is just an UPDATE un-setting `deleted_at`. Members are not removed; their memberships persist alongside the soft-deleted row in case a restore path is added later. L4 @HasPermission ensures the caller is an admin; the owner-only check inside the handler narrows further.
+     * Owner-only. Sets `deleted_at` on the organizations row; subsequent reads filter it out. The Keycloak Organization is intentionally left in place — restore is just an UPDATE un-setting `deleted_at`. Members are not removed; their memberships persist alongside the soft-deleted row in case a restore path is added later. L4 @RequirePermission ensures the caller is an admin; the owner-only check inside the handler narrows further.
      *
      * > **Requires** `administer` on `organization` (SpiceDB permission expression).
      *

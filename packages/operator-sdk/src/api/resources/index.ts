@@ -1,3 +1,5 @@
+export * from "./assets/client/requests/index.js";
+export * as assets from "./assets/index.js";
 export * from "./devices/client/requests/index.js";
 export * as devices from "./devices/index.js";
 export * from "./files/client/requests/index.js";

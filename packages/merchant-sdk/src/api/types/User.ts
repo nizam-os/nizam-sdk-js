@@ -11,6 +11,8 @@ export interface User {
     /** Keycloak Organization id the user belongs to. Null for cross-tenant platform admins. */
     organization_id?: string | undefined;
     roles: string[];
+    /** The caller's effective permission ids for the active organization (epic #317): the union of catalog grants for every role they hold. Gate actions on these (`can("asset:create")`) rather than role strings, so frontend and backend reference the one catalog and cannot drift. Coarse and instance-independent; per-instance authority ('may delete THIS asset') is enforced server-side at the mutation, never precomputed here. */
+    permissions: User.Permissions.Item[];
     /** Email shadowed from Keycloak. Null until the user completes a profile. */
     email?: string | undefined;
     /** Display name shadowed from Keycloak. */
@@ -37,6 +39,28 @@ export namespace User {
         Admin: "admin",
     } as const;
     export type Portal = (typeof Portal)[keyof typeof Portal];
+    export type Permissions = Permissions.Item[];
+
+    export namespace Permissions {
+        export const Item = {
+            AssetCreate: "asset:create",
+            AssetDelete: "asset:delete",
+            AssetDispose: "asset:dispose",
+            AssetExport: "asset:export",
+            AssetImport: "asset:import",
+            AssetRead: "asset:read",
+            AssetTransition: "asset:transition",
+            AssetUpdate: "asset:update",
+            KeycloakProjectionAdminister: "keycloak-projection:administer",
+            NotificationDeliveryRead: "notification-delivery:read",
+            OrgMaintenanceAdminister: "org-maintenance:administer",
+            ServiceAccountAdminister: "service-account:administer",
+            UserAdminister: "user:administer",
+            UserInvite: "user:invite",
+        } as const;
+        export type Item = (typeof Item)[keyof typeof Item];
+    }
+
     /** Object type discriminator. */
     export const Object_ = {
         User: "user",

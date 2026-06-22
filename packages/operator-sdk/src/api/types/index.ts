@@ -69,6 +69,7 @@ export * from "./NotificationsMarkedRead.js";
 export * from "./NotificationUnreadCount.js";
 export * from "./OpenAssignmentRequest.js";
 export * from "./Operator.js";
+export * from "./OperatorAsset.js";
 export * from "./OperatorPosition.js";
 export * from "./Organization.js";
 export * from "./Position.js";

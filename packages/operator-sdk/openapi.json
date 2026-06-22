@@ -309,7 +309,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -534,7 +534,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -835,7 +835,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1042,7 +1042,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1256,7 +1256,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1555,7 +1555,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1714,7 +1714,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1911,7 +1911,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -2125,7 +2125,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -2979,6 +2979,9 @@
                                     "roles": [
                                         "dashboard:dispatcher"
                                     ],
+                                    "permissions": [
+                                        "asset:create"
+                                    ],
                                     "email": "ali@nizam.ai",
                                     "name": "Ali Issa",
                                     "last_login_at": "2026-05-20T14:00:00Z",
@@ -3009,7 +3012,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -3133,6 +3136,364 @@
                 ]
             }
         },
+        "/v1/me/assets": {
+            "get": {
+                "tags": [
+                    "Assets"
+                ],
+                "summary": "List the assets assigned to me",
+                "description": "Returns the assets the authenticated operator is currently assigned to operate \u2014 and only those. Deny-by-default: an operator with no active assignment sees an empty list. Resolved through the narrow `operate` (assigned-operator) relation, never the owning-org `view` surface, so it never exposes a whole tenant. Ordered by `created_at` descending; bidirectional cursor pagination (`starting_after` / `ending_before`).",
+                "operationId": "listMyAssets",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The page of assets assigned to the caller.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorAsset"
+                                },
+                                "example": {
+                                    "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "kind": "ground_vehicle",
+                                    "sub_kind": "van",
+                                    "autonomy_level": 2,
+                                    "status": "active",
+                                    "name": "Truck 7",
+                                    "vin": "1HGCM82633A123456",
+                                    "plate_number": "AB-123-CD",
+                                    "make": "Volvo",
+                                    "model": "FH16",
+                                    "year": 2024,
+                                    "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "current_primary_operator_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                    "object": "asset"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/me/assets",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/me/assets",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/me/assets",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/me/assets",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "operator"
+                ]
+            }
+        },
+        "/v1/me/assets/{id}": {
+            "get": {
+                "tags": [
+                    "Assets"
+                ],
+                "summary": "Get an asset assigned to me",
+                "description": "Returns one asset the authenticated operator is assigned to operate. Resolved through the `operate` (assigned-operator) relation only \u2014 never the owning-org `view` surface. An asset the operator is not assigned to (or that does not exist) returns 404, indistinguishable from a missing id so the endpoint can't be used to probe for assets.",
+                "operationId": "getMyAsset",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The assigned asset.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OperatorAsset"
+                                },
+                                "example": {
+                                    "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "kind": "ground_vehicle",
+                                    "sub_kind": "van",
+                                    "autonomy_level": 2,
+                                    "status": "active",
+                                    "name": "Truck 7",
+                                    "vin": "1HGCM82633A123456",
+                                    "plate_number": "AB-123-CD",
+                                    "make": "Volvo",
+                                    "model": "FH16",
+                                    "year": 2024,
+                                    "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "current_primary_operator_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                    "object": "asset"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/me/assets/{id}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/me/assets/{id}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/me/assets/{id}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/me/assets/{id}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Asset not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "asset.not_found": {
+                                        "summary": "Asset not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/asset/not_found",
+                                            "title": "Asset not found",
+                                            "status": 404,
+                                            "detail": "The requested asset does not exist or is not visible to the caller.",
+                                            "instance": "/v1/me/assets/{id}",
+                                            "code": "asset.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "operator"
+                ]
+            }
+        },
         "/v1/me/devices": {
             "get": {
                 "tags": [
@@ -3178,7 +3539,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -3335,7 +3696,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -3526,7 +3887,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -3688,7 +4049,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -3898,7 +4259,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -4054,7 +4415,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -4220,7 +4581,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -4582,7 +4943,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -4754,7 +5115,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -4919,7 +5280,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -5079,7 +5440,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -5239,7 +5600,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -5422,7 +5783,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -5605,7 +5966,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -5788,7 +6149,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -5971,7 +6332,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -6132,7 +6493,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -6327,7 +6688,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -6565,7 +6926,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -6872,7 +7233,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -10150,6 +10511,30 @@
                             "example": "dashboard:dispatcher"
                         }
                     },
+                    "permissions": {
+                        "type": "array",
+                        "description": "The caller's effective permission ids for the active organization (epic #317): the union of catalog grants for every role they hold. Gate actions on these (`can(\"asset:create\")`) rather than role strings, so frontend and backend reference the one catalog and cannot drift. Coarse and instance-independent; per-instance authority ('may delete THIS asset') is enforced server-side at the mutation, never precomputed here.",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "asset:create",
+                                "asset:delete",
+                                "asset:dispose",
+                                "asset:export",
+                                "asset:import",
+                                "asset:read",
+                                "asset:transition",
+                                "asset:update",
+                                "keycloak-projection:administer",
+                                "notification-delivery:read",
+                                "org-maintenance:administer",
+                                "service-account:administer",
+                                "user:administer",
+                                "user:invite"
+                            ],
+                            "example": "asset:create"
+                        }
+                    },
                     "email": {
                         "type": "string",
                         "format": "email",
@@ -10192,6 +10577,7 @@
                     "id",
                     "login_count",
                     "object",
+                    "permissions",
                     "portal",
                     "roles"
                 ]
@@ -10301,6 +10687,113 @@
                 "required": [
                     "devices",
                     "object"
+                ]
+            },
+            "OperatorAsset": {
+                "description": "An asset as seen by an operator assigned to operate it \u2014 the operational identity fields, without the dashboard's lifecycle-management hints.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "description": "Top-level kind.",
+                        "enum": [
+                            "ground_vehicle",
+                            "aerial_vehicle",
+                            "marine_vehicle",
+                            "robot",
+                            "agv",
+                            "trailer",
+                            "container",
+                            "pallet",
+                            "equipment"
+                        ]
+                    },
+                    "sub_kind": {
+                        "type": "string",
+                        "description": "Sub-kind within the kind (free-form).",
+                        "example": "van"
+                    },
+                    "autonomy_level": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "SAE J3016 autonomy level 0..5.",
+                        "example": 2
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "maintenance",
+                            "out_of_service",
+                            "retired",
+                            "sold",
+                            "inactive",
+                            "lost"
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Truck 7"
+                    },
+                    "vin": {
+                        "type": "string",
+                        "description": "Vehicle Identification Number.",
+                        "example": "1HGCM82633A123456"
+                    },
+                    "plate_number": {
+                        "type": "string",
+                        "description": "License plate.",
+                        "example": "AB-123-CD"
+                    },
+                    "make": {
+                        "type": "string",
+                        "description": "Manufacturer.",
+                        "example": "Volvo"
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Model designation.",
+                        "example": "FH16"
+                    },
+                    "year": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Model year.",
+                        "example": 2024
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Owning organization id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "current_primary_operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Current primary operator (active assignment, role=primary).",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "asset"
+                        ],
+                        "example": "asset"
+                    }
+                },
+                "required": [
+                    "id",
+                    "kind",
+                    "object",
+                    "status"
                 ]
             },
             "ListResponseTimezone": {

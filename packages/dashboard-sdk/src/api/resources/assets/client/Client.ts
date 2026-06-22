@@ -578,6 +578,8 @@ export class AssetsClient {
     }
 
     /**
+     * Returns one asset. Visible to members of the asset's organization and to L4-granted cross-tenant readers; anyone else gets 404 — indistinguishable from a non-existent id (prevents tenant probing).
+     *
      * @param {NizamDashboard.GetAssetRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -672,6 +674,8 @@ export class AssetsClient {
     /**
      * Soft-deletes the asset: it disappears from listings immediately and frees its VIN for re-registration. Assignments and historical records are left untouched. There is no synchronous bulk-delete endpoint — delete a selection by fanning out per-id requests (each is naturally idempotent).
      *
+     * > **Requires** `manage` on `asset` (SpiceDB permission expression).
+     *
      * @param {NizamDashboard.DeleteAssetRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -765,6 +769,8 @@ export class AssetsClient {
 
     /**
      * Set-only partial update of an asset's mutable fields — display name, sub-kind, autonomy level, and the vehicle identity (VIN, plate, make, model, year). Omitted or null fields are left unchanged. An asset's `kind` is immutable and lifecycle `status` moves through dedicated transitions, so neither is editable here.
+     *
+     * > **Requires** `manage` on `asset` (SpiceDB permission expression).
      *
      * @param {NizamDashboard.UpdateAssetRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -886,6 +892,8 @@ export class AssetsClient {
     /**
      * Returns the asset to `active` service. Idempotent no-op if already active; an illegal edge (e.g. from a terminal sold/lost asset) → 409 `asset.invalid_transition`. No body — fan out per id for a bulk change.
      *
+     * > **Requires** `manage` on `asset` (SpiceDB permission expression).
+     *
      * @param {NizamDashboard.ActivateAssetRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -986,6 +994,8 @@ export class AssetsClient {
     /**
      * Marks the asset `inactive` (idle but still in-fleet). Idempotent no-op if already inactive; an illegal edge → 409 `asset.invalid_transition`. No body.
      *
+     * > **Requires** `manage` on `asset` (SpiceDB permission expression).
+     *
      * @param {NizamDashboard.DeactivateAssetRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -1085,6 +1095,8 @@ export class AssetsClient {
 
     /**
      * Moves the asset into `maintenance`. Idempotent no-op if already in maintenance; an illegal edge → 409 `asset.invalid_transition`. No body.
+     *
+     * > **Requires** `manage` on `asset` (SpiceDB permission expression).
      *
      * @param {NizamDashboard.EnterAssetMaintenanceRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -1191,6 +1203,8 @@ export class AssetsClient {
     /**
      * Marks the asset `lost` — a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already lost; an illegal edge → 409 `asset.invalid_transition`. No body.
      *
+     * > **Requires** `manage` on `asset` (SpiceDB permission expression).
+     *
      * @param {NizamDashboard.ReportAssetLostRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -1290,6 +1304,8 @@ export class AssetsClient {
 
     /**
      * Retires the asset (`retired`) — decommissioned but still owned; it may later be reactivated, sold, or reported lost. Idempotent no-op if already retired; an illegal edge → 409 `asset.invalid_transition`. No body.
+     *
+     * > **Requires** `manage` on `asset` (SpiceDB permission expression).
      *
      * @param {NizamDashboard.RetireAssetRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -1391,6 +1407,8 @@ export class AssetsClient {
     /**
      * Marks the asset `sold` — a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already sold; an illegal edge → 409 `asset.invalid_transition`. No body.
      *
+     * > **Requires** `manage` on `asset` (SpiceDB permission expression).
+     *
      * @param {NizamDashboard.SellAssetRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -1490,6 +1508,8 @@ export class AssetsClient {
 
     /**
      * Moves the asset `out_of_service`. Idempotent no-op if already out of service; an illegal edge → 409 `asset.invalid_transition`. No body.
+     *
+     * > **Requires** `manage` on `asset` (SpiceDB permission expression).
      *
      * @param {NizamDashboard.TakeAssetOutOfServiceRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.

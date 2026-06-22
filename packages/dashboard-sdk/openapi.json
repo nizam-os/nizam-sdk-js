@@ -244,7 +244,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -605,7 +605,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -847,7 +847,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1123,7 +1123,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1336,7 +1336,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1520,7 +1520,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1615,6 +1615,7 @@
                     "Assets"
                 ],
                 "summary": "Get an asset",
+                "description": "Returns one asset. Visible to members of the asset's organization and to L4-granted cross-tenant readers; anyone else gets 404 \u2014 indistinguishable from a non-existent id (prevents tenant probing).",
                 "operationId": "getAsset",
                 "parameters": [
                     {
@@ -1681,7 +1682,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1797,7 +1798,7 @@
                     "Assets"
                 ],
                 "summary": "Delete an asset",
-                "description": "Soft-deletes the asset: it disappears from listings immediately and frees its VIN for re-registration. Assignments and historical records are left untouched. There is no synchronous bulk-delete endpoint \u2014 delete a selection by fanning out per-id requests (each is naturally idempotent).",
+                "description": "Soft-deletes the asset: it disappears from listings immediately and frees its VIN for re-registration. Assignments and historical records are left untouched. There is no synchronous bulk-delete endpoint \u2014 delete a selection by fanning out per-id requests (each is naturally idempotent).\n\n> **Requires** `manage` on `asset` (SpiceDB permission expression).",
                 "operationId": "deleteAsset",
                 "parameters": [
                     {
@@ -1835,7 +1836,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1951,7 +1952,7 @@
                     "Assets"
                 ],
                 "summary": "Update an asset",
-                "description": "Set-only partial update of an asset's mutable fields \u2014 display name, sub-kind, autonomy level, and the vehicle identity (VIN, plate, make, model, year). Omitted or null fields are left unchanged. An asset's `kind` is immutable and lifecycle `status` moves through dedicated transitions, so neither is editable here.",
+                "description": "Set-only partial update of an asset's mutable fields \u2014 display name, sub-kind, autonomy level, and the vehicle identity (VIN, plate, make, model, year). Omitted or null fields are left unchanged. An asset's `kind` is immutable and lifecycle `status` moves through dedicated transitions, so neither is editable here.\n\n> **Requires** `manage` on `asset` (SpiceDB permission expression).",
                 "operationId": "updateAsset",
                 "parameters": [
                     {
@@ -2048,7 +2049,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -2228,7 +2229,7 @@
                     "Assets"
                 ],
                 "summary": "Activate an asset",
-                "description": "Returns the asset to `active` service. Idempotent no-op if already active; an illegal edge (e.g. from a terminal sold/lost asset) \u2192 409 `asset.invalid_transition`. No body \u2014 fan out per id for a bulk change.",
+                "description": "Returns the asset to `active` service. Idempotent no-op if already active; an illegal edge (e.g. from a terminal sold/lost asset) \u2192 409 `asset.invalid_transition`. No body \u2014 fan out per id for a bulk change.\n\n> **Requires** `manage` on `asset` (SpiceDB permission expression).",
                 "operationId": "activateAsset",
                 "parameters": [
                     {
@@ -2295,7 +2296,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -2437,7 +2438,7 @@
                     "Assets"
                 ],
                 "summary": "Deactivate an asset",
-                "description": "Marks the asset `inactive` (idle but still in-fleet). Idempotent no-op if already inactive; an illegal edge \u2192 409 `asset.invalid_transition`. No body.",
+                "description": "Marks the asset `inactive` (idle but still in-fleet). Idempotent no-op if already inactive; an illegal edge \u2192 409 `asset.invalid_transition`. No body.\n\n> **Requires** `manage` on `asset` (SpiceDB permission expression).",
                 "operationId": "deactivateAsset",
                 "parameters": [
                     {
@@ -2504,7 +2505,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -2646,7 +2647,7 @@
                     "Assets"
                 ],
                 "summary": "Send an asset into maintenance",
-                "description": "Moves the asset into `maintenance`. Idempotent no-op if already in maintenance; an illegal edge \u2192 409 `asset.invalid_transition`. No body.",
+                "description": "Moves the asset into `maintenance`. Idempotent no-op if already in maintenance; an illegal edge \u2192 409 `asset.invalid_transition`. No body.\n\n> **Requires** `manage` on `asset` (SpiceDB permission expression).",
                 "operationId": "enterAssetMaintenance",
                 "parameters": [
                     {
@@ -2713,7 +2714,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -2855,7 +2856,7 @@
                     "Assets"
                 ],
                 "summary": "Report an asset as lost",
-                "description": "Marks the asset `lost` \u2014 a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already lost; an illegal edge \u2192 409 `asset.invalid_transition`. No body.",
+                "description": "Marks the asset `lost` \u2014 a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already lost; an illegal edge \u2192 409 `asset.invalid_transition`. No body.\n\n> **Requires** `manage` on `asset` (SpiceDB permission expression).",
                 "operationId": "reportAssetLost",
                 "parameters": [
                     {
@@ -2922,7 +2923,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -3064,7 +3065,7 @@
                     "Assets"
                 ],
                 "summary": "Retire an asset",
-                "description": "Retires the asset (`retired`) \u2014 decommissioned but still owned; it may later be reactivated, sold, or reported lost. Idempotent no-op if already retired; an illegal edge \u2192 409 `asset.invalid_transition`. No body.",
+                "description": "Retires the asset (`retired`) \u2014 decommissioned but still owned; it may later be reactivated, sold, or reported lost. Idempotent no-op if already retired; an illegal edge \u2192 409 `asset.invalid_transition`. No body.\n\n> **Requires** `manage` on `asset` (SpiceDB permission expression).",
                 "operationId": "retireAsset",
                 "parameters": [
                     {
@@ -3131,7 +3132,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -3273,7 +3274,7 @@
                     "Assets"
                 ],
                 "summary": "Mark an asset as sold",
-                "description": "Marks the asset `sold` \u2014 a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already sold; an illegal edge \u2192 409 `asset.invalid_transition`. No body.",
+                "description": "Marks the asset `sold` \u2014 a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already sold; an illegal edge \u2192 409 `asset.invalid_transition`. No body.\n\n> **Requires** `manage` on `asset` (SpiceDB permission expression).",
                 "operationId": "sellAsset",
                 "parameters": [
                     {
@@ -3340,7 +3341,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -3482,7 +3483,7 @@
                     "Assets"
                 ],
                 "summary": "Take an asset out of service",
-                "description": "Moves the asset `out_of_service`. Idempotent no-op if already out of service; an illegal edge \u2192 409 `asset.invalid_transition`. No body.",
+                "description": "Moves the asset `out_of_service`. Idempotent no-op if already out of service; an illegal edge \u2192 409 `asset.invalid_transition`. No body.\n\n> **Requires** `manage` on `asset` (SpiceDB permission expression).",
                 "operationId": "takeAssetOutOfService",
                 "parameters": [
                     {
@@ -3549,7 +3550,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -3777,7 +3778,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -4047,7 +4048,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -4246,7 +4247,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -4604,7 +4605,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -4829,7 +4830,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -5130,7 +5131,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -5337,7 +5338,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -5551,7 +5552,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -5850,7 +5851,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -6009,7 +6010,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -6206,7 +6207,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -6479,7 +6480,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -6663,7 +6664,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -6872,7 +6873,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -7095,7 +7096,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -7443,7 +7444,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -7612,7 +7613,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -7852,7 +7853,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -8116,7 +8117,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -8481,7 +8482,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -8679,7 +8680,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -8865,7 +8866,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -9650,6 +9651,9 @@
                                     "roles": [
                                         "dashboard:dispatcher"
                                     ],
+                                    "permissions": [
+                                        "asset:create"
+                                    ],
                                     "email": "ali@nizam.ai",
                                     "name": "Ali Issa",
                                     "last_login_at": "2026-05-20T14:00:00Z",
@@ -9680,7 +9684,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -9856,7 +9860,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -10020,7 +10024,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -10189,7 +10193,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -10346,7 +10350,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -10537,7 +10541,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -10754,7 +10758,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -10887,7 +10891,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -11043,7 +11047,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -11209,7 +11213,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -11571,7 +11575,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -11743,7 +11747,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -11908,7 +11912,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -12068,7 +12072,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -12228,7 +12232,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -12411,7 +12415,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -12594,7 +12598,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -12777,7 +12781,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -12960,7 +12964,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -13186,7 +13190,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -13437,7 +13441,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -13662,7 +13666,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -13844,7 +13848,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -14123,7 +14127,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -14239,7 +14243,7 @@
                     "Organizations"
                 ],
                 "summary": "Soft-delete an organization",
-                "description": "Owner-only. Sets `deleted_at` on the organizations row; subsequent reads filter it out. The Keycloak Organization is intentionally left in place \u2014 restore is just an UPDATE un-setting `deleted_at`. Members are not removed; their memberships persist alongside the soft-deleted row in case a restore path is added later. L4 @HasPermission ensures the caller is an admin; the owner-only check inside the handler narrows further.\n\n> **Requires** `administer` on `organization` (SpiceDB permission expression).",
+                "description": "Owner-only. Sets `deleted_at` on the organizations row; subsequent reads filter it out. The Keycloak Organization is intentionally left in place \u2014 restore is just an UPDATE un-setting `deleted_at`. Members are not removed; their memberships persist alongside the soft-deleted row in case a restore path is added later. L4 @RequirePermission ensures the caller is an admin; the owner-only check inside the handler narrows further.\n\n> **Requires** `administer` on `organization` (SpiceDB permission expression).",
                 "operationId": "deleteOrganization",
                 "parameters": [
                     {
@@ -14277,7 +14281,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -14482,7 +14486,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -14700,7 +14704,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -14861,7 +14865,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -15056,7 +15060,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -15294,7 +15298,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -15658,7 +15662,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -15869,7 +15873,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -16123,7 +16127,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden \u2014 the authenticated user lacks the role required for this operation.",
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -19401,6 +19405,30 @@
                             "example": "dashboard:dispatcher"
                         }
                     },
+                    "permissions": {
+                        "type": "array",
+                        "description": "The caller's effective permission ids for the active organization (epic #317): the union of catalog grants for every role they hold. Gate actions on these (`can(\"asset:create\")`) rather than role strings, so frontend and backend reference the one catalog and cannot drift. Coarse and instance-independent; per-instance authority ('may delete THIS asset') is enforced server-side at the mutation, never precomputed here.",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "asset:create",
+                                "asset:delete",
+                                "asset:dispose",
+                                "asset:export",
+                                "asset:import",
+                                "asset:read",
+                                "asset:transition",
+                                "asset:update",
+                                "keycloak-projection:administer",
+                                "notification-delivery:read",
+                                "org-maintenance:administer",
+                                "service-account:administer",
+                                "user:administer",
+                                "user:invite"
+                            ],
+                            "example": "asset:create"
+                        }
+                    },
                     "email": {
                         "type": "string",
                         "format": "email",
@@ -19443,6 +19471,7 @@
                     "id",
                     "login_count",
                     "object",
+                    "permissions",
                     "portal",
                     "roles"
                 ]
@@ -19552,6 +19581,113 @@
                 "required": [
                     "devices",
                     "object"
+                ]
+            },
+            "OperatorAsset": {
+                "description": "An asset as seen by an operator assigned to operate it \u2014 the operational identity fields, without the dashboard's lifecycle-management hints.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "kind": {
+                        "type": "string",
+                        "description": "Top-level kind.",
+                        "enum": [
+                            "ground_vehicle",
+                            "aerial_vehicle",
+                            "marine_vehicle",
+                            "robot",
+                            "agv",
+                            "trailer",
+                            "container",
+                            "pallet",
+                            "equipment"
+                        ]
+                    },
+                    "sub_kind": {
+                        "type": "string",
+                        "description": "Sub-kind within the kind (free-form).",
+                        "example": "van"
+                    },
+                    "autonomy_level": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "SAE J3016 autonomy level 0..5.",
+                        "example": 2
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "maintenance",
+                            "out_of_service",
+                            "retired",
+                            "sold",
+                            "inactive",
+                            "lost"
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Truck 7"
+                    },
+                    "vin": {
+                        "type": "string",
+                        "description": "Vehicle Identification Number.",
+                        "example": "1HGCM82633A123456"
+                    },
+                    "plate_number": {
+                        "type": "string",
+                        "description": "License plate.",
+                        "example": "AB-123-CD"
+                    },
+                    "make": {
+                        "type": "string",
+                        "description": "Manufacturer.",
+                        "example": "Volvo"
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Model designation.",
+                        "example": "FH16"
+                    },
+                    "year": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Model year.",
+                        "example": 2024
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Owning organization id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "current_primary_operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Current primary operator (active assignment, role=primary).",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "asset"
+                        ],
+                        "example": "asset"
+                    }
+                },
+                "required": [
+                    "id",
+                    "kind",
+                    "object",
+                    "status"
                 ]
             },
             "ListResponseTimezone": {
