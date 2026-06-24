@@ -25,7 +25,7 @@ export interface ListAssetsRequest {
     created_on_or_after?: string;
     /** Only assets created on or before this calendar day (`yyyy-mm-dd`), inclusive — widened server-side to the end of the day in UTC, so the whole day counts. */
     created_on_or_before?: string;
-    /** Sort order. Allowed fields: `created_at`, `name`, `make`, `model`, `year`, `plate_number`, `vin`, `sub_kind`, `autonomy_level`, `status`, `kind`. Append `:asc` or `:desc` to each field (direction required, e.g. `created_at:desc`), comma-separated for multi-sort; unknown fields or directions are rejected with `400 validation_failed`. */
+    /** Sort order. Allowed fields: `created_at`, `name`, `plate_number`, `make`, `model`, `vin`, `sub_kind`, `year`, `autonomy_level`, `status`, `kind`. Append `:asc` or `:desc` to each field (direction required, e.g. `created_at:desc`), comma-separated for multi-sort; unknown fields or directions are rejected with `400 validation_failed`. */
     sort?: NizamDashboard.ListAssetsRequestSortItem | NizamDashboard.ListAssetsRequestSortItem[];
     /** Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied. */
     limit?: number;
