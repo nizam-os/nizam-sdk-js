@@ -38,6 +38,8 @@ export * as positions from "./positions/index.js";
 export * as realtime from "./realtime/index.js";
 export * from "./taskAttempts/client/requests/index.js";
 export * as taskAttempts from "./taskAttempts/index.js";
+export * from "./tasks/client/requests/index.js";
+export * as tasks from "./tasks/index.js";
 export * from "./users/client/requests/index.js";
 export * as users from "./users/index.js";
 export * from "./users/types/index.js";

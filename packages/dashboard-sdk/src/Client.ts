@@ -18,6 +18,7 @@ import { OrganizationsClient } from "./api/resources/organizations/client/Client
 import { PositionsClient } from "./api/resources/positions/client/Client.js";
 import { RealtimeClient } from "./api/resources/realtime/client/Client.js";
 import { TaskAttemptsClient } from "./api/resources/taskAttempts/client/Client.js";
+import { TasksClient } from "./api/resources/tasks/client/Client.js";
 import { UsersClient } from "./api/resources/users/client/Client.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "./BaseClient.js";
@@ -50,6 +51,7 @@ export class NizamDashboardClient {
     protected _organizations: OrganizationsClient | undefined;
     protected _realtime: RealtimeClient | undefined;
     protected _taskAttempts: TaskAttemptsClient | undefined;
+    protected _tasks: TasksClient | undefined;
 
     constructor(options: NizamDashboardClient.Options) {
         this._options = normalizeClientOptionsWithAuth(options);
@@ -129,6 +131,10 @@ export class NizamDashboardClient {
 
     public get taskAttempts(): TaskAttemptsClient {
         return (this._taskAttempts ??= new TaskAttemptsClient(this._options));
+    }
+
+    public get tasks(): TasksClient {
+        return (this._tasks ??= new TasksClient(this._options));
     }
 
     /**

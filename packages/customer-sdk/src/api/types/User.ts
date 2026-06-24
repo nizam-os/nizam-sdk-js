@@ -43,6 +43,7 @@ export namespace User {
 
     export namespace Permissions {
         export const Item = {
+            ActivityReadAll: "activity:read:all",
             AssetCreate: "asset:create",
             AssetDelete: "asset:delete",
             AssetDispose: "asset:dispose",
@@ -55,6 +56,7 @@ export namespace User {
             NotificationDeliveryRead: "notification-delivery:read",
             OrgMaintenanceAdminister: "org-maintenance:administer",
             ServiceAccountAdminister: "service-account:administer",
+            TaskCreate: "task:create",
             UserAdminister: "user:administer",
             UserInvite: "user:invite",
         } as const;

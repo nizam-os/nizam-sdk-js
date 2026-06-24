@@ -210,6 +210,12 @@
                                             "subject_id": "24627851-4850-48b1-95f3-848067b8d278",
                                             "causer_type": "user",
                                             "causer_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                            "causer": {
+                                                "id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                                "type": "user",
+                                                "display_name": "Jane Doe",
+                                                "subtitle": "jane@acme.test"
+                                            },
                                             "log_name": "fleet",
                                             "occurred_at": "2026-05-20T14:00:00Z",
                                             "object": "activity"
@@ -15549,6 +15555,1008 @@
                 ]
             }
         },
+        "/v1/tasks": {
+            "get": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "List tasks",
+                "description": "Lists the tasks the caller may read \u2014 their organization's tasks plus any they own or whose executor org they belong to (cross-tenant). The filtering is enforced entirely by RLS + the read bridge, never an app-layer predicate.",
+                "operationId": "listTasks",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseTask"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                            "type": "pickup",
+                                            "notes": "Leave at front desk",
+                                            "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                            "executor_organization_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                            "merchant_id": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                                            "owner_id": "d4e5f6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
+                                            "object": "task"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/tasks",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/tasks",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/tasks",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/tasks",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Create a task",
+                "description": "Creates a task owned by the active organization. The creator becomes the task's `owner` (per-instance), able to read/update/delete it regardless of role. An optional `executor_organization_id` delegates it cross-org.",
+                "operationId": "createTask",
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateTaskRequest"
+                            },
+                            "examples": {
+                                "default": {
+                                    "summary": "Create a task",
+                                    "value": {
+                                        "type": "pickup",
+                                        "executor_organization_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                        "merchant_id": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                                        "notes": "Leave at front desk"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "The created task.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                },
+                                "example": {
+                                    "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "type": "pickup",
+                                    "notes": "Leave at front desk",
+                                    "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "executor_organization_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                    "merchant_id": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                                    "owner_id": "d4e5f6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
+                                    "object": "task"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/tasks",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/tasks",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed \u2014 request body didn't satisfy `@Valid` constraints.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/validation_failed",
+                                    "title": "Validation failed",
+                                    "status": 422,
+                                    "detail": "Request body failed validation.",
+                                    "instance": "/v1/tasks",
+                                    "code": "validation_failed",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
+                                    "errors": [
+                                        {
+                                            "field": "email",
+                                            "code": "must_not_be_blank",
+                                            "message": "must not be blank"
+                                        },
+                                        {
+                                            "field": "dropoff.lat",
+                                            "code": "out_of_range",
+                                            "message": "latitude must be in [-90, 90]"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/tasks",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/tasks",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Idempotency-Key header",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/tasks",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "auth.missing_organization": {
+                                        "summary": "Missing organization context",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/auth/missing_organization",
+                                            "title": "Missing organization context",
+                                            "status": 400,
+                                            "detail": "This endpoint requires an active organization claim on the JWT.",
+                                            "instance": "/v1/tasks",
+                                            "code": "auth.missing_organization",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/tasks",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/tasks",
+                                            "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/tasks/{id}": {
+            "get": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Get a task",
+                "description": "Returns one task. Visible to the task's owner, members of its owning org, and members of a delegated executor org (cross-tenant); anyone else gets 404 \u2014 indistinguishable from a non-existent id (prevents probing).",
+                "operationId": "getTask",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The task.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                },
+                                "example": {
+                                    "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "type": "pickup",
+                                    "notes": "Leave at front desk",
+                                    "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "executor_organization_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                    "merchant_id": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                                    "owner_id": "d4e5f6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
+                                    "object": "task"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "task.not_found": {
+                                        "summary": "Task not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/task/not_found",
+                                            "title": "Task not found",
+                                            "status": 404,
+                                            "detail": "The requested task does not exist or is not visible to the caller.",
+                                            "instance": "/v1/tasks/{id}",
+                                            "code": "task.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Delete a task",
+                "description": "Soft-deletes the task. Authorized for the task's owner or an admin/staff of its owning org only (a delegated executor cannot delete) \u2014 the `task:delete` relation.\n\n> **Requires** `delete` on `task` (SpiceDB permission expression).",
+                "operationId": "deleteTask",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted."
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "task.not_found": {
+                                        "summary": "Task not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/task/not_found",
+                                            "title": "Task not found",
+                                            "status": 404,
+                                            "detail": "The requested task does not exist or is not visible to the caller.",
+                                            "instance": "/v1/tasks/{id}",
+                                            "code": "task.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Update a task",
+                "description": "Set-only partial update. Authorized for the task's owner or an admin/staff of its owning or executor org (a plain member cannot edit) \u2014 the `task:update` relation.\n\n> **Requires** `update` on `task` (SpiceDB permission expression).",
+                "operationId": "updateTask",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateTaskRequest"
+                            },
+                            "examples": {
+                                "default": {
+                                    "summary": "Update a task",
+                                    "value": {
+                                        "notes": "Customer rescheduled to 4pm"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "The updated task.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                },
+                                "example": {
+                                    "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "type": "pickup",
+                                    "notes": "Leave at front desk",
+                                    "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "executor_organization_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                    "merchant_id": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                                    "owner_id": "d4e5f6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
+                                    "object": "task"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed \u2014 request body didn't satisfy `@Valid` constraints.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/validation_failed",
+                                    "title": "Validation failed",
+                                    "status": 422,
+                                    "detail": "Request body failed validation.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "validation_failed",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
+                                    "errors": [
+                                        {
+                                            "field": "email",
+                                            "code": "must_not_be_blank",
+                                            "message": "must not be blank"
+                                        },
+                                        {
+                                            "field": "dropoff.lat",
+                                            "code": "out_of_range",
+                                            "message": "latitude must be in [-90, 90]"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/tasks/{id}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Task not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "task.not_found": {
+                                        "summary": "Task not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/task/not_found",
+                                            "title": "Task not found",
+                                            "status": 404,
+                                            "detail": "The requested task does not exist or is not visible to the caller.",
+                                            "instance": "/v1/tasks/{id}",
+                                            "code": "task.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
         "/v1/users": {
             "get": {
                 "tags": [
@@ -16412,6 +17420,117 @@
                     "login_count",
                     "object",
                     "status"
+                ]
+            },
+            "Task": {
+                "description": "A unit of work \u2014 the reference resource for per-verb relationship authorization.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The kind of stop.",
+                        "enum": [
+                            "pickup",
+                            "dropoff",
+                            "service",
+                            "return",
+                            "exchange",
+                            "end_at_hub",
+                            "end_at_driver_address",
+                            "route_load",
+                            "break"
+                        ]
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Free-form notes (the editable content).",
+                        "example": "Leave at front desk"
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Owning organization id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "executor_organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Executor organization the task is delegated to (cross-org), if any.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "merchant_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Merchant the task belongs to, if any.",
+                        "example": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                    },
+                    "owner_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The user who created (owns) the task \u2014 the SpiceDB `task#owner`.",
+                        "example": "d4e5f6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "task"
+                        ],
+                        "example": "task"
+                    }
+                },
+                "required": [
+                    "id",
+                    "object",
+                    "organization_id",
+                    "type"
+                ]
+            },
+            "CreateTaskRequest": {
+                "description": "Create a new task.",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "The kind of stop.",
+                        "enum": [
+                            "pickup",
+                            "dropoff",
+                            "service",
+                            "return",
+                            "exchange",
+                            "end_at_hub",
+                            "end_at_driver_address",
+                            "route_load",
+                            "break"
+                        ]
+                    },
+                    "executor_organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Executor organization to delegate the task to (cross-org). Optional.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "merchant_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Merchant the task belongs to. Optional.",
+                        "example": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Free-form notes.",
+                        "example": "Leave at front desk",
+                        "maxLength": 4096,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "type"
                 ]
             },
             "UploadInitiation": {
@@ -18686,6 +19805,18 @@
                     "ids"
                 ]
             },
+            "UpdateTaskRequest": {
+                "description": "Update a task (set-only partial update).",
+                "properties": {
+                    "notes": {
+                        "type": "string",
+                        "description": "Free-form notes.",
+                        "example": "Customer rescheduled to 4pm",
+                        "maxLength": 4096,
+                        "minLength": 0
+                    }
+                }
+            },
             "UpdateOrganizationRequest": {
                 "properties": {
                     "name": {
@@ -19080,6 +20211,52 @@
                     }
                 }
             },
+            "ListResponseTask": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Task"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
             "TaskAttemptPhoto": {
                 "description": "A proof-of-delivery photo captured during a task attempt.",
                 "properties": {
@@ -19411,6 +20588,7 @@
                         "items": {
                             "type": "string",
                             "enum": [
+                                "activity:read:all",
                                 "asset:create",
                                 "asset:delete",
                                 "asset:dispose",
@@ -19423,6 +20601,7 @@
                                 "notification-delivery:read",
                                 "org-maintenance:administer",
                                 "service-account:administer",
+                                "task:create",
                                 "user:administer",
                                 "user:invite"
                             ],
@@ -20843,6 +22022,32 @@
                     }
                 }
             },
+            "ActivityCauser": {
+                "description": "Resolved human identity of an activity actor.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Actor id \u2014 mirrors `causer_id`; null for system/scheduled rows.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Actor type \u2014 mirrors `causer_type`; null for system/scheduled rows.",
+                        "example": "user"
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "description": "Renderable actor label \u2014 the resolved name, or a stable \"System\" / \"Unknown\" fallback. Never null.",
+                        "example": "Jane Doe"
+                    },
+                    "subtitle": {
+                        "type": "string",
+                        "description": "Secondary line \u2014 a user's email; null for operators and system.",
+                        "example": "jane@acme.test"
+                    }
+                }
+            },
             "ActivityResource": {
                 "description": "One entry in an organization's activity feed (append-only audit timeline).",
                 "properties": {
@@ -20909,6 +22114,9 @@
                         "description": "Id of the actor that performed the action. Null for system/scheduled actions.",
                         "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
                     },
+                    "causer": {
+                        "$ref": "#/components/schemas/ActivityCauser"
+                    },
                     "log_name": {
                         "type": "string",
                         "description": "Optional UI filtering bucket.",
@@ -20930,6 +22138,7 @@
                     }
                 },
                 "required": [
+                    "causer",
                     "description",
                     "id",
                     "object",

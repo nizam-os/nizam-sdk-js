@@ -7520,6 +7520,117 @@
                     "status"
                 ]
             },
+            "Task": {
+                "description": "A unit of work \u2014 the reference resource for per-verb relationship authorization.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The kind of stop.",
+                        "enum": [
+                            "pickup",
+                            "dropoff",
+                            "service",
+                            "return",
+                            "exchange",
+                            "end_at_hub",
+                            "end_at_driver_address",
+                            "route_load",
+                            "break"
+                        ]
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Free-form notes (the editable content).",
+                        "example": "Leave at front desk"
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Owning organization id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "executor_organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Executor organization the task is delegated to (cross-org), if any.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "merchant_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Merchant the task belongs to, if any.",
+                        "example": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                    },
+                    "owner_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The user who created (owns) the task \u2014 the SpiceDB `task#owner`.",
+                        "example": "d4e5f6a7-8b9c-0d1e-2f3a-4b5c6d7e8f9a"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "task"
+                        ],
+                        "example": "task"
+                    }
+                },
+                "required": [
+                    "id",
+                    "object",
+                    "organization_id",
+                    "type"
+                ]
+            },
+            "CreateTaskRequest": {
+                "description": "Create a new task.",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "The kind of stop.",
+                        "enum": [
+                            "pickup",
+                            "dropoff",
+                            "service",
+                            "return",
+                            "exchange",
+                            "end_at_hub",
+                            "end_at_driver_address",
+                            "route_load",
+                            "break"
+                        ]
+                    },
+                    "executor_organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Executor organization to delegate the task to (cross-org). Optional.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "merchant_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Merchant the task belongs to. Optional.",
+                        "example": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Free-form notes.",
+                        "example": "Leave at front desk",
+                        "maxLength": 4096,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "type"
+                ]
+            },
             "UploadInitiation": {
                 "description": "A freshly initiated upload: the session handle, the pre-reserved file id and the presigned part URLs. Resume/complete/cancel go through the generic file-uploads endpoints.",
                 "properties": {
@@ -9792,6 +9903,18 @@
                     "ids"
                 ]
             },
+            "UpdateTaskRequest": {
+                "description": "Update a task (set-only partial update).",
+                "properties": {
+                    "notes": {
+                        "type": "string",
+                        "description": "Free-form notes.",
+                        "example": "Customer rescheduled to 4pm",
+                        "maxLength": 4096,
+                        "minLength": 0
+                    }
+                }
+            },
             "UpdateOrganizationRequest": {
                 "properties": {
                     "name": {
@@ -10186,6 +10309,52 @@
                     }
                 }
             },
+            "ListResponseTask": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Task"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
             "TaskAttemptPhoto": {
                 "description": "A proof-of-delivery photo captured during a task attempt.",
                 "properties": {
@@ -10517,6 +10686,7 @@
                         "items": {
                             "type": "string",
                             "enum": [
+                                "activity:read:all",
                                 "asset:create",
                                 "asset:delete",
                                 "asset:dispose",
@@ -10529,6 +10699,7 @@
                                 "notification-delivery:read",
                                 "org-maintenance:administer",
                                 "service-account:administer",
+                                "task:create",
                                 "user:administer",
                                 "user:invite"
                             ],
@@ -11949,6 +12120,32 @@
                     }
                 }
             },
+            "ActivityCauser": {
+                "description": "Resolved human identity of an activity actor.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Actor id \u2014 mirrors `causer_id`; null for system/scheduled rows.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Actor type \u2014 mirrors `causer_type`; null for system/scheduled rows.",
+                        "example": "user"
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "description": "Renderable actor label \u2014 the resolved name, or a stable \"System\" / \"Unknown\" fallback. Never null.",
+                        "example": "Jane Doe"
+                    },
+                    "subtitle": {
+                        "type": "string",
+                        "description": "Secondary line \u2014 a user's email; null for operators and system.",
+                        "example": "jane@acme.test"
+                    }
+                }
+            },
             "ActivityResource": {
                 "description": "One entry in an organization's activity feed (append-only audit timeline).",
                 "properties": {
@@ -12015,6 +12212,9 @@
                         "description": "Id of the actor that performed the action. Null for system/scheduled actions.",
                         "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
                     },
+                    "causer": {
+                        "$ref": "#/components/schemas/ActivityCauser"
+                    },
                     "log_name": {
                         "type": "string",
                         "description": "Optional UI filtering bucket.",
@@ -12036,6 +12236,7 @@
                     }
                 },
                 "required": [
+                    "causer",
                     "description",
                     "id",
                     "object",
