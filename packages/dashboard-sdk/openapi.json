@@ -105,6 +105,10 @@
             "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
         },
         {
+            "name": "Pricing",
+            "description": "Public subscription pricing for the pricing page (no authentication)."
+        },
+        {
             "name": "Realtime",
             "description": "Realtime (STOMP/WebSocket) session bootstrap \u2014 mint a ticket to open a connection."
         },
@@ -14827,6 +14831,156 @@
                 ]
             }
         },
+        "/v1/pricing": {
+            "get": {
+                "tags": [
+                    "Pricing"
+                ],
+                "summary": "List publicly sellable plans",
+                "description": "The active, visible subscription plans for the public pricing page, ordered for display. Anonymous \u2014 no authentication required.",
+                "operationId": "listPricing",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponsePricingPlan"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "code": "pro",
+                                            "name": "Pro",
+                                            "description": "For growing fleets.",
+                                            "price": {
+                                                "currency": "USD",
+                                                "minor_units": 1050,
+                                                "decimal": "10.5"
+                                            },
+                                            "setup_fee": {
+                                                "currency": "USD",
+                                                "minor_units": 1050,
+                                                "decimal": "10.5"
+                                            },
+                                            "billing_model": "flat",
+                                            "billing_period": "monthly",
+                                            "trial_days": 14,
+                                            "features": {
+                                                "flags": {
+                                                    "advanced_routing": true,
+                                                    "white_label": false
+                                                },
+                                                "quotas": {
+                                                    "fleet.order.created": 1000
+                                                }
+                                            },
+                                            "object": "pricing_plan"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/pricing",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/pricing",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/pricing",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard",
+                    "merchant",
+                    "customer",
+                    "carrier",
+                    "operator"
+                ]
+            }
+        },
         "/v1/realtime/tickets": {
             "post": {
                 "tags": [
@@ -17725,6 +17879,340 @@
                     "ticket"
                 ]
             },
+            "Money": {
+                "description": "A monetary amount as integer minor units plus its ISO-4217 currency.",
+                "properties": {
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code.",
+                        "example": "USD"
+                    },
+                    "minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Amount in the currency's minor units (cents for USD, yen for JPY, fils for KWD).",
+                        "example": 1050
+                    },
+                    "decimal": {
+                        "type": "string",
+                        "description": "Amount as a major-unit decimal string at the currency's scale.",
+                        "example": "10.5"
+                    }
+                }
+            },
+            "PlanFeatures": {
+                "description": "A plan's entitlements: capability flags + numeric quota ceilings.",
+                "properties": {
+                    "flags": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean",
+                            "description": "Capability flags keyed by feature id. An absent flag means off.",
+                            "example": false
+                        },
+                        "description": "Capability flags keyed by feature id. An absent flag means off.",
+                        "example": {
+                            "advanced_routing": true,
+                            "white_label": false
+                        }
+                    },
+                    "quotas": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "Quota ceilings keyed by meter key or feature id. An absent quota means unlimited; a present 0 means hard-blocked."
+                        },
+                        "description": "Quota ceilings keyed by meter key or feature id. An absent quota means unlimited; a present 0 means hard-blocked.",
+                        "example": {
+                            "fleet.order.created": 1000
+                        }
+                    }
+                }
+            },
+            "SubscriptionPlan": {
+                "description": "A subscription plan in the platform billing catalog (admin view).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable plan id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Stable plan code (natural key).",
+                        "example": "pro"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Pro"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "For growing fleets."
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Catalog lifecycle status.",
+                        "enum": [
+                            "draft",
+                            "active",
+                            "grandfathered",
+                            "retired",
+                            "archived"
+                        ],
+                        "example": "active"
+                    },
+                    "price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "setup_fee": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "billing_model": {
+                        "type": "string",
+                        "description": "Pricing shape.",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "per_event",
+                            "tiered",
+                            "hybrid"
+                        ],
+                        "example": "flat"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence.",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Sort position on the pricing page (ascending).",
+                        "example": 10
+                    },
+                    "default_trial_days": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Default free-trial length in days.",
+                        "example": 14
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/PlanFeatures"
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "description": "Whether the plan is live (sellable to subscribers).",
+                        "example": true
+                    },
+                    "visible": {
+                        "type": "boolean",
+                        "description": "Whether the plan appears on the public pricing page.",
+                        "example": true
+                    },
+                    "processor_product_id": {
+                        "type": "string",
+                        "description": "Processor (Stripe) Product id, once provisioned.",
+                        "example": "plan_pro"
+                    },
+                    "processor_price_id": {
+                        "type": "string",
+                        "description": "Processor (Stripe) Price id, once provisioned.",
+                        "example": "price_123"
+                    },
+                    "allowed_transitions": {
+                        "type": "array",
+                        "description": "Lifecycle statuses this plan may legally transition to next.",
+                        "example": [
+                            "grandfathered",
+                            "retired"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "Lifecycle statuses this plan may legally transition to next.",
+                            "enum": [
+                                "draft",
+                                "active",
+                                "grandfathered",
+                                "retired",
+                                "archived"
+                            ],
+                            "example": "[\"grandfathered\",\"retired\"]"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last update time.",
+                        "example": "2026-06-25T12:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "subscription_plan"
+                        ],
+                        "example": "subscription_plan"
+                    }
+                },
+                "required": [
+                    "active",
+                    "allowed_transitions",
+                    "billing_model",
+                    "billing_period",
+                    "code",
+                    "created_at",
+                    "features",
+                    "id",
+                    "name",
+                    "object",
+                    "position",
+                    "price",
+                    "setup_fee",
+                    "status",
+                    "updated_at",
+                    "visible"
+                ]
+            },
+            "CreatePlanRequest": {
+                "description": "Author a new draft subscription plan.",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Stable plan code (natural key) \u2014 a lowercase url-safe slug.",
+                        "example": "pro",
+                        "maxLength": 64,
+                        "minLength": 0,
+                        "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Pro",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "For growing fleets."
+                    },
+                    "price_minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Recurring price in the currency's minor units.",
+                        "example": 4900
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code.",
+                        "example": "USD",
+                        "minLength": 1,
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "setup_fee_minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "One-time setup fee in minor units (default 0).",
+                        "example": 0
+                    },
+                    "billing_model": {
+                        "type": "string",
+                        "description": "Pricing shape.",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "per_event",
+                            "tiered",
+                            "hybrid"
+                        ],
+                        "example": "flat"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence.",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Sort position on the pricing page (ascending).",
+                        "example": 10
+                    },
+                    "default_trial_days": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Default free-trial length in days.",
+                        "example": 14
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/PlanFeaturesRequest"
+                    }
+                },
+                "required": [
+                    "billing_model",
+                    "billing_period",
+                    "code",
+                    "currency",
+                    "name"
+                ]
+            },
+            "PlanFeaturesRequest": {
+                "description": "A plan's entitlements: capability flags + numeric quota ceilings.",
+                "properties": {
+                    "flags": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean",
+                            "description": "Capability flags keyed by feature id.",
+                            "example": false
+                        },
+                        "description": "Capability flags keyed by feature id.",
+                        "example": {
+                            "advanced_routing": true
+                        }
+                    },
+                    "quotas": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "Quota ceilings (non-negative) keyed by meter key or feature id."
+                        },
+                        "description": "Quota ceilings (non-negative) keyed by meter key or feature id.",
+                        "example": {
+                            "fleet.order.created": 1000
+                        }
+                    }
+                }
+            },
             "CreateOrganizationRequest": {
                 "properties": {
                     "name": {
@@ -19817,6 +20305,82 @@
                     }
                 }
             },
+            "UpdatePlanRequest": {
+                "description": "Edit a subscription plan's catalog fields (partial update).",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Pro",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "For growing fleets."
+                    },
+                    "price_minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Recurring price in minor units.",
+                        "example": 5900
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code.",
+                        "example": "USD",
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "setup_fee_minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "One-time setup fee in minor units.",
+                        "example": 0
+                    },
+                    "billing_model": {
+                        "type": "string",
+                        "description": "Pricing shape.",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "per_event",
+                            "tiered",
+                            "hybrid"
+                        ],
+                        "example": "flat"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence.",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Sort position on the pricing page.",
+                        "example": 10
+                    },
+                    "default_trial_days": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Default free-trial length in days.",
+                        "example": 14
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/PlanFeaturesRequest"
+                    }
+                }
+            },
             "UpdateOrganizationRequest": {
                 "properties": {
                     "name": {
@@ -20350,6 +20914,176 @@
                     }
                 }
             },
+            "ListResponsePricingPlan": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/PricingPlan"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "PricingPlan": {
+                "description": "A publicly sellable subscription plan, for the pricing page.",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Stable plan code.",
+                        "example": "pro"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Pro"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Marketing description.",
+                        "example": "For growing fleets."
+                    },
+                    "price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "setup_fee": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "billing_model": {
+                        "type": "string",
+                        "description": "Pricing shape.",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "per_event",
+                            "tiered",
+                            "hybrid"
+                        ],
+                        "example": "flat"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence.",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "trial_days": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Free-trial length in days, when the plan offers one.",
+                        "example": 14
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/PlanFeatures"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "pricing_plan"
+                        ],
+                        "example": "pricing_plan"
+                    }
+                },
+                "required": [
+                    "billing_model",
+                    "billing_period",
+                    "code",
+                    "features",
+                    "name",
+                    "object",
+                    "price",
+                    "setup_fee"
+                ]
+            },
+            "ListResponseSubscriptionPlan": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/SubscriptionPlan"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
             "ListResponseOrganization": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
@@ -20600,6 +21334,8 @@
                                 "keycloak-projection:administer",
                                 "notification-delivery:read",
                                 "org-maintenance:administer",
+                                "plan:manage",
+                                "plan:read",
                                 "service-account:administer",
                                 "task:create",
                                 "user:administer",

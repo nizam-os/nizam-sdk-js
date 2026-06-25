@@ -8,6 +8,7 @@ import { LookupsClient } from "./api/resources/lookups/client/Client.js";
 import { NotificationPreferencesClient } from "./api/resources/notificationPreferences/client/Client.js";
 import { NotificationsClient } from "./api/resources/notifications/client/Client.js";
 import { PositionsClient } from "./api/resources/positions/client/Client.js";
+import { PricingClient } from "./api/resources/pricing/client/Client.js";
 import { RealtimeClient } from "./api/resources/realtime/client/Client.js";
 import { TaskAttemptsClient } from "./api/resources/taskAttempts/client/Client.js";
 import { UsersClient } from "./api/resources/users/client/Client.js";
@@ -32,6 +33,7 @@ export class NizamOperatorRuntimeClient {
     protected _positions: PositionsClient | undefined;
     protected _notificationPreferences: NotificationPreferencesClient | undefined;
     protected _notifications: NotificationsClient | undefined;
+    protected _pricing: PricingClient | undefined;
     protected _realtime: RealtimeClient | undefined;
     protected _taskAttempts: TaskAttemptsClient | undefined;
 
@@ -73,6 +75,10 @@ export class NizamOperatorRuntimeClient {
 
     public get notifications(): NotificationsClient {
         return (this._notifications ??= new NotificationsClient(this._options));
+    }
+
+    public get pricing(): PricingClient {
+        return (this._pricing ??= new PricingClient(this._options));
     }
 
     public get realtime(): RealtimeClient {

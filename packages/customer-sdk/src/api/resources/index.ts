@@ -9,6 +9,7 @@ export * as notificationPreferences from "./notificationPreferences/index.js";
 export * from "./notifications/client/requests/index.js";
 export * as notifications from "./notifications/index.js";
 export * from "./notifications/types/index.js";
+export * as pricing from "./pricing/index.js";
 export * as realtime from "./realtime/index.js";
 export * from "./users/client/requests/index.js";
 export * as users from "./users/index.js";

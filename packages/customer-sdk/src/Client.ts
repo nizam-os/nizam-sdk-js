@@ -5,6 +5,7 @@ import { FilesClient } from "./api/resources/files/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
 import { NotificationPreferencesClient } from "./api/resources/notificationPreferences/client/Client.js";
 import { NotificationsClient } from "./api/resources/notifications/client/Client.js";
+import { PricingClient } from "./api/resources/pricing/client/Client.js";
 import { RealtimeClient } from "./api/resources/realtime/client/Client.js";
 import { UsersClient } from "./api/resources/users/client/Client.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
@@ -25,6 +26,7 @@ export class NizamCustomerClient {
     protected _devices: DevicesClient | undefined;
     protected _notificationPreferences: NotificationPreferencesClient | undefined;
     protected _notifications: NotificationsClient | undefined;
+    protected _pricing: PricingClient | undefined;
     protected _realtime: RealtimeClient | undefined;
 
     constructor(options: NizamCustomerClient.Options) {
@@ -53,6 +55,10 @@ export class NizamCustomerClient {
 
     public get notifications(): NotificationsClient {
         return (this._notifications ??= new NotificationsClient(this._options));
+    }
+
+    public get pricing(): PricingClient {
+        return (this._pricing ??= new PricingClient(this._options));
     }
 
     public get realtime(): RealtimeClient {

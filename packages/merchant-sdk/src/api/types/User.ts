@@ -55,6 +55,8 @@ export namespace User {
             KeycloakProjectionAdminister: "keycloak-projection:administer",
             NotificationDeliveryRead: "notification-delivery:read",
             OrgMaintenanceAdminister: "org-maintenance:administer",
+            PlanManage: "plan:manage",
+            PlanRead: "plan:read",
             ServiceAccountAdminister: "service-account:administer",
             TaskCreate: "task:create",
             UserAdminister: "user:administer",

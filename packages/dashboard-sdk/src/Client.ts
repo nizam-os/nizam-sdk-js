@@ -16,6 +16,7 @@ import { NotificationsClient } from "./api/resources/notifications/client/Client
 import { OperatorsClient } from "./api/resources/operators/client/Client.js";
 import { OrganizationsClient } from "./api/resources/organizations/client/Client.js";
 import { PositionsClient } from "./api/resources/positions/client/Client.js";
+import { PricingClient } from "./api/resources/pricing/client/Client.js";
 import { RealtimeClient } from "./api/resources/realtime/client/Client.js";
 import { TaskAttemptsClient } from "./api/resources/taskAttempts/client/Client.js";
 import { TasksClient } from "./api/resources/tasks/client/Client.js";
@@ -49,6 +50,7 @@ export class NizamDashboardClient {
     protected _notifications: NotificationsClient | undefined;
     protected _operators: OperatorsClient | undefined;
     protected _organizations: OrganizationsClient | undefined;
+    protected _pricing: PricingClient | undefined;
     protected _realtime: RealtimeClient | undefined;
     protected _taskAttempts: TaskAttemptsClient | undefined;
     protected _tasks: TasksClient | undefined;
@@ -123,6 +125,10 @@ export class NizamDashboardClient {
 
     public get organizations(): OrganizationsClient {
         return (this._organizations ??= new OrganizationsClient(this._options));
+    }
+
+    public get pricing(): PricingClient {
+        return (this._pricing ??= new PricingClient(this._options));
     }
 
     public get realtime(): RealtimeClient {
