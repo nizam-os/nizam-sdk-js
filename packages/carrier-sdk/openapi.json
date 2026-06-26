@@ -53,8 +53,16 @@
             "description": "The authenticated user's registered push devices."
         },
         {
+            "name": "Inbound webhooks",
+            "description": "Platform-staff dead-letter triage for the inbound-webhook inbox."
+        },
+        {
             "name": "Invites",
             "description": "Org-admin invites and recipient acceptance."
+        },
+        {
+            "name": "Invoices",
+            "description": "An organization's accounts-receivable invoices, projected from the billing processor."
         },
         {
             "name": "Jobs",
@@ -74,11 +82,11 @@
         },
         {
             "name": "Memberships",
-            "description": "User \u2194 organization memberships \u2014 list the caller's memberships, join, leave, role checks."
+            "description": "User \u2194 organization memberships \u2014 list, join, leave, role checks."
         },
         {
             "name": "Memberships",
-            "description": "User \u2194 organization memberships \u2014 list, join, leave, role checks."
+            "description": "User \u2194 organization memberships \u2014 list the caller's memberships, join, leave, role checks."
         },
         {
             "name": "Notification deliveries",
@@ -103,6 +111,10 @@
         {
             "name": "Organizations",
             "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
+        },
+        {
+            "name": "Payments",
+            "description": "An organization's realized payments, projected from the billing processor."
         },
         {
             "name": "Pricing",
@@ -7380,6 +7392,208 @@
                     "filename"
                 ]
             },
+            "Money": {
+                "description": "A monetary amount as integer minor units plus its ISO-4217 currency.",
+                "properties": {
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code.",
+                        "example": "USD"
+                    },
+                    "minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Amount in the currency's minor units (cents for USD, yen for JPY, fils for KWD).",
+                        "example": 1050
+                    },
+                    "decimal": {
+                        "type": "string",
+                        "description": "Amount as a major-unit decimal string at the currency's scale.",
+                        "example": "10.5"
+                    }
+                }
+            },
+            "PlatformSubscription": {
+                "description": "An organization's subscription to a platform plan.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable subscription id.",
+                        "example": "9f8e7d6c-5b4a-3210-fedc-ba9876543210"
+                    },
+                    "plan_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The subscribed plan's id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Billing lifecycle status.",
+                        "enum": [
+                            "incomplete",
+                            "incomplete_expired",
+                            "trialing",
+                            "active",
+                            "past_due",
+                            "paused",
+                            "suspended",
+                            "unpaid",
+                            "canceled",
+                            "ended"
+                        ],
+                        "example": "active"
+                    },
+                    "trial_ends_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Trial end, when in a trial.",
+                        "example": "2026-07-09T00:00:00Z"
+                    },
+                    "current_period_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start of the current billing period.",
+                        "example": "2026-06-25T00:00:00Z"
+                    },
+                    "current_period_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "End of the current billing period.",
+                        "example": "2026-07-25T00:00:00Z"
+                    },
+                    "canceled_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the subscription was cancelled.",
+                        "example": "2026-08-01T12:00:00Z"
+                    },
+                    "cancel_at_period_end_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When a scheduled end-of-period cancellation takes effect.",
+                        "example": "2026-08-25T00:00:00Z"
+                    },
+                    "price_override": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 settlement currency.",
+                        "example": "USD"
+                    },
+                    "allowed_transitions": {
+                        "type": "array",
+                        "description": "Lifecycle statuses this subscription may legally transition to next.",
+                        "example": [
+                            "past_due",
+                            "paused",
+                            "canceled"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "Lifecycle statuses this subscription may legally transition to next.",
+                            "enum": [
+                                "incomplete",
+                                "incomplete_expired",
+                                "trialing",
+                                "active",
+                                "past_due",
+                                "paused",
+                                "suspended",
+                                "unpaid",
+                                "canceled",
+                                "ended"
+                            ],
+                            "example": "[\"past_due\",\"paused\",\"canceled\"]"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last update time.",
+                        "example": "2026-06-25T12:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "platform_subscription"
+                        ],
+                        "example": "platform_subscription"
+                    }
+                },
+                "required": [
+                    "allowed_transitions",
+                    "created_at",
+                    "currency",
+                    "id",
+                    "object",
+                    "plan_id",
+                    "status",
+                    "updated_at"
+                ]
+            },
+            "SubscriptionCheckout": {
+                "description": "A started subscription and the checkout URL to complete it.",
+                "properties": {
+                    "subscription": {
+                        "$ref": "#/components/schemas/PlatformSubscription"
+                    },
+                    "checkout_url": {
+                        "type": "string",
+                        "description": "Hosted checkout URL to complete payment; null when billing is disabled.",
+                        "example": "https://checkout.stripe.com/c/pay/cs_test_a1b2c3"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "subscription_checkout"
+                        ],
+                        "example": "subscription_checkout"
+                    }
+                },
+                "required": [
+                    "object",
+                    "subscription"
+                ]
+            },
+            "SubscribeRequest": {
+                "description": "Start a subscription on a plan.",
+                "properties": {
+                    "plan_code": {
+                        "type": "string",
+                        "description": "The code of the plan to subscribe to.",
+                        "example": "pro",
+                        "minLength": 1,
+                        "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
+                    }
+                },
+                "required": [
+                    "plan_code"
+                ]
+            },
+            "ChangePlanRequest": {
+                "description": "Upgrade or downgrade a subscription to a different plan.",
+                "properties": {
+                    "plan_code": {
+                        "type": "string",
+                        "description": "The code of the plan to move to.",
+                        "example": "enterprise",
+                        "minLength": 1,
+                        "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
+                    }
+                },
+                "required": [
+                    "plan_code"
+                ]
+            },
             "RealtimeTicket": {
                 "description": "A short-lived ticket authorizing a single realtime (STOMP/WebSocket) connection.",
                 "properties": {
@@ -7408,27 +7622,6 @@
                     "object",
                     "ticket"
                 ]
-            },
-            "Money": {
-                "description": "A monetary amount as integer minor units plus its ISO-4217 currency.",
-                "properties": {
-                    "currency": {
-                        "type": "string",
-                        "description": "ISO-4217 currency code.",
-                        "example": "USD"
-                    },
-                    "minor_units": {
-                        "type": "integer",
-                        "format": "int64",
-                        "description": "Amount in the currency's minor units (cents for USD, yen for JPY, fils for KWD).",
-                        "example": 1050
-                    },
-                    "decimal": {
-                        "type": "string",
-                        "description": "Amount as a major-unit decimal string at the currency's scale.",
-                        "example": "10.5"
-                    }
-                }
             },
             "PlanFeatures": {
                 "description": "A plan's entitlements: capability flags + numeric quota ceilings.",
@@ -9345,6 +9538,40 @@
                     "etag"
                 ]
             },
+            "BillingPortalSession": {
+                "description": "A short-lived Stripe-hosted billing portal session: the URL to redirect to and the return URL.",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "The hosted billing portal URL to redirect the customer to.",
+                        "example": "https://billing.stripe.com/p/session/test_abc123"
+                    },
+                    "return_url": {
+                        "type": "string",
+                        "description": "Where the customer is returned after they finish in the portal.",
+                        "example": "https://app.nizam.io/settings/billing"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the session was created.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "billing_portal_session"
+                        ],
+                        "example": "billing_portal_session"
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "object",
+                    "return_url",
+                    "url"
+                ]
+            },
             "OpenAssignmentRequest": {
                 "description": "Open a new assignment.",
                 "properties": {
@@ -10614,6 +10841,104 @@
                     }
                 }
             },
+            "Payment": {
+                "description": "A realized payment event: its owning invoice, rail, amount, refund state and status.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the payment.",
+                        "example": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765"
+                    },
+                    "invoice_id": {
+                        "type": "string",
+                        "description": "The invoice this payment settles, when invoice-owned.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Realized lifecycle status.",
+                        "enum": [
+                            "pending",
+                            "requires_action",
+                            "authorized",
+                            "processing",
+                            "succeeded",
+                            "partially_refunded",
+                            "refunded",
+                            "failed",
+                            "canceled",
+                            "disputed",
+                            "charged_back"
+                        ],
+                        "example": "succeeded"
+                    },
+                    "payment_method": {
+                        "type": "string",
+                        "description": "Settlement rail.",
+                        "enum": [
+                            "card",
+                            "ach",
+                            "bank_transfer",
+                            "direct_debit",
+                            "wire",
+                            "cheque",
+                            "cash",
+                            "cod",
+                            "wallet",
+                            "account_credit",
+                            "adjustment"
+                        ],
+                        "example": "card"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "refunded_amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "refund_count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "How many refunds have been applied.",
+                        "example": 0
+                    },
+                    "received_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the funds were received.",
+                        "example": "2026-06-26T08:30:00Z"
+                    },
+                    "refunded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the most recent refund was applied.",
+                        "example": "2026-06-28T10:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the payment record was created.",
+                        "example": "2026-06-26T08:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "payment"
+                        ],
+                        "example": "payment"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "created_at",
+                    "id",
+                    "object",
+                    "payment_method",
+                    "refund_count",
+                    "refunded_amount",
+                    "status"
+                ]
+            },
             "ListResponseOrganization": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
@@ -10861,12 +11186,17 @@
                                 "asset:read",
                                 "asset:transition",
                                 "asset:update",
+                                "inbound-webhook:read",
+                                "invoice:read",
                                 "keycloak-projection:administer",
                                 "notification-delivery:read",
                                 "org-maintenance:administer",
+                                "payment:read",
                                 "plan:manage",
                                 "plan:read",
                                 "service-account:administer",
+                                "subscription:manage",
+                                "subscription:read",
                                 "task:create",
                                 "user:administer",
                                 "user:invite"
@@ -11582,6 +11912,209 @@
                     }
                 }
             },
+            "Invoice": {
+                "description": "An accounts-receivable invoice: its billing party, money rollups, lifecycle status and dates.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the invoice.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "invoice_number": {
+                        "type": "string",
+                        "description": "The tenant-facing invoice number, when assigned.",
+                        "example": "INV-2026-00042"
+                    },
+                    "billing_party_type": {
+                        "type": "string",
+                        "description": "The kind of party billed.",
+                        "enum": [
+                            "merchant",
+                            "customer",
+                            "carrier",
+                            "organization"
+                        ],
+                        "example": "organization"
+                    },
+                    "billing_party_id": {
+                        "type": "string",
+                        "description": "Identifier of the billed party.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Accounts-receivable lifecycle status.",
+                        "enum": [
+                            "draft",
+                            "open",
+                            "partially_paid",
+                            "past_due",
+                            "paid",
+                            "disputed",
+                            "refunded",
+                            "void",
+                            "uncollectible"
+                        ],
+                        "example": "paid"
+                    },
+                    "subtotal": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "discount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "tax": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount_total": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount_paid": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount_due": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "issuedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the invoice was issued/finalized.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When payment is due.",
+                        "example": "2026-07-09T00:00:00Z"
+                    },
+                    "paid_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the balance first reached zero.",
+                        "example": "2026-06-26T08:30:00Z"
+                    },
+                    "period_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start of the billing period this invoice covers.",
+                        "example": "2026-06-01T00:00:00Z"
+                    },
+                    "period_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "End of the billing period this invoice covers.",
+                        "example": "2026-07-01T00:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the invoice record was created.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "items": {
+                        "type": "array",
+                        "description": "The invoice's line items (detail read only).",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/InvoiceItem"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "invoice"
+                        ],
+                        "example": "invoice"
+                    }
+                },
+                "required": [
+                    "amount_due",
+                    "amount_paid",
+                    "amount_total",
+                    "billing_party_id",
+                    "billing_party_type",
+                    "created_at",
+                    "discount",
+                    "id",
+                    "issuedAt",
+                    "object",
+                    "status",
+                    "subtotal",
+                    "tax"
+                ]
+            },
+            "InvoiceItem": {
+                "description": "A single line item of an invoice: its source, quantity and money rollups.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the line item.",
+                        "example": "2b1c0a9f-8e7d-6c5b-4a39-281706f5e4d3"
+                    },
+                    "source_type": {
+                        "type": "string",
+                        "description": "The billable-origin kind, or null for an ad-hoc charge line.",
+                        "example": "platform_subscription"
+                    },
+                    "source_id": {
+                        "type": "string",
+                        "description": "The originating entity id, when the line is entity-backed.",
+                        "example": "9f8e7d6c-5b4a-3210-fedc-ba9876543210"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Human-readable line description.",
+                        "example": "Pro plan \u2014 monthly"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Optional billing code.",
+                        "example": "PRO-MONTHLY"
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "description": "Billed quantity (fractional).",
+                        "example": "1"
+                    },
+                    "unit_amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "subtotal": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "discount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "tax": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount_total": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "invoice_item"
+                        ],
+                        "example": "invoice_item"
+                    }
+                },
+                "required": [
+                    "amount_total",
+                    "discount",
+                    "id",
+                    "object",
+                    "quantity",
+                    "subtotal",
+                    "tax",
+                    "unit_amount"
+                ]
+            },
             "ListResponseNotificationDeadLetter": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
@@ -11711,6 +12244,124 @@
                     "organization_id",
                     "provider",
                     "recipient_address"
+                ]
+            },
+            "ListResponseWebhookDeadLetter": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/WebhookDeadLetter"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "WebhookDeadLetter": {
+                "description": "An inbound webhook event whose processing exhausted its retries.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Inbox row id.",
+                        "example": "3f2a1b0c-9d8e-4f6a-8b1c-2d3e4f5a6b7c"
+                    },
+                    "provider": {
+                        "type": "string",
+                        "description": "The source provider.",
+                        "example": "stripe"
+                    },
+                    "event_id": {
+                        "type": "string",
+                        "description": "The provider's event id.",
+                        "example": "evt_1QabcXYZ0123456789"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The event type that failed.",
+                        "example": "customer.subscription.updated"
+                    },
+                    "attempt_count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of processing attempts made.",
+                        "example": 5
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Resolved owning organization, if processing got far enough to resolve it.",
+                        "example": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                    },
+                    "received_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the event was ingested (RFC 3339).",
+                        "example": "2026-06-13T12:00:00Z"
+                    },
+                    "failed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When it dead-lettered (RFC 3339).",
+                        "example": "2026-06-13T12:30:00Z"
+                    },
+                    "error": {
+                        "type": "string",
+                        "description": "The last processing error recorded.",
+                        "example": "Cannot deserialize\u2026"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "webhook_dead_letter"
+                        ],
+                        "example": "webhook_dead_letter"
+                    }
+                },
+                "required": [
+                    "attempt_count",
+                    "event_id",
+                    "id",
+                    "object",
+                    "provider",
+                    "received_at",
+                    "type"
                 ]
             },
             "ImportError": {

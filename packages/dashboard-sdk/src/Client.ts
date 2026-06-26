@@ -4,10 +4,12 @@ import { ActiveOrganizationClient } from "./api/resources/activeOrganization/cli
 import { ActivityClient } from "./api/resources/activity/client/Client.js";
 import { AssetsClient } from "./api/resources/assets/client/Client.js";
 import { AssignmentsClient } from "./api/resources/assignments/client/Client.js";
+import { BillingPortalClient } from "./api/resources/billingPortal/client/Client.js";
 import { DevicesClient } from "./api/resources/devices/client/Client.js";
 import { FilesClient } from "./api/resources/files/client/Client.js";
 import { ImportsClient } from "./api/resources/imports/client/Client.js";
 import { InvitesClient } from "./api/resources/invites/client/Client.js";
+import { InvoicesClient } from "./api/resources/invoices/client/Client.js";
 import { JobsClient } from "./api/resources/jobs/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
 import { MembershipsClient } from "./api/resources/memberships/client/Client.js";
@@ -15,9 +17,11 @@ import { NotificationPreferencesClient } from "./api/resources/notificationPrefe
 import { NotificationsClient } from "./api/resources/notifications/client/Client.js";
 import { OperatorsClient } from "./api/resources/operators/client/Client.js";
 import { OrganizationsClient } from "./api/resources/organizations/client/Client.js";
+import { PaymentsClient } from "./api/resources/payments/client/Client.js";
 import { PositionsClient } from "./api/resources/positions/client/Client.js";
 import { PricingClient } from "./api/resources/pricing/client/Client.js";
 import { RealtimeClient } from "./api/resources/realtime/client/Client.js";
+import { SubscriptionsClient } from "./api/resources/subscriptions/client/Client.js";
 import { TaskAttemptsClient } from "./api/resources/taskAttempts/client/Client.js";
 import { TasksClient } from "./api/resources/tasks/client/Client.js";
 import { UsersClient } from "./api/resources/users/client/Client.js";
@@ -36,10 +40,12 @@ export class NizamDashboardClient {
     protected _activity: ActivityClient | undefined;
     protected _assets: AssetsClient | undefined;
     protected _assignments: AssignmentsClient | undefined;
+    protected _billingPortal: BillingPortalClient | undefined;
     protected _files: FilesClient | undefined;
     protected _positions: PositionsClient | undefined;
     protected _imports: ImportsClient | undefined;
     protected _invites: InvitesClient | undefined;
+    protected _invoices: InvoicesClient | undefined;
     protected _jobs: JobsClient | undefined;
     protected _lookups: LookupsClient | undefined;
     protected _users: UsersClient | undefined;
@@ -50,8 +56,10 @@ export class NizamDashboardClient {
     protected _notifications: NotificationsClient | undefined;
     protected _operators: OperatorsClient | undefined;
     protected _organizations: OrganizationsClient | undefined;
+    protected _payments: PaymentsClient | undefined;
     protected _pricing: PricingClient | undefined;
     protected _realtime: RealtimeClient | undefined;
+    protected _subscriptions: SubscriptionsClient | undefined;
     protected _taskAttempts: TaskAttemptsClient | undefined;
     protected _tasks: TasksClient | undefined;
 
@@ -71,6 +79,10 @@ export class NizamDashboardClient {
         return (this._assignments ??= new AssignmentsClient(this._options));
     }
 
+    public get billingPortal(): BillingPortalClient {
+        return (this._billingPortal ??= new BillingPortalClient(this._options));
+    }
+
     public get files(): FilesClient {
         return (this._files ??= new FilesClient(this._options));
     }
@@ -85,6 +97,10 @@ export class NizamDashboardClient {
 
     public get invites(): InvitesClient {
         return (this._invites ??= new InvitesClient(this._options));
+    }
+
+    public get invoices(): InvoicesClient {
+        return (this._invoices ??= new InvoicesClient(this._options));
     }
 
     public get jobs(): JobsClient {
@@ -127,12 +143,20 @@ export class NizamDashboardClient {
         return (this._organizations ??= new OrganizationsClient(this._options));
     }
 
+    public get payments(): PaymentsClient {
+        return (this._payments ??= new PaymentsClient(this._options));
+    }
+
     public get pricing(): PricingClient {
         return (this._pricing ??= new PricingClient(this._options));
     }
 
     public get realtime(): RealtimeClient {
         return (this._realtime ??= new RealtimeClient(this._options));
+    }
+
+    public get subscriptions(): SubscriptionsClient {
+        return (this._subscriptions ??= new SubscriptionsClient(this._options));
     }
 
     public get taskAttempts(): TaskAttemptsClient {

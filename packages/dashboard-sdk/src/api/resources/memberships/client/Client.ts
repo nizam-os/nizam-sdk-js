@@ -16,7 +16,7 @@ export declare namespace MembershipsClient {
 }
 
 /**
- * User ↔ organization memberships — list, join, leave, role checks.
+ * User ↔ organization memberships — list the caller's memberships, join, leave, role checks.
  */
 export class MembershipsClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<MembershipsClient.Options>;

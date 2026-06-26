@@ -53,8 +53,16 @@
             "description": "The authenticated user's registered push devices."
         },
         {
+            "name": "Inbound webhooks",
+            "description": "Platform-staff dead-letter triage for the inbound-webhook inbox."
+        },
+        {
             "name": "Invites",
             "description": "Org-admin invites and recipient acceptance."
+        },
+        {
+            "name": "Invoices",
+            "description": "An organization's accounts-receivable invoices, projected from the billing processor."
         },
         {
             "name": "Jobs",
@@ -74,11 +82,11 @@
         },
         {
             "name": "Memberships",
-            "description": "User \u2194 organization memberships \u2014 list the caller's memberships, join, leave, role checks."
+            "description": "User \u2194 organization memberships \u2014 list, join, leave, role checks."
         },
         {
             "name": "Memberships",
-            "description": "User \u2194 organization memberships \u2014 list, join, leave, role checks."
+            "description": "User \u2194 organization memberships \u2014 list the caller's memberships, join, leave, role checks."
         },
         {
             "name": "Notification deliveries",
@@ -103,6 +111,10 @@
         {
             "name": "Organizations",
             "description": "Tenants \u2014 the top-level container for users, merchants, and operations."
+        },
+        {
+            "name": "Payments",
+            "description": "An organization's realized payments, projected from the billing processor."
         },
         {
             "name": "Pricing",
@@ -4424,6 +4436,199 @@
                 ]
             }
         },
+        "/v1/billing/portal-sessions": {
+            "post": {
+                "tags": [
+                    "Billing portal"
+                ],
+                "summary": "Open the billing portal",
+                "description": "Mints a short-lived Stripe-hosted billing portal session so the organization's billing admin can self-serve payment methods, invoices and plan changes, and returns the URL to redirect the browser to.",
+                "operationId": "createBillingPortalSession",
+                "responses": {
+                    "201": {
+                        "description": "The portal session URL.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BillingPortalSession"
+                                },
+                                "example": {
+                                    "url": "https://billing.stripe.com/p/session/test_abc123",
+                                    "return_url": "https://app.nizam.io/settings/billing",
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "object": "billing_portal_session"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/billing/portal-sessions",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/billing/portal-sessions",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/billing/portal-sessions",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/billing/portal-sessions",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "No billing customer \u00b7 Billing portal not configured",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "billing_portal.customer_not_linked": {
+                                        "summary": "No billing customer",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/billing_portal/customer_not_linked",
+                                            "title": "No billing customer",
+                                            "status": 409,
+                                            "detail": "This organization is not yet set up with the billing processor. Start a subscription first.",
+                                            "instance": "/v1/billing/portal-sessions",
+                                            "code": "billing_portal.customer_not_linked",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "billing_portal.not_configured": {
+                                        "summary": "Billing portal not configured",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/billing_portal/not_configured",
+                                            "title": "Billing portal not configured",
+                                            "status": 409,
+                                            "detail": "The billing portal is not available. No return URL is configured.",
+                                            "instance": "/v1/billing/portal-sessions",
+                                            "code": "billing_portal.not_configured",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Billing portal session failed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "billing_portal.provisioning_failed": {
+                                        "summary": "Billing portal session failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/billing_portal/provisioning_failed",
+                                            "title": "Billing portal session failed",
+                                            "status": 502,
+                                            "detail": "The billing portal session could not be created with the billing processor. Please retry.",
+                                            "instance": "/v1/billing/portal-sessions",
+                                            "code": "billing_portal.provisioning_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
         "/v1/files": {
             "get": {
                 "tags": [
@@ -8335,6 +8540,426 @@
                     "merchant",
                     "carrier",
                     "operator"
+                ]
+            }
+        },
+        "/v1/invoices": {
+            "get": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "List invoices (paginated)",
+                "description": "The caller's organization's invoices, newest first. Keyset-paginated (`starting_after` / `ending_before`); no sort parameter. Org-scoped (RLS). Line items are returned by the detail read, not the list.",
+                "operationId": "listInvoices",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A page of invoices.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invoice"
+                                },
+                                "example": {
+                                    "id": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d",
+                                    "invoice_number": "INV-2026-00042",
+                                    "billing_party_type": "organization",
+                                    "billing_party_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "status": "paid",
+                                    "subtotal": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "discount": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "tax": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "amount_total": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "amount_paid": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "amount_due": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "issuedAt": "2026-06-25T12:00:00Z",
+                                    "due_at": "2026-07-09T00:00:00Z",
+                                    "paid_at": "2026-06-26T08:30:00Z",
+                                    "period_start": "2026-06-01T00:00:00Z",
+                                    "period_end": "2026-07-01T00:00:00Z",
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "items": [
+                                        
+                                    ],
+                                    "object": "invoice"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/invoices",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/invoices",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/invoices",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/invoices",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/invoices/{invoiceId}": {
+            "get": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "Get an invoice",
+                "description": "One invoice with its line items. 404 when it does not exist in the caller's organization.",
+                "operationId": "getInvoice",
+                "parameters": [
+                    {
+                        "name": "invoiceId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The invoice and its line items.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invoice"
+                                },
+                                "example": {
+                                    "id": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d",
+                                    "invoice_number": "INV-2026-00042",
+                                    "billing_party_type": "organization",
+                                    "billing_party_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "status": "paid",
+                                    "subtotal": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "discount": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "tax": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "amount_total": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "amount_paid": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "amount_due": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "issuedAt": "2026-06-25T12:00:00Z",
+                                    "due_at": "2026-07-09T00:00:00Z",
+                                    "paid_at": "2026-06-26T08:30:00Z",
+                                    "period_start": "2026-06-01T00:00:00Z",
+                                    "period_end": "2026-07-01T00:00:00Z",
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "items": [
+                                        
+                                    ],
+                                    "object": "invoice"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/invoices/{invoiceId}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/invoices/{invoiceId}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/invoices/{invoiceId}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/invoices/{invoiceId}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Invoice not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "invoice.not_found": {
+                                        "summary": "Invoice not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/invoice/not_found",
+                                            "title": "Invoice not found",
+                                            "status": 404,
+                                            "detail": "The requested invoice does not exist.",
+                                            "instance": "/v1/invoices/{invoiceId}",
+                                            "code": "invoice.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
                 ]
             }
         },
@@ -14831,6 +15456,374 @@
                 ]
             }
         },
+        "/v1/payments": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "List payments (paginated)",
+                "description": "The caller's organization's payments, newest first. Keyset-paginated (`starting_after` / `ending_before`); no sort parameter. Org-scoped (RLS).",
+                "operationId": "listPayments",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A page of payments.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Payment"
+                                },
+                                "example": {
+                                    "id": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765",
+                                    "invoice_id": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d",
+                                    "status": "succeeded",
+                                    "payment_method": "card",
+                                    "amount": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "refunded_amount": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "refund_count": 0,
+                                    "received_at": "2026-06-26T08:30:00Z",
+                                    "refunded_at": "2026-06-28T10:00:00Z",
+                                    "created_at": "2026-06-26T08:30:00Z",
+                                    "object": "payment"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/payments",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/payments",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/payments",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/payments",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/payments/{paymentId}": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Get a payment",
+                "description": "One payment. 404 when it does not exist in the caller's organization.",
+                "operationId": "getPayment",
+                "parameters": [
+                    {
+                        "name": "paymentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The payment.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Payment"
+                                },
+                                "example": {
+                                    "id": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765",
+                                    "invoice_id": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d",
+                                    "status": "succeeded",
+                                    "payment_method": "card",
+                                    "amount": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "refunded_amount": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "refund_count": 0,
+                                    "received_at": "2026-06-26T08:30:00Z",
+                                    "refunded_at": "2026-06-28T10:00:00Z",
+                                    "created_at": "2026-06-26T08:30:00Z",
+                                    "object": "payment"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/payments/{paymentId}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/payments/{paymentId}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/payments/{paymentId}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/payments/{paymentId}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "payment.not_found": {
+                                        "summary": "Payment not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/payment/not_found",
+                                            "title": "Payment not found",
+                                            "status": 404,
+                                            "detail": "The requested payment does not exist.",
+                                            "instance": "/v1/payments/{paymentId}",
+                                            "code": "payment.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
         "/v1/pricing": {
             "get": {
                 "tags": [
@@ -15115,6 +16108,1536 @@
                     "carrier",
                     "operator",
                     "platform_staff"
+                ]
+            }
+        },
+        "/v1/subscriptions": {
+            "post": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Start a subscription",
+                "description": "Subscribes the organization to a plan and returns a hosted checkout URL to complete payment. Enforces one live subscription per organization. When the plan has a trial the subscription starts `trialing`, otherwise `incomplete` until the first charge.",
+                "operationId": "subscribe",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubscribeRequest"
+                            },
+                            "examples": {
+                                "default": {
+                                    "summary": "Start a subscription",
+                                    "value": {
+                                        "plan_code": "pro"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "The created subscription and the checkout URL.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubscriptionCheckout"
+                                },
+                                "example": {
+                                    "subscription": {
+                                        "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                        "plan_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                        "status": "active",
+                                        "trial_ends_at": "2026-07-09T00:00:00Z",
+                                        "current_period_start": "2026-06-25T00:00:00Z",
+                                        "current_period_end": "2026-07-25T00:00:00Z",
+                                        "canceled_at": "2026-08-01T12:00:00Z",
+                                        "cancel_at_period_end_at": "2026-08-25T00:00:00Z",
+                                        "price_override": {
+                                            "currency": "USD",
+                                            "minor_units": 1050,
+                                            "decimal": "10.5"
+                                        },
+                                        "currency": "USD",
+                                        "allowed_transitions": [
+                                            "past_due",
+                                            "paused",
+                                            "canceled"
+                                        ],
+                                        "created_at": "2026-06-25T12:00:00Z",
+                                        "updated_at": "2026-06-25T12:30:00Z",
+                                        "object": "platform_subscription"
+                                    },
+                                    "checkout_url": "https://checkout.stripe.com/c/pay/cs_test_a1b2c3",
+                                    "object": "subscription_checkout"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/subscriptions",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/subscriptions",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed \u2014 request body didn't satisfy `@Valid` constraints.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.plan_not_available": {
+                                        "summary": "Plan not available",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/plan_not_available",
+                                            "title": "Plan not available",
+                                            "status": 422,
+                                            "detail": "The requested plan does not exist or is not available to subscribe to.",
+                                            "instance": "/v1/subscriptions",
+                                            "code": "platform_subscription.plan_not_available",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
+                                            "errors": [
+                                                {
+                                                    "field": "plan_code",
+                                                    "code": "not_available",
+                                                    "message": "This plan is not available to subscribe to."
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/subscriptions",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/subscriptions",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Organization already has a live subscription",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.already_subscribed": {
+                                        "summary": "Organization already has a live subscription",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/already_subscribed",
+                                            "title": "Organization already has a live subscription",
+                                            "status": 409,
+                                            "detail": "This organization already has a live subscription. Change or cancel it before starting a new one.",
+                                            "instance": "/v1/subscriptions",
+                                            "code": "platform_subscription.already_subscribed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Subscription provisioning failed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.provisioning_failed": {
+                                        "summary": "Subscription provisioning failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/provisioning_failed",
+                                            "title": "Subscription provisioning failed",
+                                            "status": 502,
+                                            "detail": "The subscription could not be provisioned with the billing processor. Please retry.",
+                                            "instance": "/v1/subscriptions",
+                                            "code": "platform_subscription.provisioning_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/subscriptions/current": {
+            "get": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Get the current subscription",
+                "description": "The organization's current live subscription (at most one). 404 when the org has none.",
+                "operationId": "getCurrentSubscription",
+                "responses": {
+                    "200": {
+                        "description": "The current subscription.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformSubscription"
+                                },
+                                "example": {
+                                    "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "plan_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "status": "active",
+                                    "trial_ends_at": "2026-07-09T00:00:00Z",
+                                    "current_period_start": "2026-06-25T00:00:00Z",
+                                    "current_period_end": "2026-07-25T00:00:00Z",
+                                    "canceled_at": "2026-08-01T12:00:00Z",
+                                    "cancel_at_period_end_at": "2026-08-25T00:00:00Z",
+                                    "price_override": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "currency": "USD",
+                                    "allowed_transitions": [
+                                        "past_due",
+                                        "paused",
+                                        "canceled"
+                                    ],
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "updated_at": "2026-06-25T12:30:00Z",
+                                    "object": "platform_subscription"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/subscriptions/current",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/subscriptions/current",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/subscriptions/current",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/subscriptions/current",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subscription not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.not_found": {
+                                        "summary": "Subscription not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/not_found",
+                                            "title": "Subscription not found",
+                                            "status": 404,
+                                            "detail": "The requested subscription does not exist.",
+                                            "instance": "/v1/subscriptions/current",
+                                            "code": "platform_subscription.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/subscriptions/{id}": {
+            "get": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Get a subscription",
+                "operationId": "getSubscription",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The subscription.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformSubscription"
+                                },
+                                "example": {
+                                    "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "plan_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "status": "active",
+                                    "trial_ends_at": "2026-07-09T00:00:00Z",
+                                    "current_period_start": "2026-06-25T00:00:00Z",
+                                    "current_period_end": "2026-07-25T00:00:00Z",
+                                    "canceled_at": "2026-08-01T12:00:00Z",
+                                    "cancel_at_period_end_at": "2026-08-25T00:00:00Z",
+                                    "price_override": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "currency": "USD",
+                                    "allowed_transitions": [
+                                        "past_due",
+                                        "paused",
+                                        "canceled"
+                                    ],
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "updated_at": "2026-06-25T12:30:00Z",
+                                    "object": "platform_subscription"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/subscriptions/{id}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/subscriptions/{id}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/subscriptions/{id}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/subscriptions/{id}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subscription not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.not_found": {
+                                        "summary": "Subscription not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/not_found",
+                                            "title": "Subscription not found",
+                                            "status": 404,
+                                            "detail": "The requested subscription does not exist.",
+                                            "instance": "/v1/subscriptions/{id}",
+                                            "code": "platform_subscription.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/subscriptions/{id}/cancel": {
+            "post": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Cancel a subscription",
+                "description": "Cancels the subscription immediately (records `canceled_at`; cancels at the processor). Terminal; an illegal edge \u2192 409 `platform_subscription.invalid_transition`.",
+                "operationId": "cancelSubscription",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The cancelled subscription.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformSubscription"
+                                },
+                                "example": {
+                                    "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "plan_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "status": "active",
+                                    "trial_ends_at": "2026-07-09T00:00:00Z",
+                                    "current_period_start": "2026-06-25T00:00:00Z",
+                                    "current_period_end": "2026-07-25T00:00:00Z",
+                                    "canceled_at": "2026-08-01T12:00:00Z",
+                                    "cancel_at_period_end_at": "2026-08-25T00:00:00Z",
+                                    "price_override": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "currency": "USD",
+                                    "allowed_transitions": [
+                                        "past_due",
+                                        "paused",
+                                        "canceled"
+                                    ],
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "updated_at": "2026-06-25T12:30:00Z",
+                                    "object": "platform_subscription"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/subscriptions/{id}/cancel",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/subscriptions/{id}/cancel",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/subscriptions/{id}/cancel",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/subscriptions/{id}/cancel",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subscription not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.not_found": {
+                                        "summary": "Subscription not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/not_found",
+                                            "title": "Subscription not found",
+                                            "status": 404,
+                                            "detail": "The requested subscription does not exist.",
+                                            "instance": "/v1/subscriptions/{id}/cancel",
+                                            "code": "platform_subscription.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Invalid subscription transition",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.invalid_transition": {
+                                        "summary": "Invalid subscription transition",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
+                                            "title": "Invalid subscription transition",
+                                            "status": 409,
+                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
+                                            "instance": "/v1/subscriptions/{id}/cancel",
+                                            "code": "platform_subscription.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/subscriptions/{id}/change-plan": {
+            "post": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Change a subscription's plan",
+                "description": "Upgrades or downgrades the subscription to a different plan; the processor handles proration. Only a live subscription may change plans.",
+                "operationId": "changeSubscriptionPlan",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChangePlanRequest"
+                            },
+                            "examples": {
+                                "default": {
+                                    "summary": "Change a subscription's plan",
+                                    "value": {
+                                        "plan_code": "enterprise"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "The updated subscription.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformSubscription"
+                                },
+                                "example": {
+                                    "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "plan_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "status": "active",
+                                    "trial_ends_at": "2026-07-09T00:00:00Z",
+                                    "current_period_start": "2026-06-25T00:00:00Z",
+                                    "current_period_end": "2026-07-25T00:00:00Z",
+                                    "canceled_at": "2026-08-01T12:00:00Z",
+                                    "cancel_at_period_end_at": "2026-08-25T00:00:00Z",
+                                    "price_override": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "currency": "USD",
+                                    "allowed_transitions": [
+                                        "past_due",
+                                        "paused",
+                                        "canceled"
+                                    ],
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "updated_at": "2026-06-25T12:30:00Z",
+                                    "object": "platform_subscription"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/subscriptions/{id}/change-plan",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/subscriptions/{id}/change-plan",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed \u2014 request body didn't satisfy `@Valid` constraints.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.plan_not_available": {
+                                        "summary": "Plan not available",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/plan_not_available",
+                                            "title": "Plan not available",
+                                            "status": 422,
+                                            "detail": "The requested plan does not exist or is not available to subscribe to.",
+                                            "instance": "/v1/subscriptions/{id}/change-plan",
+                                            "code": "platform_subscription.plan_not_available",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
+                                            "errors": [
+                                                {
+                                                    "field": "plan_code",
+                                                    "code": "not_available",
+                                                    "message": "This plan is not available to subscribe to."
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/subscriptions/{id}/change-plan",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/subscriptions/{id}/change-plan",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subscription not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.not_found": {
+                                        "summary": "Subscription not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/not_found",
+                                            "title": "Subscription not found",
+                                            "status": 404,
+                                            "detail": "The requested subscription does not exist.",
+                                            "instance": "/v1/subscriptions/{id}/change-plan",
+                                            "code": "platform_subscription.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Invalid subscription transition",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.invalid_transition": {
+                                        "summary": "Invalid subscription transition",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
+                                            "title": "Invalid subscription transition",
+                                            "status": 409,
+                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
+                                            "instance": "/v1/subscriptions/{id}/change-plan",
+                                            "code": "platform_subscription.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Subscription provisioning failed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.provisioning_failed": {
+                                        "summary": "Subscription provisioning failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/provisioning_failed",
+                                            "title": "Subscription provisioning failed",
+                                            "status": 502,
+                                            "detail": "The subscription could not be provisioned with the billing processor. Please retry.",
+                                            "instance": "/v1/subscriptions/{id}/change-plan",
+                                            "code": "platform_subscription.provisioning_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/subscriptions/{id}/pause": {
+            "post": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Pause a subscription",
+                "description": "Pauses billing (halts collection; no cancellation). Idempotent no-op if already paused; an illegal edge \u2192 409 `platform_subscription.invalid_transition`.",
+                "operationId": "pauseSubscription",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The paused subscription.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformSubscription"
+                                },
+                                "example": {
+                                    "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "plan_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "status": "active",
+                                    "trial_ends_at": "2026-07-09T00:00:00Z",
+                                    "current_period_start": "2026-06-25T00:00:00Z",
+                                    "current_period_end": "2026-07-25T00:00:00Z",
+                                    "canceled_at": "2026-08-01T12:00:00Z",
+                                    "cancel_at_period_end_at": "2026-08-25T00:00:00Z",
+                                    "price_override": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "currency": "USD",
+                                    "allowed_transitions": [
+                                        "past_due",
+                                        "paused",
+                                        "canceled"
+                                    ],
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "updated_at": "2026-06-25T12:30:00Z",
+                                    "object": "platform_subscription"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/subscriptions/{id}/pause",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/subscriptions/{id}/pause",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/subscriptions/{id}/pause",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/subscriptions/{id}/pause",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subscription not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.not_found": {
+                                        "summary": "Subscription not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/not_found",
+                                            "title": "Subscription not found",
+                                            "status": 404,
+                                            "detail": "The requested subscription does not exist.",
+                                            "instance": "/v1/subscriptions/{id}/pause",
+                                            "code": "platform_subscription.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Invalid subscription transition",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.invalid_transition": {
+                                        "summary": "Invalid subscription transition",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
+                                            "title": "Invalid subscription transition",
+                                            "status": 409,
+                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
+                                            "instance": "/v1/subscriptions/{id}/pause",
+                                            "code": "platform_subscription.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/subscriptions/{id}/resume": {
+            "post": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Resume a subscription",
+                "description": "Resumes a paused subscription. Only a paused subscription may resume; an illegal edge \u2192 409 `platform_subscription.invalid_transition`.",
+                "operationId": "resumeSubscription",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The resumed subscription.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlatformSubscription"
+                                },
+                                "example": {
+                                    "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "plan_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "status": "active",
+                                    "trial_ends_at": "2026-07-09T00:00:00Z",
+                                    "current_period_start": "2026-06-25T00:00:00Z",
+                                    "current_period_end": "2026-07-25T00:00:00Z",
+                                    "canceled_at": "2026-08-01T12:00:00Z",
+                                    "cancel_at_period_end_at": "2026-08-25T00:00:00Z",
+                                    "price_override": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "currency": "USD",
+                                    "allowed_transitions": [
+                                        "past_due",
+                                        "paused",
+                                        "canceled"
+                                    ],
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "updated_at": "2026-06-25T12:30:00Z",
+                                    "object": "platform_subscription"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/subscriptions/{id}/resume",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/subscriptions/{id}/resume",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/subscriptions/{id}/resume",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/subscriptions/{id}/resume",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subscription not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.not_found": {
+                                        "summary": "Subscription not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/not_found",
+                                            "title": "Subscription not found",
+                                            "status": 404,
+                                            "detail": "The requested subscription does not exist.",
+                                            "instance": "/v1/subscriptions/{id}/resume",
+                                            "code": "platform_subscription.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Invalid subscription transition",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "platform_subscription.invalid_transition": {
+                                        "summary": "Invalid subscription transition",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
+                                            "title": "Invalid subscription transition",
+                                            "status": 409,
+                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
+                                            "instance": "/v1/subscriptions/{id}/resume",
+                                            "code": "platform_subscription.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
                 ]
             }
         },
@@ -17850,6 +20373,208 @@
                     "filename"
                 ]
             },
+            "Money": {
+                "description": "A monetary amount as integer minor units plus its ISO-4217 currency.",
+                "properties": {
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code.",
+                        "example": "USD"
+                    },
+                    "minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Amount in the currency's minor units (cents for USD, yen for JPY, fils for KWD).",
+                        "example": 1050
+                    },
+                    "decimal": {
+                        "type": "string",
+                        "description": "Amount as a major-unit decimal string at the currency's scale.",
+                        "example": "10.5"
+                    }
+                }
+            },
+            "PlatformSubscription": {
+                "description": "An organization's subscription to a platform plan.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable subscription id.",
+                        "example": "9f8e7d6c-5b4a-3210-fedc-ba9876543210"
+                    },
+                    "plan_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The subscribed plan's id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Billing lifecycle status.",
+                        "enum": [
+                            "incomplete",
+                            "incomplete_expired",
+                            "trialing",
+                            "active",
+                            "past_due",
+                            "paused",
+                            "suspended",
+                            "unpaid",
+                            "canceled",
+                            "ended"
+                        ],
+                        "example": "active"
+                    },
+                    "trial_ends_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Trial end, when in a trial.",
+                        "example": "2026-07-09T00:00:00Z"
+                    },
+                    "current_period_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start of the current billing period.",
+                        "example": "2026-06-25T00:00:00Z"
+                    },
+                    "current_period_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "End of the current billing period.",
+                        "example": "2026-07-25T00:00:00Z"
+                    },
+                    "canceled_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the subscription was cancelled.",
+                        "example": "2026-08-01T12:00:00Z"
+                    },
+                    "cancel_at_period_end_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When a scheduled end-of-period cancellation takes effect.",
+                        "example": "2026-08-25T00:00:00Z"
+                    },
+                    "price_override": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 settlement currency.",
+                        "example": "USD"
+                    },
+                    "allowed_transitions": {
+                        "type": "array",
+                        "description": "Lifecycle statuses this subscription may legally transition to next.",
+                        "example": [
+                            "past_due",
+                            "paused",
+                            "canceled"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "Lifecycle statuses this subscription may legally transition to next.",
+                            "enum": [
+                                "incomplete",
+                                "incomplete_expired",
+                                "trialing",
+                                "active",
+                                "past_due",
+                                "paused",
+                                "suspended",
+                                "unpaid",
+                                "canceled",
+                                "ended"
+                            ],
+                            "example": "[\"past_due\",\"paused\",\"canceled\"]"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last update time.",
+                        "example": "2026-06-25T12:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "platform_subscription"
+                        ],
+                        "example": "platform_subscription"
+                    }
+                },
+                "required": [
+                    "allowed_transitions",
+                    "created_at",
+                    "currency",
+                    "id",
+                    "object",
+                    "plan_id",
+                    "status",
+                    "updated_at"
+                ]
+            },
+            "SubscriptionCheckout": {
+                "description": "A started subscription and the checkout URL to complete it.",
+                "properties": {
+                    "subscription": {
+                        "$ref": "#/components/schemas/PlatformSubscription"
+                    },
+                    "checkout_url": {
+                        "type": "string",
+                        "description": "Hosted checkout URL to complete payment; null when billing is disabled.",
+                        "example": "https://checkout.stripe.com/c/pay/cs_test_a1b2c3"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "subscription_checkout"
+                        ],
+                        "example": "subscription_checkout"
+                    }
+                },
+                "required": [
+                    "object",
+                    "subscription"
+                ]
+            },
+            "SubscribeRequest": {
+                "description": "Start a subscription on a plan.",
+                "properties": {
+                    "plan_code": {
+                        "type": "string",
+                        "description": "The code of the plan to subscribe to.",
+                        "example": "pro",
+                        "minLength": 1,
+                        "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
+                    }
+                },
+                "required": [
+                    "plan_code"
+                ]
+            },
+            "ChangePlanRequest": {
+                "description": "Upgrade or downgrade a subscription to a different plan.",
+                "properties": {
+                    "plan_code": {
+                        "type": "string",
+                        "description": "The code of the plan to move to.",
+                        "example": "enterprise",
+                        "minLength": 1,
+                        "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
+                    }
+                },
+                "required": [
+                    "plan_code"
+                ]
+            },
             "RealtimeTicket": {
                 "description": "A short-lived ticket authorizing a single realtime (STOMP/WebSocket) connection.",
                 "properties": {
@@ -17878,27 +20603,6 @@
                     "object",
                     "ticket"
                 ]
-            },
-            "Money": {
-                "description": "A monetary amount as integer minor units plus its ISO-4217 currency.",
-                "properties": {
-                    "currency": {
-                        "type": "string",
-                        "description": "ISO-4217 currency code.",
-                        "example": "USD"
-                    },
-                    "minor_units": {
-                        "type": "integer",
-                        "format": "int64",
-                        "description": "Amount in the currency's minor units (cents for USD, yen for JPY, fils for KWD).",
-                        "example": 1050
-                    },
-                    "decimal": {
-                        "type": "string",
-                        "description": "Amount as a major-unit decimal string at the currency's scale.",
-                        "example": "10.5"
-                    }
-                }
             },
             "PlanFeatures": {
                 "description": "A plan's entitlements: capability flags + numeric quota ceilings.",
@@ -19815,6 +22519,40 @@
                     "etag"
                 ]
             },
+            "BillingPortalSession": {
+                "description": "A short-lived Stripe-hosted billing portal session: the URL to redirect to and the return URL.",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "The hosted billing portal URL to redirect the customer to.",
+                        "example": "https://billing.stripe.com/p/session/test_abc123"
+                    },
+                    "return_url": {
+                        "type": "string",
+                        "description": "Where the customer is returned after they finish in the portal.",
+                        "example": "https://app.nizam.io/settings/billing"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the session was created.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "billing_portal_session"
+                        ],
+                        "example": "billing_portal_session"
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "object",
+                    "return_url",
+                    "url"
+                ]
+            },
             "OpenAssignmentRequest": {
                 "description": "Open a new assignment.",
                 "properties": {
@@ -21084,6 +23822,104 @@
                     }
                 }
             },
+            "Payment": {
+                "description": "A realized payment event: its owning invoice, rail, amount, refund state and status.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the payment.",
+                        "example": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765"
+                    },
+                    "invoice_id": {
+                        "type": "string",
+                        "description": "The invoice this payment settles, when invoice-owned.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Realized lifecycle status.",
+                        "enum": [
+                            "pending",
+                            "requires_action",
+                            "authorized",
+                            "processing",
+                            "succeeded",
+                            "partially_refunded",
+                            "refunded",
+                            "failed",
+                            "canceled",
+                            "disputed",
+                            "charged_back"
+                        ],
+                        "example": "succeeded"
+                    },
+                    "payment_method": {
+                        "type": "string",
+                        "description": "Settlement rail.",
+                        "enum": [
+                            "card",
+                            "ach",
+                            "bank_transfer",
+                            "direct_debit",
+                            "wire",
+                            "cheque",
+                            "cash",
+                            "cod",
+                            "wallet",
+                            "account_credit",
+                            "adjustment"
+                        ],
+                        "example": "card"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "refunded_amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "refund_count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "How many refunds have been applied.",
+                        "example": 0
+                    },
+                    "received_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the funds were received.",
+                        "example": "2026-06-26T08:30:00Z"
+                    },
+                    "refunded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the most recent refund was applied.",
+                        "example": "2026-06-28T10:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the payment record was created.",
+                        "example": "2026-06-26T08:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "payment"
+                        ],
+                        "example": "payment"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "created_at",
+                    "id",
+                    "object",
+                    "payment_method",
+                    "refund_count",
+                    "refunded_amount",
+                    "status"
+                ]
+            },
             "ListResponseOrganization": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
@@ -21331,12 +24167,17 @@
                                 "asset:read",
                                 "asset:transition",
                                 "asset:update",
+                                "inbound-webhook:read",
+                                "invoice:read",
                                 "keycloak-projection:administer",
                                 "notification-delivery:read",
                                 "org-maintenance:administer",
+                                "payment:read",
                                 "plan:manage",
                                 "plan:read",
                                 "service-account:administer",
+                                "subscription:manage",
+                                "subscription:read",
                                 "task:create",
                                 "user:administer",
                                 "user:invite"
@@ -22052,6 +24893,209 @@
                     }
                 }
             },
+            "Invoice": {
+                "description": "An accounts-receivable invoice: its billing party, money rollups, lifecycle status and dates.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the invoice.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "invoice_number": {
+                        "type": "string",
+                        "description": "The tenant-facing invoice number, when assigned.",
+                        "example": "INV-2026-00042"
+                    },
+                    "billing_party_type": {
+                        "type": "string",
+                        "description": "The kind of party billed.",
+                        "enum": [
+                            "merchant",
+                            "customer",
+                            "carrier",
+                            "organization"
+                        ],
+                        "example": "organization"
+                    },
+                    "billing_party_id": {
+                        "type": "string",
+                        "description": "Identifier of the billed party.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Accounts-receivable lifecycle status.",
+                        "enum": [
+                            "draft",
+                            "open",
+                            "partially_paid",
+                            "past_due",
+                            "paid",
+                            "disputed",
+                            "refunded",
+                            "void",
+                            "uncollectible"
+                        ],
+                        "example": "paid"
+                    },
+                    "subtotal": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "discount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "tax": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount_total": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount_paid": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount_due": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "issuedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the invoice was issued/finalized.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When payment is due.",
+                        "example": "2026-07-09T00:00:00Z"
+                    },
+                    "paid_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the balance first reached zero.",
+                        "example": "2026-06-26T08:30:00Z"
+                    },
+                    "period_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start of the billing period this invoice covers.",
+                        "example": "2026-06-01T00:00:00Z"
+                    },
+                    "period_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "End of the billing period this invoice covers.",
+                        "example": "2026-07-01T00:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the invoice record was created.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "items": {
+                        "type": "array",
+                        "description": "The invoice's line items (detail read only).",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/InvoiceItem"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "invoice"
+                        ],
+                        "example": "invoice"
+                    }
+                },
+                "required": [
+                    "amount_due",
+                    "amount_paid",
+                    "amount_total",
+                    "billing_party_id",
+                    "billing_party_type",
+                    "created_at",
+                    "discount",
+                    "id",
+                    "issuedAt",
+                    "object",
+                    "status",
+                    "subtotal",
+                    "tax"
+                ]
+            },
+            "InvoiceItem": {
+                "description": "A single line item of an invoice: its source, quantity and money rollups.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the line item.",
+                        "example": "2b1c0a9f-8e7d-6c5b-4a39-281706f5e4d3"
+                    },
+                    "source_type": {
+                        "type": "string",
+                        "description": "The billable-origin kind, or null for an ad-hoc charge line.",
+                        "example": "platform_subscription"
+                    },
+                    "source_id": {
+                        "type": "string",
+                        "description": "The originating entity id, when the line is entity-backed.",
+                        "example": "9f8e7d6c-5b4a-3210-fedc-ba9876543210"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Human-readable line description.",
+                        "example": "Pro plan \u2014 monthly"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Optional billing code.",
+                        "example": "PRO-MONTHLY"
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "description": "Billed quantity (fractional).",
+                        "example": "1"
+                    },
+                    "unit_amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "subtotal": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "discount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "tax": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount_total": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "invoice_item"
+                        ],
+                        "example": "invoice_item"
+                    }
+                },
+                "required": [
+                    "amount_total",
+                    "discount",
+                    "id",
+                    "object",
+                    "quantity",
+                    "subtotal",
+                    "tax",
+                    "unit_amount"
+                ]
+            },
             "ListResponseNotificationDeadLetter": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
@@ -22181,6 +25225,124 @@
                     "organization_id",
                     "provider",
                     "recipient_address"
+                ]
+            },
+            "ListResponseWebhookDeadLetter": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/WebhookDeadLetter"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "WebhookDeadLetter": {
+                "description": "An inbound webhook event whose processing exhausted its retries.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Inbox row id.",
+                        "example": "3f2a1b0c-9d8e-4f6a-8b1c-2d3e4f5a6b7c"
+                    },
+                    "provider": {
+                        "type": "string",
+                        "description": "The source provider.",
+                        "example": "stripe"
+                    },
+                    "event_id": {
+                        "type": "string",
+                        "description": "The provider's event id.",
+                        "example": "evt_1QabcXYZ0123456789"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The event type that failed.",
+                        "example": "customer.subscription.updated"
+                    },
+                    "attempt_count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of processing attempts made.",
+                        "example": 5
+                    },
+                    "organization_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Resolved owning organization, if processing got far enough to resolve it.",
+                        "example": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                    },
+                    "received_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the event was ingested (RFC 3339).",
+                        "example": "2026-06-13T12:00:00Z"
+                    },
+                    "failed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When it dead-lettered (RFC 3339).",
+                        "example": "2026-06-13T12:30:00Z"
+                    },
+                    "error": {
+                        "type": "string",
+                        "description": "The last processing error recorded.",
+                        "example": "Cannot deserialize\u2026"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "webhook_dead_letter"
+                        ],
+                        "example": "webhook_dead_letter"
+                    }
+                },
+                "required": [
+                    "attempt_count",
+                    "event_id",
+                    "id",
+                    "object",
+                    "provider",
+                    "received_at",
+                    "type"
                 ]
             },
             "ImportError": {
