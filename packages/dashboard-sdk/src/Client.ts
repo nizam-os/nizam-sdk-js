@@ -16,6 +16,7 @@ import { MembershipsClient } from "./api/resources/memberships/client/Client.js"
 import { NotificationPreferencesClient } from "./api/resources/notificationPreferences/client/Client.js";
 import { NotificationsClient } from "./api/resources/notifications/client/Client.js";
 import { OperatorsClient } from "./api/resources/operators/client/Client.js";
+import { OrgAddOnsClient } from "./api/resources/orgAddOns/client/Client.js";
 import { OrganizationsClient } from "./api/resources/organizations/client/Client.js";
 import { PaymentsClient } from "./api/resources/payments/client/Client.js";
 import { PositionsClient } from "./api/resources/positions/client/Client.js";
@@ -55,6 +56,7 @@ export class NizamDashboardClient {
     protected _notificationPreferences: NotificationPreferencesClient | undefined;
     protected _notifications: NotificationsClient | undefined;
     protected _operators: OperatorsClient | undefined;
+    protected _orgAddOns: OrgAddOnsClient | undefined;
     protected _organizations: OrganizationsClient | undefined;
     protected _payments: PaymentsClient | undefined;
     protected _pricing: PricingClient | undefined;
@@ -137,6 +139,10 @@ export class NizamDashboardClient {
 
     public get operators(): OperatorsClient {
         return (this._operators ??= new OperatorsClient(this._options));
+    }
+
+    public get orgAddOns(): OrgAddOnsClient {
+        return (this._orgAddOns ??= new OrgAddOnsClient(this._options));
     }
 
     public get organizations(): OrganizationsClient {

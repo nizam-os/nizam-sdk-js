@@ -14188,6 +14188,1145 @@
                 ]
             }
         },
+        "/v1/org-addons": {
+            "get": {
+                "tags": [
+                    "Org Add-ons"
+                ],
+                "summary": "List the organization's add-ons (paginated)",
+                "description": "The org's add-ons ordered by `created_at` descending. Filter by `status` (comma-separated, case-insensitive). Pagination is bidirectional (`starting_after` / `ending_before`).",
+                "operationId": "listOrgAddons",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by lifecycle status. Comma-separated; matched case-insensitively.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "incomplete",
+                                    "incomplete_expired",
+                                    "trialing",
+                                    "active",
+                                    "past_due",
+                                    "paused",
+                                    "suspended",
+                                    "canceled",
+                                    "ended"
+                                ]
+                            }
+                        },
+                        "example": [
+                            "incomplete"
+                        ]
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort order. Allowed fields: `created_at`. Append `:asc` or `:desc` to each field (direction required, e.g. `created_at:desc`), comma-separated for multi-sort; unknown fields or directions are rejected with `400 validation_failed`.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "created_at:asc",
+                                    "created_at:desc"
+                                ]
+                            }
+                        },
+                        "example": "<string>"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseOrgAddon"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                            "addon_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                            "platform_subscription_id": "8f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                            "status": "active",
+                                            "quantity": 1,
+                                            "unit_price": {
+                                                "currency": "USD",
+                                                "minor_units": 1050,
+                                                "decimal": "10.5"
+                                            },
+                                            "started_at": "2026-06-25T12:00:00Z",
+                                            "current_period_start": "2026-06-25T00:00:00Z",
+                                            "current_period_end": "2026-07-25T00:00:00Z",
+                                            "canceled_at": "2026-08-01T12:00:00Z",
+                                            "created_at": "2026-06-25T12:00:00Z",
+                                            "updated_at": "2026-06-25T12:30:00Z",
+                                            "object": "org_addon"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/org-addons",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/org-addons",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/org-addons",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/org-addons",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Validation failed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "validation_failed": {
+                                        "summary": "Validation failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/validation_failed",
+                                            "title": "Validation failed",
+                                            "status": 400,
+                                            "detail": "Sort field is not supported on this endpoint.",
+                                            "instance": "/v1/org-addons",
+                                            "code": "validation_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Org Add-ons"
+                ],
+                "summary": "Add an add-on",
+                "description": "Adds a catalog add-on to the organization's current subscription as a Stripe Subscription Item, snapshotting the charged price. The add-on must be active + self-serve; the org must have a live subscription; at most one live subscription per add-on.",
+                "operationId": "addOrgAddon",
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddOrgAddonRequest"
+                            },
+                            "examples": {
+                                "default": {
+                                    "summary": "Add an add-on",
+                                    "value": {
+                                        "addon_code": "advanced-routing",
+                                        "quantity": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "The created add-on subscription.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrgAddon"
+                                },
+                                "example": {
+                                    "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "addon_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "platform_subscription_id": "8f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "status": "active",
+                                    "quantity": 1,
+                                    "unit_price": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "started_at": "2026-06-25T12:00:00Z",
+                                    "current_period_start": "2026-06-25T00:00:00Z",
+                                    "current_period_end": "2026-07-25T00:00:00Z",
+                                    "canceled_at": "2026-08-01T12:00:00Z",
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "updated_at": "2026-06-25T12:30:00Z",
+                                    "object": "org_addon"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/org-addons",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/org-addons",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed \u2014 request body didn't satisfy `@Valid` constraints.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "org_addon.addon_not_available": {
+                                        "summary": "Add-on not available",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/org_addon/addon_not_available",
+                                            "title": "Add-on not available",
+                                            "status": 422,
+                                            "detail": "The requested add-on does not exist or is not available to subscribe to.",
+                                            "instance": "/v1/org-addons",
+                                            "code": "org_addon.addon_not_available",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
+                                            "errors": [
+                                                {
+                                                    "field": "addon_code",
+                                                    "code": "not_available",
+                                                    "message": "This add-on is not available to subscribe to."
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/org-addons",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/org-addons",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Idempotency-Key header",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/org-addons",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/org-addons",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/org-addons",
+                                            "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "org_addon.no_active_subscription": {
+                                        "summary": "No active subscription",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/org_addon/no_active_subscription",
+                                            "title": "No active subscription",
+                                            "status": 409,
+                                            "detail": "The organization has no live subscription to attach this add-on to. Subscribe to a plan first.",
+                                            "instance": "/v1/org-addons",
+                                            "code": "org_addon.no_active_subscription",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "org_addon.already_subscribed": {
+                                        "summary": "Organization already subscribes to this add-on",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/org_addon/already_subscribed",
+                                            "title": "Organization already subscribes to this add-on",
+                                            "status": 409,
+                                            "detail": "This organization already has a live subscription to this add-on. Cancel it before re-adding.",
+                                            "instance": "/v1/org-addons",
+                                            "code": "org_addon.already_subscribed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Add-on provisioning failed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "org_addon.provisioning_failed": {
+                                        "summary": "Add-on provisioning failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/org_addon/provisioning_failed",
+                                            "title": "Add-on provisioning failed",
+                                            "status": 502,
+                                            "detail": "The add-on could not be provisioned with the billing processor. Please retry.",
+                                            "instance": "/v1/org-addons",
+                                            "code": "org_addon.provisioning_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/org-addons/available": {
+            "get": {
+                "tags": [
+                    "Org Add-ons"
+                ],
+                "summary": "List add-ons available to add",
+                "description": "Every active, self-serve add-on the organization may subscribe to, ordered by category then name. A single page (the catalog is bounded).",
+                "operationId": "listAvailableAddons",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ListResponseAddonSummary"
+                                },
+                                "example": {
+                                    "object": "list",
+                                    "data": [
+                                        {
+                                            "id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                            "code": "advanced-routing",
+                                            "name": "Advanced Routing",
+                                            "category": "automation",
+                                            "pricing_model": "per_seat",
+                                            "price": {
+                                                "currency": "USD",
+                                                "minor_units": 1050,
+                                                "decimal": "10.5"
+                                            },
+                                            "billing_period": "monthly",
+                                            "active": true,
+                                            "self_serve": true,
+                                            "created_at": "2026-06-25T12:00:00Z",
+                                            "object": "addon"
+                                        }
+                                    ],
+                                    "has_more": true,
+                                    "has_previous": false,
+                                    "next_cursor": "Y3Vyc29yX25leHRfMDFKNVE=",
+                                    "prev_cursor": "Y3Vyc29yX3ByZXZfMDFKNVE=",
+                                    "limit": 20
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/org-addons/available",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/org-addons/available",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/org-addons/available",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/org-addons/available",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/org-addons/{id}": {
+            "get": {
+                "tags": [
+                    "Org Add-ons"
+                ],
+                "summary": "Get an add-on subscription",
+                "operationId": "getOrgAddon",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The add-on subscription.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrgAddon"
+                                },
+                                "example": {
+                                    "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "addon_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "platform_subscription_id": "8f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "status": "active",
+                                    "quantity": 1,
+                                    "unit_price": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "started_at": "2026-06-25T12:00:00Z",
+                                    "current_period_start": "2026-06-25T00:00:00Z",
+                                    "current_period_end": "2026-07-25T00:00:00Z",
+                                    "canceled_at": "2026-08-01T12:00:00Z",
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "updated_at": "2026-06-25T12:30:00Z",
+                                    "object": "org_addon"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/org-addons/{id}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/org-addons/{id}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/org-addons/{id}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/org-addons/{id}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Add-on subscription not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "org_addon.not_found": {
+                                        "summary": "Add-on subscription not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/org_addon/not_found",
+                                            "title": "Add-on subscription not found",
+                                            "status": 404,
+                                            "detail": "The requested add-on subscription does not exist.",
+                                            "instance": "/v1/org-addons/{id}",
+                                            "code": "org_addon.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/org-addons/{id}/cancel": {
+            "post": {
+                "tags": [
+                    "Org Add-ons"
+                ],
+                "summary": "Remove (cancel) an add-on",
+                "description": "Cancels the add-on, deleting its Stripe Subscription Item (prorated) and recording `canceled_at`. Terminal; an illegal edge \u2192 409 `org_addon.invalid_transition`. The row is retained as billing history.",
+                "operationId": "cancelOrgAddon",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The cancelled add-on.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrgAddon"
+                                },
+                                "example": {
+                                    "id": "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "addon_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "platform_subscription_id": "8f8e7d6c-5b4a-3210-fedc-ba9876543210",
+                                    "status": "active",
+                                    "quantity": 1,
+                                    "unit_price": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "started_at": "2026-06-25T12:00:00Z",
+                                    "current_period_start": "2026-06-25T00:00:00Z",
+                                    "current_period_end": "2026-07-25T00:00:00Z",
+                                    "canceled_at": "2026-08-01T12:00:00Z",
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "updated_at": "2026-06-25T12:30:00Z",
+                                    "object": "org_addon"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/org-addons/{id}/cancel",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/org-addons/{id}/cancel",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/org-addons/{id}/cancel",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/org-addons/{id}/cancel",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Add-on subscription not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "org_addon.not_found": {
+                                        "summary": "Add-on subscription not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/org_addon/not_found",
+                                            "title": "Add-on subscription not found",
+                                            "status": 404,
+                                            "detail": "The requested add-on subscription does not exist.",
+                                            "instance": "/v1/org-addons/{id}/cancel",
+                                            "code": "org_addon.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Invalid add-on transition",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "org_addon.invalid_transition": {
+                                        "summary": "Invalid add-on transition",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/org_addon/invalid_transition",
+                                            "title": "Invalid add-on transition",
+                                            "status": 409,
+                                            "detail": "The add-on cannot make the requested lifecycle transition from its current status.",
+                                            "instance": "/v1/org-addons/{id}/cancel",
+                                            "code": "org_addon.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Add-on provisioning failed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "org_addon.provisioning_failed": {
+                                        "summary": "Add-on provisioning failed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/org_addon/provisioning_failed",
+                                            "title": "Add-on provisioning failed",
+                                            "status": 502,
+                                            "detail": "The add-on could not be provisioned with the billing processor. Please retry.",
+                                            "instance": "/v1/org-addons/{id}/cancel",
+                                            "code": "org_addon.provisioning_failed",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
         "/v1/organizations": {
             "get": {
                 "tags": [
@@ -21044,6 +22183,129 @@
                     "status"
                 ]
             },
+            "OrgAddon": {
+                "description": "An organization's subscription to a catalog add-on.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable org add-on id.",
+                        "example": "9f8e7d6c-5b4a-3210-fedc-ba9876543210"
+                    },
+                    "addon_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The subscribed add-on's id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "platform_subscription_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The parent platform subscription this add-on attaches to.",
+                        "example": "8f8e7d6c-5b4a-3210-fedc-ba9876543210"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Add-on lifecycle status.",
+                        "enum": [
+                            "incomplete",
+                            "incomplete_expired",
+                            "trialing",
+                            "active",
+                            "past_due",
+                            "paused",
+                            "suspended",
+                            "canceled",
+                            "ended"
+                        ],
+                        "example": "active"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Seat quantity (1 for flat / one-time; N for per-seat).",
+                        "example": 1
+                    },
+                    "unit_price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the add-on subscription began.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "current_period_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start of the current billing period.",
+                        "example": "2026-06-25T00:00:00Z"
+                    },
+                    "current_period_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "End of the current billing period.",
+                        "example": "2026-07-25T00:00:00Z"
+                    },
+                    "canceled_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the add-on was cancelled.",
+                        "example": "2026-08-01T12:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last update time.",
+                        "example": "2026-06-25T12:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "org_addon"
+                        ],
+                        "example": "org_addon"
+                    }
+                },
+                "required": [
+                    "addon_id",
+                    "created_at",
+                    "id",
+                    "object",
+                    "quantity",
+                    "status",
+                    "updated_at"
+                ]
+            },
+            "AddOrgAddonRequest": {
+                "description": "Add a catalog add-on to the organization's subscription.",
+                "properties": {
+                    "addon_code": {
+                        "type": "string",
+                        "description": "The catalog add-on's code.",
+                        "example": "advanced-routing",
+                        "maxLength": 64,
+                        "minLength": 0,
+                        "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Seat quantity (default 1).",
+                        "example": 1,
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "addon_code"
+                ]
+            },
             "CreateAutonomousOperatorRequest": {
                 "description": "Create an autonomous (software-agent) operator.",
                 "properties": {
@@ -23031,6 +24293,317 @@
                     "ids"
                 ]
             },
+            "Addon": {
+                "description": "A first-party paid add-on in the platform billing catalog (admin view).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable add-on id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Stable add-on code (natural key).",
+                        "example": "advanced-routing"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Advanced Routing"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "Multi-stop route optimization."
+                    },
+                    "marketing_text": {
+                        "type": "string",
+                        "description": "Marketing copy for the storefront card.",
+                        "example": "Cut miles, not corners."
+                    },
+                    "icon_file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Storefront icon file id.",
+                        "example": "1b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Catalog category.",
+                        "enum": [
+                            "analytics",
+                            "integrations",
+                            "compliance",
+                            "capacity",
+                            "automation",
+                            "telematics",
+                            "communications",
+                            "storage",
+                            "security",
+                            "support",
+                            "branding",
+                            "white_label",
+                            "api_access",
+                            "onboarding",
+                            "other"
+                        ],
+                        "example": "automation"
+                    },
+                    "pricing_model": {
+                        "type": "string",
+                        "description": "Pricing shape.",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "usage",
+                            "tiered",
+                            "one_time"
+                        ],
+                        "example": "per_seat"
+                    },
+                    "price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence (null for free / one-time).",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/AddonFeatures"
+                    },
+                    "processor_product_id": {
+                        "type": "string",
+                        "description": "Processor (Stripe) Product id, once provisioned.",
+                        "example": "addon_advanced-routing"
+                    },
+                    "processor_price_id": {
+                        "type": "string",
+                        "description": "Processor (Stripe) Price id, once provisioned.",
+                        "example": "price_123"
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "description": "Whether the add-on is sellable.",
+                        "example": true
+                    },
+                    "self_serve": {
+                        "type": "boolean",
+                        "description": "Whether a tenant may self-subscribe (vs admin / sales-assisted).",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last update time.",
+                        "example": "2026-06-25T12:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "addon"
+                        ],
+                        "example": "addon"
+                    }
+                },
+                "required": [
+                    "active",
+                    "category",
+                    "code",
+                    "created_at",
+                    "features",
+                    "id",
+                    "name",
+                    "object",
+                    "pricing_model",
+                    "self_serve",
+                    "updated_at"
+                ]
+            },
+            "AddonFeatures": {
+                "description": "An add-on's entitlement contribution: capability flags + numeric quota ceilings.",
+                "properties": {
+                    "flags": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean",
+                            "description": "Capability flags keyed by feature id. An absent flag means off.",
+                            "example": false
+                        },
+                        "description": "Capability flags keyed by feature id. An absent flag means off.",
+                        "example": {
+                            "advanced_routing": true
+                        }
+                    },
+                    "quotas": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "Quota ceilings keyed by meter key or feature id. An absent quota means no contribution; a present 0 contributes a hard zero."
+                        },
+                        "description": "Quota ceilings keyed by meter key or feature id. An absent quota means no contribution; a present 0 contributes a hard zero.",
+                        "example": {
+                            "max_seats": 25
+                        }
+                    }
+                }
+            },
+            "AddonFeaturesRequest": {
+                "description": "An add-on's entitlement contribution: capability flags + numeric quota ceilings.",
+                "properties": {
+                    "flags": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean",
+                            "description": "Capability flags keyed by feature id.",
+                            "example": false
+                        },
+                        "description": "Capability flags keyed by feature id.",
+                        "example": {
+                            "advanced_routing": true
+                        }
+                    },
+                    "quotas": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "Quota ceilings (non-negative) keyed by meter key or feature id."
+                        },
+                        "description": "Quota ceilings (non-negative) keyed by meter key or feature id.",
+                        "example": {
+                            "fleet.order.created": 1000
+                        }
+                    }
+                }
+            },
+            "CreateAddonRequest": {
+                "description": "Author a new add-on in the catalog.",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Stable add-on code (natural key) \u2014 a lowercase url-safe slug.",
+                        "example": "advanced-routing",
+                        "maxLength": 64,
+                        "minLength": 0,
+                        "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Advanced Routing",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Catalog category.",
+                        "enum": [
+                            "analytics",
+                            "integrations",
+                            "compliance",
+                            "capacity",
+                            "automation",
+                            "telematics",
+                            "communications",
+                            "storage",
+                            "security",
+                            "support",
+                            "branding",
+                            "white_label",
+                            "api_access",
+                            "onboarding",
+                            "other"
+                        ],
+                        "example": "automation"
+                    },
+                    "pricing_model": {
+                        "type": "string",
+                        "description": "Pricing shape.",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "usage",
+                            "tiered",
+                            "one_time"
+                        ],
+                        "example": "per_seat"
+                    },
+                    "price_minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Price in the currency's minor units (omit for a free add-on).",
+                        "example": 900
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code (required when priced).",
+                        "example": "USD",
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence (required for a recurring model; omit otherwise).",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "Multi-stop route optimization."
+                    },
+                    "marketing_text": {
+                        "type": "string",
+                        "description": "Marketing copy for the storefront card.",
+                        "example": "Cut miles, not corners."
+                    },
+                    "icon_file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Storefront icon file id.",
+                        "example": "1b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e"
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/AddonFeaturesRequest"
+                    },
+                    "self_serve": {
+                        "type": "boolean",
+                        "description": "Whether a tenant may self-subscribe (default true).",
+                        "example": true
+                    }
+                },
+                "required": [
+                    "category",
+                    "code",
+                    "name",
+                    "pricing_model"
+                ]
+            },
             "UpdateTaskRequest": {
                 "description": "Update a task (set-only partial update).",
                 "properties": {
@@ -23464,6 +25037,94 @@
                         "description": "New model year \u2014 1900 or later, no later than next year. Omit to leave unchanged.",
                         "example": 2024,
                         "minimum": 1900
+                    }
+                }
+            },
+            "UpdateAddonRequest": {
+                "description": "Edit an add-on's catalog fields (partial update).",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Advanced Routing",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "Multi-stop route optimization."
+                    },
+                    "marketing_text": {
+                        "type": "string",
+                        "description": "Marketing copy for the storefront card.",
+                        "example": "Cut miles, not corners."
+                    },
+                    "icon_file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Storefront icon file id.",
+                        "example": "1b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Catalog category.",
+                        "enum": [
+                            "analytics",
+                            "integrations",
+                            "compliance",
+                            "capacity",
+                            "automation",
+                            "telematics",
+                            "communications",
+                            "storage",
+                            "security",
+                            "support",
+                            "branding",
+                            "white_label",
+                            "api_access",
+                            "onboarding",
+                            "other"
+                        ],
+                        "example": "automation"
+                    },
+                    "price_minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Price in minor units.",
+                        "example": 1900
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code.",
+                        "example": "USD",
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence.",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/AddonFeaturesRequest"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "description": "Whether the add-on is sellable.",
+                        "example": true
+                    },
+                    "is_self_serve": {
+                        "type": "boolean",
+                        "description": "Whether a tenant may self-subscribe.",
+                        "example": true
                     }
                 }
             },
@@ -23966,6 +25627,204 @@
                     }
                 }
             },
+            "ListResponseOrgAddon": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/OrgAddon"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "AddonSummary": {
+                "description": "An add-on in the platform billing catalog (list view).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable add-on id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Stable add-on code (natural key).",
+                        "example": "advanced-routing"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Advanced Routing"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Catalog category.",
+                        "enum": [
+                            "analytics",
+                            "integrations",
+                            "compliance",
+                            "capacity",
+                            "automation",
+                            "telematics",
+                            "communications",
+                            "storage",
+                            "security",
+                            "support",
+                            "branding",
+                            "white_label",
+                            "api_access",
+                            "onboarding",
+                            "other"
+                        ],
+                        "example": "automation"
+                    },
+                    "pricing_model": {
+                        "type": "string",
+                        "description": "Pricing shape.",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "usage",
+                            "tiered",
+                            "one_time"
+                        ],
+                        "example": "per_seat"
+                    },
+                    "price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence (null for free / one-time).",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "description": "Whether the add-on is sellable.",
+                        "example": true
+                    },
+                    "self_serve": {
+                        "type": "boolean",
+                        "description": "Whether a tenant may self-subscribe.",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "addon"
+                        ],
+                        "example": "addon"
+                    }
+                },
+                "required": [
+                    "active",
+                    "category",
+                    "code",
+                    "created_at",
+                    "id",
+                    "name",
+                    "object",
+                    "pricing_model",
+                    "self_serve"
+                ]
+            },
+            "ListResponseAddonSummary": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/AddonSummary"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
             "ListResponseNotification": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
@@ -24159,6 +26018,8 @@
                             "type": "string",
                             "enum": [
                                 "activity:read:all",
+                                "addon:manage",
+                                "addon:read",
                                 "asset:create",
                                 "asset:delete",
                                 "asset:dispose",
@@ -24172,6 +26033,8 @@
                                 "keycloak-projection:administer",
                                 "notification-delivery:read",
                                 "org-maintenance:administer",
+                                "org_addon:manage",
+                                "org_addon:read",
                                 "payment:read",
                                 "plan:manage",
                                 "plan:read",

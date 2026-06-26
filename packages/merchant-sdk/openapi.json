@@ -7714,6 +7714,129 @@
                     "status"
                 ]
             },
+            "OrgAddon": {
+                "description": "An organization's subscription to a catalog add-on.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable org add-on id.",
+                        "example": "9f8e7d6c-5b4a-3210-fedc-ba9876543210"
+                    },
+                    "addon_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The subscribed add-on's id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "platform_subscription_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The parent platform subscription this add-on attaches to.",
+                        "example": "8f8e7d6c-5b4a-3210-fedc-ba9876543210"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Add-on lifecycle status.",
+                        "enum": [
+                            "incomplete",
+                            "incomplete_expired",
+                            "trialing",
+                            "active",
+                            "past_due",
+                            "paused",
+                            "suspended",
+                            "canceled",
+                            "ended"
+                        ],
+                        "example": "active"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Seat quantity (1 for flat / one-time; N for per-seat).",
+                        "example": 1
+                    },
+                    "unit_price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the add-on subscription began.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "current_period_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start of the current billing period.",
+                        "example": "2026-06-25T00:00:00Z"
+                    },
+                    "current_period_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "End of the current billing period.",
+                        "example": "2026-07-25T00:00:00Z"
+                    },
+                    "canceled_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the add-on was cancelled.",
+                        "example": "2026-08-01T12:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last update time.",
+                        "example": "2026-06-25T12:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "org_addon"
+                        ],
+                        "example": "org_addon"
+                    }
+                },
+                "required": [
+                    "addon_id",
+                    "created_at",
+                    "id",
+                    "object",
+                    "quantity",
+                    "status",
+                    "updated_at"
+                ]
+            },
+            "AddOrgAddonRequest": {
+                "description": "Add a catalog add-on to the organization's subscription.",
+                "properties": {
+                    "addon_code": {
+                        "type": "string",
+                        "description": "The catalog add-on's code.",
+                        "example": "advanced-routing",
+                        "maxLength": 64,
+                        "minLength": 0,
+                        "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Seat quantity (default 1).",
+                        "example": 1,
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "addon_code"
+                ]
+            },
             "CreateAutonomousOperatorRequest": {
                 "description": "Create an autonomous (software-agent) operator.",
                 "properties": {
@@ -9701,6 +9824,317 @@
                     "ids"
                 ]
             },
+            "Addon": {
+                "description": "A first-party paid add-on in the platform billing catalog (admin view).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable add-on id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Stable add-on code (natural key).",
+                        "example": "advanced-routing"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Advanced Routing"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "Multi-stop route optimization."
+                    },
+                    "marketing_text": {
+                        "type": "string",
+                        "description": "Marketing copy for the storefront card.",
+                        "example": "Cut miles, not corners."
+                    },
+                    "icon_file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Storefront icon file id.",
+                        "example": "1b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Catalog category.",
+                        "enum": [
+                            "analytics",
+                            "integrations",
+                            "compliance",
+                            "capacity",
+                            "automation",
+                            "telematics",
+                            "communications",
+                            "storage",
+                            "security",
+                            "support",
+                            "branding",
+                            "white_label",
+                            "api_access",
+                            "onboarding",
+                            "other"
+                        ],
+                        "example": "automation"
+                    },
+                    "pricing_model": {
+                        "type": "string",
+                        "description": "Pricing shape.",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "usage",
+                            "tiered",
+                            "one_time"
+                        ],
+                        "example": "per_seat"
+                    },
+                    "price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence (null for free / one-time).",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/AddonFeatures"
+                    },
+                    "processor_product_id": {
+                        "type": "string",
+                        "description": "Processor (Stripe) Product id, once provisioned.",
+                        "example": "addon_advanced-routing"
+                    },
+                    "processor_price_id": {
+                        "type": "string",
+                        "description": "Processor (Stripe) Price id, once provisioned.",
+                        "example": "price_123"
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "description": "Whether the add-on is sellable.",
+                        "example": true
+                    },
+                    "self_serve": {
+                        "type": "boolean",
+                        "description": "Whether a tenant may self-subscribe (vs admin / sales-assisted).",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last update time.",
+                        "example": "2026-06-25T12:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "addon"
+                        ],
+                        "example": "addon"
+                    }
+                },
+                "required": [
+                    "active",
+                    "category",
+                    "code",
+                    "created_at",
+                    "features",
+                    "id",
+                    "name",
+                    "object",
+                    "pricing_model",
+                    "self_serve",
+                    "updated_at"
+                ]
+            },
+            "AddonFeatures": {
+                "description": "An add-on's entitlement contribution: capability flags + numeric quota ceilings.",
+                "properties": {
+                    "flags": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean",
+                            "description": "Capability flags keyed by feature id. An absent flag means off.",
+                            "example": false
+                        },
+                        "description": "Capability flags keyed by feature id. An absent flag means off.",
+                        "example": {
+                            "advanced_routing": true
+                        }
+                    },
+                    "quotas": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "Quota ceilings keyed by meter key or feature id. An absent quota means no contribution; a present 0 contributes a hard zero."
+                        },
+                        "description": "Quota ceilings keyed by meter key or feature id. An absent quota means no contribution; a present 0 contributes a hard zero.",
+                        "example": {
+                            "max_seats": 25
+                        }
+                    }
+                }
+            },
+            "AddonFeaturesRequest": {
+                "description": "An add-on's entitlement contribution: capability flags + numeric quota ceilings.",
+                "properties": {
+                    "flags": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "boolean",
+                            "description": "Capability flags keyed by feature id.",
+                            "example": false
+                        },
+                        "description": "Capability flags keyed by feature id.",
+                        "example": {
+                            "advanced_routing": true
+                        }
+                    },
+                    "quotas": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "Quota ceilings (non-negative) keyed by meter key or feature id."
+                        },
+                        "description": "Quota ceilings (non-negative) keyed by meter key or feature id.",
+                        "example": {
+                            "fleet.order.created": 1000
+                        }
+                    }
+                }
+            },
+            "CreateAddonRequest": {
+                "description": "Author a new add-on in the catalog.",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Stable add-on code (natural key) \u2014 a lowercase url-safe slug.",
+                        "example": "advanced-routing",
+                        "maxLength": 64,
+                        "minLength": 0,
+                        "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Advanced Routing",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Catalog category.",
+                        "enum": [
+                            "analytics",
+                            "integrations",
+                            "compliance",
+                            "capacity",
+                            "automation",
+                            "telematics",
+                            "communications",
+                            "storage",
+                            "security",
+                            "support",
+                            "branding",
+                            "white_label",
+                            "api_access",
+                            "onboarding",
+                            "other"
+                        ],
+                        "example": "automation"
+                    },
+                    "pricing_model": {
+                        "type": "string",
+                        "description": "Pricing shape.",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "usage",
+                            "tiered",
+                            "one_time"
+                        ],
+                        "example": "per_seat"
+                    },
+                    "price_minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Price in the currency's minor units (omit for a free add-on).",
+                        "example": 900
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code (required when priced).",
+                        "example": "USD",
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence (required for a recurring model; omit otherwise).",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "Multi-stop route optimization."
+                    },
+                    "marketing_text": {
+                        "type": "string",
+                        "description": "Marketing copy for the storefront card.",
+                        "example": "Cut miles, not corners."
+                    },
+                    "icon_file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Storefront icon file id.",
+                        "example": "1b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e"
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/AddonFeaturesRequest"
+                    },
+                    "self_serve": {
+                        "type": "boolean",
+                        "description": "Whether a tenant may self-subscribe (default true).",
+                        "example": true
+                    }
+                },
+                "required": [
+                    "category",
+                    "code",
+                    "name",
+                    "pricing_model"
+                ]
+            },
             "UpdateTaskRequest": {
                 "description": "Update a task (set-only partial update).",
                 "properties": {
@@ -10134,6 +10568,94 @@
                         "description": "New model year \u2014 1900 or later, no later than next year. Omit to leave unchanged.",
                         "example": 2024,
                         "minimum": 1900
+                    }
+                }
+            },
+            "UpdateAddonRequest": {
+                "description": "Edit an add-on's catalog fields (partial update).",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Advanced Routing",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "Multi-stop route optimization."
+                    },
+                    "marketing_text": {
+                        "type": "string",
+                        "description": "Marketing copy for the storefront card.",
+                        "example": "Cut miles, not corners."
+                    },
+                    "icon_file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Storefront icon file id.",
+                        "example": "1b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Catalog category.",
+                        "enum": [
+                            "analytics",
+                            "integrations",
+                            "compliance",
+                            "capacity",
+                            "automation",
+                            "telematics",
+                            "communications",
+                            "storage",
+                            "security",
+                            "support",
+                            "branding",
+                            "white_label",
+                            "api_access",
+                            "onboarding",
+                            "other"
+                        ],
+                        "example": "automation"
+                    },
+                    "price_minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Price in minor units.",
+                        "example": 1900
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code.",
+                        "example": "USD",
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence.",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/AddonFeaturesRequest"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "description": "Whether the add-on is sellable.",
+                        "example": true
+                    },
+                    "is_self_serve": {
+                        "type": "boolean",
+                        "description": "Whether a tenant may self-subscribe.",
+                        "example": true
                     }
                 }
             },
@@ -10636,6 +11158,204 @@
                     }
                 }
             },
+            "ListResponseOrgAddon": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/OrgAddon"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "AddonSummary": {
+                "description": "An add-on in the platform billing catalog (list view).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable add-on id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Stable add-on code (natural key).",
+                        "example": "advanced-routing"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Advanced Routing"
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Catalog category.",
+                        "enum": [
+                            "analytics",
+                            "integrations",
+                            "compliance",
+                            "capacity",
+                            "automation",
+                            "telematics",
+                            "communications",
+                            "storage",
+                            "security",
+                            "support",
+                            "branding",
+                            "white_label",
+                            "api_access",
+                            "onboarding",
+                            "other"
+                        ],
+                        "example": "automation"
+                    },
+                    "pricing_model": {
+                        "type": "string",
+                        "description": "Pricing shape.",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "usage",
+                            "tiered",
+                            "one_time"
+                        ],
+                        "example": "per_seat"
+                    },
+                    "price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence (null for free / one-time).",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "description": "Whether the add-on is sellable.",
+                        "example": true
+                    },
+                    "self_serve": {
+                        "type": "boolean",
+                        "description": "Whether a tenant may self-subscribe.",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "addon"
+                        ],
+                        "example": "addon"
+                    }
+                },
+                "required": [
+                    "active",
+                    "category",
+                    "code",
+                    "created_at",
+                    "id",
+                    "name",
+                    "object",
+                    "pricing_model",
+                    "self_serve"
+                ]
+            },
+            "ListResponseAddonSummary": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/AddonSummary"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
             "ListResponseNotification": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
@@ -10829,6 +11549,8 @@
                             "type": "string",
                             "enum": [
                                 "activity:read:all",
+                                "addon:manage",
+                                "addon:read",
                                 "asset:create",
                                 "asset:delete",
                                 "asset:dispose",
@@ -10842,6 +11564,8 @@
                                 "keycloak-projection:administer",
                                 "notification-delivery:read",
                                 "org-maintenance:administer",
+                                "org_addon:manage",
+                                "org_addon:read",
                                 "payment:read",
                                 "plan:manage",
                                 "plan:read",

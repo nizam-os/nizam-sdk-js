@@ -44,6 +44,8 @@ export namespace User {
     export namespace Permissions {
         export const Item = {
             ActivityReadAll: "activity:read:all",
+            AddonManage: "addon:manage",
+            AddonRead: "addon:read",
             AssetCreate: "asset:create",
             AssetDelete: "asset:delete",
             AssetDispose: "asset:dispose",
@@ -57,6 +59,8 @@ export namespace User {
             KeycloakProjectionAdminister: "keycloak-projection:administer",
             NotificationDeliveryRead: "notification-delivery:read",
             OrgMaintenanceAdminister: "org-maintenance:administer",
+            OrgAddonManage: "org_addon:manage",
+            OrgAddonRead: "org_addon:read",
             PaymentRead: "payment:read",
             PlanManage: "plan:manage",
             PlanRead: "plan:read",
