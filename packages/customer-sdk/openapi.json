@@ -49,6 +49,10 @@
             "description": "Time-bound bindings between assets and operators in a role. Append a new row to reassign; never mutate in place."
         },
         {
+            "name": "COD Collections",
+            "description": "Cash-on-delivery collections an organization records and settles."
+        },
+        {
             "name": "Devices",
             "description": "The authenticated user's registered push devices."
         },
@@ -87,6 +91,10 @@
         {
             "name": "Memberships",
             "description": "User \u2194 organization memberships \u2014 list the caller's memberships, join, leave, role checks."
+        },
+        {
+            "name": "Merchant Payouts",
+            "description": "Settlement payments an organization disburses to its merchants."
         },
         {
             "name": "Notification deliveries",
@@ -7697,6 +7705,497 @@
                     "object"
                 ]
             },
+            "MerchantPayout": {
+                "description": "A merchant payout: the merchant, settlement period, money rollups, lifecycle status and destination.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the payout.",
+                        "example": "7a6b5c4d-3e2f-1a0b-9c8d-7e6f5a4b3c2d"
+                    },
+                    "merchant_id": {
+                        "type": "string",
+                        "description": "The merchant being settled.",
+                        "example": "8f7e6d5c-4b3a-2918-0765-5e4d3c2b1a09"
+                    },
+                    "period_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start of the settlement period.",
+                        "example": "2026-06-01T00:00:00Z"
+                    },
+                    "period_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "End of the settlement period.",
+                        "example": "2026-06-30T23:59:59Z"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Settlement lifecycle status.",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "on_hold",
+                            "scheduled",
+                            "processing",
+                            "sent",
+                            "failed",
+                            "reversed",
+                            "canceled"
+                        ],
+                        "example": "pending"
+                    },
+                    "gross": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "fees": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "net": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "payment_method": {
+                        "type": "string",
+                        "description": "The disbursement rail.",
+                        "enum": [
+                            "wire",
+                            "ach",
+                            "cheque",
+                            "processor_transfer",
+                            "card",
+                            "paypal",
+                            "digital_wallet",
+                            "cash",
+                            "internal_credit",
+                            "adjustment"
+                        ],
+                        "example": "wire"
+                    },
+                    "payment_destination_type": {
+                        "type": "string",
+                        "description": "The frozen destination kind, once recorded.",
+                        "enum": [
+                            "bank_account",
+                            "connected_account",
+                            "cheque_mail",
+                            "card",
+                            "paypal",
+                            "digital_wallet",
+                            "internal_balance",
+                            "cash"
+                        ],
+                        "example": "bank_account"
+                    },
+                    "bank_name": {
+                        "type": "string",
+                        "description": "Destination bank name (snapshot).",
+                        "example": "First National Bank"
+                    },
+                    "bank_account_name": {
+                        "type": "string",
+                        "description": "Destination account holder name (snapshot).",
+                        "example": "Acme Logistics LLC"
+                    },
+                    "bank_account_last4": {
+                        "type": "string",
+                        "description": "Last 4 digits of the destination account (PCI-aware).",
+                        "example": "6789"
+                    },
+                    "bank_routing_last4": {
+                        "type": "string",
+                        "description": "Last 4 digits of the destination routing number (PCI-aware).",
+                        "example": "0021"
+                    },
+                    "cheque_number": {
+                        "type": "string",
+                        "description": "Cheque number, for a cheque disbursement.",
+                        "example": "001234"
+                    },
+                    "processor_transfer_id": {
+                        "type": "string",
+                        "description": "The processor transfer reference, once disbursed.",
+                        "example": "xfer_8f3a21bc9d"
+                    },
+                    "external_reference": {
+                        "type": "string",
+                        "description": "An external reference for the disbursement.",
+                        "example": "WIRE-2026-06-0042"
+                    },
+                    "scheduled_for": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the payout is scheduled to run.",
+                        "example": "2026-07-05T09:00:00Z"
+                    },
+                    "sent_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the payout was disbursed.",
+                        "example": "2026-07-05T14:30:00Z"
+                    },
+                    "failed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the payout failed.",
+                        "example": "2026-07-05T14:35:00Z"
+                    },
+                    "failure_reason": {
+                        "type": "string",
+                        "description": "Why the payout failed.",
+                        "example": "Bank rejected: account closed"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Free-form settlement note.",
+                        "example": "June COD settlement"
+                    },
+                    "allowed_transitions": {
+                        "type": "array",
+                        "description": "The lifecycle statuses this payout may legally move to next.",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "pending",
+                                "on_hold",
+                                "scheduled",
+                                "processing",
+                                "sent",
+                                "failed",
+                                "reversed",
+                                "canceled"
+                            ],
+                            "example": "processing"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the payout was created.",
+                        "example": "2026-07-02T10:00:00Z"
+                    },
+                    "lines": {
+                        "type": "array",
+                        "description": "The settlement lines (detail read only).",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/MerchantPayoutLine"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "merchant_payout"
+                        ],
+                        "example": "merchant_payout"
+                    }
+                },
+                "required": [
+                    "allowed_transitions",
+                    "created_at",
+                    "fees",
+                    "gross",
+                    "id",
+                    "merchant_id",
+                    "net",
+                    "object",
+                    "payment_method",
+                    "status"
+                ]
+            },
+            "MerchantPayoutLine": {
+                "description": "A single settlement line of a merchant payout: its kind, source, quantity and signed total.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the line.",
+                        "example": "2b1c0a9f-8e7d-6c5b-4a39-281706f5e4d3"
+                    },
+                    "source_type": {
+                        "type": "string",
+                        "description": "The origin kind, or null for an ad-hoc charge line.",
+                        "example": "cod_collection"
+                    },
+                    "source_id": {
+                        "type": "string",
+                        "description": "The originating entity id, when the line is entity-backed.",
+                        "example": "9f8e7d6c-5b4a-3210-fedc-ba9876543210"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Human-readable line description.",
+                        "example": "COD collection for parcel"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Optional billing code.",
+                        "example": "commission"
+                    },
+                    "line_type": {
+                        "type": "string",
+                        "description": "The contribution kind.",
+                        "example": "source"
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "description": "Line quantity (fractional).",
+                        "example": "1"
+                    },
+                    "unit_amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount_total": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "merchant_payout_line"
+                        ],
+                        "example": "merchant_payout_line"
+                    }
+                },
+                "required": [
+                    "amount_total",
+                    "id",
+                    "line_type",
+                    "object",
+                    "quantity",
+                    "unit_amount"
+                ]
+            },
+            "BuildMerchantPayoutRequest": {
+                "description": "Build a merchant-payout settlement statement.",
+                "properties": {
+                    "merchant_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The merchant to settle.",
+                        "example": "8f7e6d5c-4b3a-2918-0765-5e4d3c2b1a09"
+                    },
+                    "period_start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start of the settlement period (inclusive).",
+                        "example": "2026-06-01T00:00:00Z"
+                    },
+                    "period_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "End of the settlement period (inclusive).",
+                        "example": "2026-06-30T23:59:59Z"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code (the single currency the statement settles).",
+                        "example": "USD",
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "payment_method": {
+                        "type": "string",
+                        "description": "The disbursement rail.",
+                        "enum": [
+                            "wire",
+                            "ach",
+                            "cheque",
+                            "processor_transfer",
+                            "card",
+                            "paypal",
+                            "digital_wallet",
+                            "cash",
+                            "internal_credit",
+                            "adjustment"
+                        ],
+                        "example": "wire"
+                    },
+                    "destination": {
+                        "$ref": "#/components/schemas/MerchantPayoutDestination"
+                    },
+                    "lines": {
+                        "type": "array",
+                        "description": "Manual fee / adjustment / credit lines to add (optional).",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/MerchantPayoutLineInput"
+                        }
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Free-form settlement note.",
+                        "example": "June COD settlement",
+                        "maxLength": 2000,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "currency",
+                    "merchant_id",
+                    "payment_method"
+                ]
+            },
+            "MerchantPayoutDestination": {
+                "description": "The frozen destination snapshot of a merchant payout.",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "The destination kind.",
+                        "enum": [
+                            "bank_account",
+                            "connected_account",
+                            "cheque_mail",
+                            "card",
+                            "paypal",
+                            "digital_wallet",
+                            "internal_balance",
+                            "cash"
+                        ],
+                        "example": "bank_account"
+                    },
+                    "bank_name": {
+                        "type": "string",
+                        "description": "Destination bank name.",
+                        "example": "First National Bank"
+                    },
+                    "bank_account_name": {
+                        "type": "string",
+                        "description": "Destination account holder name.",
+                        "example": "Acme Logistics LLC"
+                    },
+                    "account_last4": {
+                        "type": "string",
+                        "description": "Last 4 digits of the destination account (PCI-aware).",
+                        "example": "6789",
+                        "pattern": "^[0-9]{1,4}$"
+                    },
+                    "routing_last4": {
+                        "type": "string",
+                        "description": "Last 4 digits of the destination routing number (PCI-aware).",
+                        "example": "0021",
+                        "pattern": "^[0-9]{1,4}$"
+                    },
+                    "cheque_number": {
+                        "type": "string",
+                        "description": "Cheque number, for a cheque disbursement.",
+                        "example": "001234"
+                    }
+                },
+                "required": [
+                    "type"
+                ]
+            },
+            "MerchantPayoutLineInput": {
+                "description": "A manual fee / adjustment line to add to a settlement build.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "line_type": {
+                        "type": "string",
+                        "description": "The contribution kind.",
+                        "enum": [
+                            "source",
+                            "tip",
+                            "fee",
+                            "tax",
+                            "surcharge",
+                            "discount",
+                            "adjustment",
+                            "credit",
+                            "reversal",
+                            "rounding"
+                        ],
+                        "example": "fee"
+                    },
+                    "source_type": {
+                        "type": "string",
+                        "description": "The origin kind, for an entity-backed line.",
+                        "enum": [
+                            "cod_collection",
+                            "order",
+                            "task",
+                            "parcel",
+                            "adjustment",
+                            "fee",
+                            "credit"
+                        ],
+                        "example": "fee"
+                    },
+                    "source_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The originating entity id, when the line is entity-backed.",
+                        "example": "9f8e7d6c-5b4a-3210-fedc-ba9876543210"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Human-readable line description.",
+                        "example": "Platform commission"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Optional billing code.",
+                        "example": "commission"
+                    },
+                    "amount": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Signed amount in the payout's minor units (negative for a deduction).",
+                        "example": -1500
+                    }
+                },
+                "required": [
+                    "line_type"
+                ]
+            },
+            "MarkSentMerchantPayoutRequest": {
+                "description": "Record a merchant payout as disbursed.",
+                "properties": {
+                    "processor_transfer_id": {
+                        "type": "string",
+                        "description": "The processor transfer reference (record-only).",
+                        "example": "xfer_8f3a21bc9d"
+                    },
+                    "external_reference": {
+                        "type": "string",
+                        "description": "An external reference for the disbursement.",
+                        "example": "WIRE-2026-06-0042"
+                    }
+                }
+            },
+            "ScheduleMerchantPayoutRequest": {
+                "description": "Schedule a merchant payout for a future run.",
+                "properties": {
+                    "scheduled_for": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the payout should run.",
+                        "example": "2026-07-05T09:00:00Z"
+                    }
+                },
+                "required": [
+                    "scheduled_for"
+                ]
+            },
+            "FailMerchantPayoutRequest": {
+                "description": "Record a merchant payout as failed.",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "description": "Why the payout failed.",
+                        "example": "Bank rejected: account closed",
+                        "maxLength": 2000,
+                        "minLength": 0
+                    }
+                }
+            },
             "InitiateProfilePictureUploadRequest": {
                 "description": "Declares a profile-picture upload and requests presigned part URLs.",
                 "properties": {
@@ -8789,6 +9288,188 @@
                 },
                 "required": [
                     "etag"
+                ]
+            },
+            "CodCollection": {
+                "description": "A cash-on-delivery collection: its refs, amount, lifecycle status and settlement link.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the COD collection.",
+                        "example": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765"
+                    },
+                    "merchant_id": {
+                        "type": "string",
+                        "description": "The merchant the collected cash is owed to.",
+                        "example": "8f7e6d5c-4b3a-2918-0765-5e4d3c2b1a09"
+                    },
+                    "task_id": {
+                        "type": "string",
+                        "description": "The delivery task (stop) the cash was collected against.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "parcel_id": {
+                        "type": "string",
+                        "description": "The parcel the cash was collected against.",
+                        "example": "1a2b3c4d-5e6f-7081-92a3-b4c5d6e7f809"
+                    },
+                    "operator_id": {
+                        "type": "string",
+                        "description": "The operator who collected the cash.",
+                        "example": "9a8b7c6d-5e4f-3021-1234-56789abcdef0"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "pending",
+                            "collected",
+                            "deposited",
+                            "disputed",
+                            "reconciled",
+                            "refunded",
+                            "canceled",
+                            "failed",
+                            "written_off"
+                        ],
+                        "example": "collected"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "collected_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the cash landed in the operator's hands.",
+                        "example": "2026-06-26T10:00:00Z"
+                    },
+                    "merchant_payout_id": {
+                        "type": "string",
+                        "description": "The merchant payout this collection was reconciled into, once settled.",
+                        "example": "7a6b5c4d-3e2f-1a0b-9c8d-7e6f5a4b3c2d"
+                    },
+                    "reconciled_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the collection was reconciled into a payout.",
+                        "example": "2026-06-28T09:00:00Z"
+                    },
+                    "refunded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the COD was refunded to the customer.",
+                        "example": "2026-06-29T09:00:00Z"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Free-form note recorded with the collection.",
+                        "example": "Collected in full at the door"
+                    },
+                    "allowed_transitions": {
+                        "type": "array",
+                        "description": "The lifecycle statuses this collection may legally move to next.",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "collected",
+                                "deposited",
+                                "disputed",
+                                "reconciled",
+                                "refunded",
+                                "canceled",
+                                "failed",
+                                "written_off"
+                            ],
+                            "example": "deposited"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the collection record was created.",
+                        "example": "2026-06-26T10:00:05Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "cod_collection"
+                        ],
+                        "example": "cod_collection"
+                    }
+                },
+                "required": [
+                    "allowed_transitions",
+                    "amount",
+                    "created_at",
+                    "id",
+                    "object",
+                    "status"
+                ]
+            },
+            "RecordCodCollectionRequest": {
+                "description": "Record a cash-on-delivery collection.",
+                "properties": {
+                    "merchant_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The merchant the collected cash is owed to.",
+                        "example": "8f7e6d5c-4b3a-2918-0765-5e4d3c2b1a09"
+                    },
+                    "task_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The delivery task (stop) the cash was collected against.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "parcel_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The parcel the cash was collected against.",
+                        "example": "1a2b3c4d-5e6f-7081-92a3-b4c5d6e7f809"
+                    },
+                    "operator_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The operator who collected the cash.",
+                        "example": "9a8b7c6d-5e4f-3021-1234-56789abcdef0"
+                    },
+                    "amount": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Amount collected, in the currency's minor units (cents for USD).",
+                        "example": 5000
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO-4217 currency code.",
+                        "example": "USD",
+                        "pattern": "^[A-Z]{3}$"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Free-form note (receipt reference, doorstep detail, \u2026).",
+                        "example": "Collected in full at the door",
+                        "maxLength": 2000,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "currency"
+                ]
+            },
+            "ReconcileCodCollectionRequest": {
+                "description": "Match a COD collection into a merchant payout.",
+                "properties": {
+                    "merchant_payout_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The merchant payout to reconcile this collection into.",
+                        "example": "7a6b5c4d-3e2f-1a0b-9c8d-7e6f5a4b3c2d"
+                    }
+                },
+                "required": [
+                    "merchant_payout_id"
                 ]
             },
             "BillingPortalSession": {
@@ -11038,9 +11719,18 @@
                                 "asset:read",
                                 "asset:transition",
                                 "asset:update",
+                                "cod_collection:adjust",
+                                "cod_collection:read",
+                                "cod_collection:record",
+                                "cod_collection:settle",
+                                "cod_collection:write_off",
                                 "inbound-webhook:read",
                                 "invoice:read",
                                 "keycloak-projection:administer",
+                                "merchant_payout:adjust",
+                                "merchant_payout:build",
+                                "merchant_payout:read",
+                                "merchant_payout:settle",
                                 "notification-delivery:read",
                                 "org-maintenance:administer",
                                 "org_addon:manage",

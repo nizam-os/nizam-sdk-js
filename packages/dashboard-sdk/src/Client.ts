@@ -5,6 +5,7 @@ import { ActivityClient } from "./api/resources/activity/client/Client.js";
 import { AssetsClient } from "./api/resources/assets/client/Client.js";
 import { AssignmentsClient } from "./api/resources/assignments/client/Client.js";
 import { BillingPortalClient } from "./api/resources/billingPortal/client/Client.js";
+import { CodCollectionsClient } from "./api/resources/codCollections/client/Client.js";
 import { DevicesClient } from "./api/resources/devices/client/Client.js";
 import { FilesClient } from "./api/resources/files/client/Client.js";
 import { ImportsClient } from "./api/resources/imports/client/Client.js";
@@ -13,6 +14,7 @@ import { InvoicesClient } from "./api/resources/invoices/client/Client.js";
 import { JobsClient } from "./api/resources/jobs/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
 import { MembershipsClient } from "./api/resources/memberships/client/Client.js";
+import { MerchantPayoutsClient } from "./api/resources/merchantPayouts/client/Client.js";
 import { NotificationPreferencesClient } from "./api/resources/notificationPreferences/client/Client.js";
 import { NotificationsClient } from "./api/resources/notifications/client/Client.js";
 import { OperatorsClient } from "./api/resources/operators/client/Client.js";
@@ -42,6 +44,7 @@ export class NizamDashboardClient {
     protected _assets: AssetsClient | undefined;
     protected _assignments: AssignmentsClient | undefined;
     protected _billingPortal: BillingPortalClient | undefined;
+    protected _codCollections: CodCollectionsClient | undefined;
     protected _files: FilesClient | undefined;
     protected _positions: PositionsClient | undefined;
     protected _imports: ImportsClient | undefined;
@@ -54,6 +57,7 @@ export class NizamDashboardClient {
     protected _devices: DevicesClient | undefined;
     protected _memberships: MembershipsClient | undefined;
     protected _notificationPreferences: NotificationPreferencesClient | undefined;
+    protected _merchantPayouts: MerchantPayoutsClient | undefined;
     protected _notifications: NotificationsClient | undefined;
     protected _operators: OperatorsClient | undefined;
     protected _orgAddOns: OrgAddOnsClient | undefined;
@@ -83,6 +87,10 @@ export class NizamDashboardClient {
 
     public get billingPortal(): BillingPortalClient {
         return (this._billingPortal ??= new BillingPortalClient(this._options));
+    }
+
+    public get codCollections(): CodCollectionsClient {
+        return (this._codCollections ??= new CodCollectionsClient(this._options));
     }
 
     public get files(): FilesClient {
@@ -131,6 +139,10 @@ export class NizamDashboardClient {
 
     public get notificationPreferences(): NotificationPreferencesClient {
         return (this._notificationPreferences ??= new NotificationPreferencesClient(this._options));
+    }
+
+    public get merchantPayouts(): MerchantPayoutsClient {
+        return (this._merchantPayouts ??= new MerchantPayoutsClient(this._options));
     }
 
     public get notifications(): NotificationsClient {
