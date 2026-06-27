@@ -1,6 +1,6 @@
 {
   "name": "@nizam-os/merchant-sdk",
-  "version": "10.0.0",
+  "version": "11.0.0",
   "description": "Nizam Merchant API SDK for TypeScript / JavaScript.",
   "license": "MIT",
   "private": false,

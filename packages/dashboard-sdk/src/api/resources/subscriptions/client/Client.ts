@@ -2,7 +2,7 @@
 
 import type { BaseClientOptions, BaseRequestOptions } from "../../../../BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "../../../../BaseClient.js";
-import { mergeHeaders } from "../../../../core/headers.js";
+import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as core from "../../../../core/index.js";
 import * as environments from "../../../../environments.js";
 import { handleNonStatusCodeError } from "../../../../errors/handleNonStatusCodeError.js";
@@ -28,6 +28,7 @@ export class SubscriptionsClient {
      * @param {NizamDashboard.SubscribeRequest} request
      * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.ConflictError}
@@ -38,6 +39,7 @@ export class SubscriptionsClient {
      *
      * @example
      *     await client.subscriptions.subscribe({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         plan_code: "pro"
      *     })
      */
@@ -52,10 +54,12 @@ export class SubscriptionsClient {
         request: NizamDashboard.SubscribeRequest,
         requestOptions?: SubscriptionsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.SubscriptionCheckout>> {
+        const { "Idempotency-Key": idempotencyKey, ..._body } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -70,7 +74,7 @@ export class SubscriptionsClient {
             contentType: "application/json",
             queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
             requestType: "json",
-            body: request,
+            body: _body,
             timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
             maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
             abortSignal: requestOptions?.abortSignal,
@@ -83,6 +87,11 @@ export class SubscriptionsClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -316,6 +325,7 @@ export class SubscriptionsClient {
      * @param {NizamDashboard.CancelSubscriptionRequest} request
      * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
@@ -325,6 +335,7 @@ export class SubscriptionsClient {
      *
      * @example
      *     await client.subscriptions.cancelSubscription({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         id: "00000000-0000-0000-0000-000000000000"
      *     })
      */
@@ -339,11 +350,12 @@ export class SubscriptionsClient {
         request: NizamDashboard.CancelSubscriptionRequest,
         requestOptions?: SubscriptionsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.PlatformSubscription>> {
-        const { id } = request;
+        const { id, "Idempotency-Key": idempotencyKey } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -368,6 +380,11 @@ export class SubscriptionsClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -421,6 +438,7 @@ export class SubscriptionsClient {
      * @param {NizamDashboard.ChangePlanRequest} request
      * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
@@ -432,6 +450,7 @@ export class SubscriptionsClient {
      *
      * @example
      *     await client.subscriptions.changeSubscriptionPlan({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         id: "00000000-0000-0000-0000-000000000000",
      *         plan_code: "enterprise"
      *     })
@@ -447,11 +466,12 @@ export class SubscriptionsClient {
         request: NizamDashboard.ChangePlanRequest,
         requestOptions?: SubscriptionsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.PlatformSubscription>> {
-        const { id, ..._body } = request;
+        const { id, "Idempotency-Key": idempotencyKey, ..._body } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -479,6 +499,11 @@ export class SubscriptionsClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -542,6 +567,7 @@ export class SubscriptionsClient {
      * @param {NizamDashboard.PauseSubscriptionRequest} request
      * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
@@ -551,6 +577,7 @@ export class SubscriptionsClient {
      *
      * @example
      *     await client.subscriptions.pauseSubscription({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         id: "00000000-0000-0000-0000-000000000000"
      *     })
      */
@@ -565,11 +592,12 @@ export class SubscriptionsClient {
         request: NizamDashboard.PauseSubscriptionRequest,
         requestOptions?: SubscriptionsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.PlatformSubscription>> {
-        const { id } = request;
+        const { id, "Idempotency-Key": idempotencyKey } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -594,6 +622,11 @@ export class SubscriptionsClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -642,6 +675,7 @@ export class SubscriptionsClient {
      * @param {NizamDashboard.ResumeSubscriptionRequest} request
      * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
@@ -651,6 +685,7 @@ export class SubscriptionsClient {
      *
      * @example
      *     await client.subscriptions.resumeSubscription({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         id: "00000000-0000-0000-0000-000000000000"
      *     })
      */
@@ -665,11 +700,12 @@ export class SubscriptionsClient {
         request: NizamDashboard.ResumeSubscriptionRequest,
         requestOptions?: SubscriptionsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.PlatformSubscription>> {
-        const { id } = request;
+        const { id, "Idempotency-Key": idempotencyKey } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -694,6 +730,11 @@ export class SubscriptionsClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,

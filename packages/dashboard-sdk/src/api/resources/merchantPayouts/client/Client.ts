@@ -124,7 +124,7 @@ export class MerchantPayoutsClient {
     }
 
     /**
-     * Builds a draft settlement statement for a merchant: pulls the merchant's reconcilable COD collections into source lines and reconciles them, appends any manual fee / adjustment lines, and foots gross/fees/net. 409 `merchant_payout.period_already_settled` if a live payout already covers the same merchant + period; 422 `merchant_payout.currency_mismatch` on a mixed-currency line.
+     * Builds a draft settlement statement for a merchant: pulls the merchant's reconcilable COD collections into source lines and reconciles them, appends any manual fee / adjustment lines, and foots gross/fees/net. 422 `billing_party.unknown` if the `merchant_id` does not belong to the organization; 409 `merchant_payout.period_already_settled` if a live payout already covers the same merchant + period; 422 `merchant_payout.currency_mismatch` on a mixed-currency line.
      *
      * @param {NizamDashboard.BuildMerchantPayoutRequest} request
      * @param {MerchantPayoutsClient.RequestOptions} requestOptions - Request-specific configuration.

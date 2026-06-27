@@ -59,6 +59,7 @@ export namespace User {
             CodCollectionRecord: "cod_collection:record",
             CodCollectionSettle: "cod_collection:settle",
             CodCollectionWriteOff: "cod_collection:write_off",
+            CreditNoteRead: "credit_note:read",
             InboundWebhookRead: "inbound-webhook:read",
             InvoiceRead: "invoice:read",
             KeycloakProjectionAdminister: "keycloak-projection:administer",

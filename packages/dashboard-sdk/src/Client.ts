@@ -6,6 +6,7 @@ import { AssetsClient } from "./api/resources/assets/client/Client.js";
 import { AssignmentsClient } from "./api/resources/assignments/client/Client.js";
 import { BillingPortalClient } from "./api/resources/billingPortal/client/Client.js";
 import { CodCollectionsClient } from "./api/resources/codCollections/client/Client.js";
+import { CreditNotesClient } from "./api/resources/creditNotes/client/Client.js";
 import { DevicesClient } from "./api/resources/devices/client/Client.js";
 import { FilesClient } from "./api/resources/files/client/Client.js";
 import { ImportsClient } from "./api/resources/imports/client/Client.js";
@@ -45,6 +46,7 @@ export class NizamDashboardClient {
     protected _assignments: AssignmentsClient | undefined;
     protected _billingPortal: BillingPortalClient | undefined;
     protected _codCollections: CodCollectionsClient | undefined;
+    protected _creditNotes: CreditNotesClient | undefined;
     protected _files: FilesClient | undefined;
     protected _positions: PositionsClient | undefined;
     protected _imports: ImportsClient | undefined;
@@ -91,6 +93,10 @@ export class NizamDashboardClient {
 
     public get codCollections(): CodCollectionsClient {
         return (this._codCollections ??= new CodCollectionsClient(this._options));
+    }
+
+    public get creditNotes(): CreditNotesClient {
+        return (this._creditNotes ??= new CreditNotesClient(this._options));
     }
 
     public get files(): FilesClient {

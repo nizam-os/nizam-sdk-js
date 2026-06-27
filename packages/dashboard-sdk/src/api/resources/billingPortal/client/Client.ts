@@ -2,7 +2,7 @@
 
 import type { BaseClientOptions, BaseRequestOptions } from "../../../../BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "../../../../BaseClient.js";
-import { mergeHeaders } from "../../../../core/headers.js";
+import { mergeHeaders, mergeOnlyDefinedHeaders } from "../../../../core/headers.js";
 import * as core from "../../../../core/index.js";
 import * as environments from "../../../../environments.js";
 import { handleNonStatusCodeError } from "../../../../errors/handleNonStatusCodeError.js";
@@ -25,8 +25,10 @@ export class BillingPortalClient {
     /**
      * Mints a short-lived Stripe-hosted billing portal session so the organization's billing admin can self-serve payment methods, invoices and plan changes, and returns the URL to redirect the browser to.
      *
+     * @param {NizamDashboard.CreateBillingPortalSessionRequest} request
      * @param {BillingPortalClient.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.ConflictError}
@@ -35,21 +37,27 @@ export class BillingPortalClient {
      * @throws {@link NizamDashboard.BadGatewayError}
      *
      * @example
-     *     await client.billingPortal.createBillingPortalSession()
+     *     await client.billingPortal.createBillingPortalSession({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
+     *     })
      */
     public createBillingPortalSession(
+        request: NizamDashboard.CreateBillingPortalSessionRequest = {},
         requestOptions?: BillingPortalClient.RequestOptions,
     ): core.HttpResponsePromise<NizamDashboard.BillingPortalSession> {
-        return core.HttpResponsePromise.fromPromise(this.__createBillingPortalSession(requestOptions));
+        return core.HttpResponsePromise.fromPromise(this.__createBillingPortalSession(request, requestOptions));
     }
 
     private async __createBillingPortalSession(
+        request: NizamDashboard.CreateBillingPortalSessionRequest = {},
         requestOptions?: BillingPortalClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.BillingPortalSession>> {
+        const { "Idempotency-Key": idempotencyKey } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -74,6 +82,11 @@ export class BillingPortalClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,

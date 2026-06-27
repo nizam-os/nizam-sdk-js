@@ -124,7 +124,7 @@ export class CodCollectionsClient {
     }
 
     /**
-     * Records cash collected at delivery — a new `collected` COD collection owned by the active organization. Must reference the task or parcel it was collected against (else 400).
+     * Records cash collected at delivery — a new `collected` COD collection owned by the active organization. Must reference the task or parcel it was collected against (else 400). 422 `billing_party.unknown` if a `merchant_id` is given that does not belong to the organization.
      *
      * @param {NizamDashboard.RecordCodCollectionRequest} request
      * @param {CodCollectionsClient.RequestOptions} requestOptions - Request-specific configuration.

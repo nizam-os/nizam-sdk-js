@@ -53,6 +53,14 @@
             "description": "Cash-on-delivery collections an organization records and settles."
         },
         {
+            "name": "Credit notes",
+            "description": "An organization's credit notes and customer credit balance."
+        },
+        {
+            "name": "Credit notes",
+            "description": "An organization's accounts-receivable credit notes, projected from the billing processor."
+        },
+        {
             "name": "Devices",
             "description": "The authenticated user's registered push devices."
         },
@@ -4452,6 +4460,19 @@
                 "summary": "Open the billing portal",
                 "description": "Mints a short-lived Stripe-hosted billing portal session so the organization's billing admin can self-serve payment methods, invoices and plan changes, and returns the URL to redirect the browser to.",
                 "operationId": "createBillingPortalSession",
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "The portal session URL.",
@@ -4571,14 +4592,62 @@
                             }
                         }
                     },
-                    "409": {
-                        "description": "No billing customer \u00b7 Billing portal not configured",
+                    "400": {
+                        "description": "Invalid Idempotency-Key header",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
                                 "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/billing/portal-sessions",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/billing/portal-sessions",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/billing/portal-sessions",
+                                            "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
                                     "billing_portal.customer_not_linked": {
                                         "summary": "No billing customer",
                                         "value": {
@@ -4827,7 +4896,7 @@
                     "COD Collections"
                 ],
                 "summary": "Record a COD collection",
-                "description": "Records cash collected at delivery \u2014 a new `collected` COD collection owned by the active organization. Must reference the task or parcel it was collected against (else 400).",
+                "description": "Records cash collected at delivery \u2014 a new `collected` COD collection owned by the active organization. Must reference the task or parcel it was collected against (else 400). 422 `billing_party.unknown` if a `merchant_id` is given that does not belong to the organization.",
                 "operationId": "recordCodCollection",
                 "parameters": [
                     {
@@ -4945,26 +5014,19 @@
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
-                                "example": {
-                                    "type": "https://docs.nizam.ai/errors/validation_failed",
-                                    "title": "Validation failed",
-                                    "status": 422,
-                                    "detail": "Request body failed validation.",
-                                    "instance": "/v1/cod-collections",
-                                    "code": "validation_failed",
-                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01",
-                                    "errors": [
-                                        {
-                                            "field": "email",
-                                            "code": "must_not_be_blank",
-                                            "message": "must not be blank"
-                                        },
-                                        {
-                                            "field": "dropoff.lat",
-                                            "code": "out_of_range",
-                                            "message": "latitude must be in [-90, 90]"
+                                "examples": {
+                                    "billing_party.unknown": {
+                                        "summary": "Unknown billing party",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/billing_party/unknown",
+                                            "title": "Unknown billing party",
+                                            "status": 422,
+                                            "detail": "The referenced billing party does not exist in your organization.",
+                                            "instance": "/v1/cod-collections",
+                                            "code": "billing_party.unknown",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
-                                    ]
+                                    }
                                 }
                             }
                         }
@@ -6376,6 +6438,544 @@
                                             "detail": "The COD collection cannot make the requested lifecycle transition from its current status.",
                                             "instance": "/v1/cod-collections/{id}/write-off",
                                             "code": "cod_collection.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/credit-balance": {
+            "get": {
+                "tags": [
+                    "Credit notes"
+                ],
+                "summary": "Get the customer credit balance",
+                "description": "The caller's organization's customer credit balance, projected from the processor. Signed: a negative balance is credit available, a positive balance is owed. Null when no balance has been recorded yet.",
+                "operationId": "getCustomerCreditBalance",
+                "responses": {
+                    "200": {
+                        "description": "The organization's customer credit balance.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerCreditBalance"
+                                },
+                                "example": {
+                                    "balance": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "as_of": "2026-06-25T12:00:00Z",
+                                    "object": "customer_credit_balance"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/credit-balance",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/credit-balance",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/credit-balance",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/credit-balance",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/credit-notes": {
+            "get": {
+                "tags": [
+                    "Credit notes"
+                ],
+                "summary": "List credit notes (paginated)",
+                "description": "The caller's organization's credit notes, newest first. Keyset-paginated (`starting_after` / `ending_before`); no sort parameter. Org-scoped (RLS). Lines are returned by the detail read, not the list.",
+                "operationId": "listCreditNotes",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A page of credit notes.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreditNote"
+                                },
+                                "example": {
+                                    "id": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d",
+                                    "invoice_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "credit_note_number": "CN-2026-00042",
+                                    "billing_party_type": "organization",
+                                    "billing_party_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "status": "issued",
+                                    "reason": "order_change",
+                                    "credit_type": "pre_payment",
+                                    "subtotal": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "tax": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "total": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "out_of_band": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "memo": "Proration credit for plan downgrade",
+                                    "issuedAt": "2026-06-25T12:00:00Z",
+                                    "voided_at": "2026-06-26T09:00:00Z",
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "lines": [
+                                        
+                                    ],
+                                    "object": "credit_note"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/credit-notes",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/credit-notes",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/credit-notes",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/credit-notes",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/credit-notes/{creditNoteId}": {
+            "get": {
+                "tags": [
+                    "Credit notes"
+                ],
+                "summary": "Get a credit note",
+                "description": "One credit note with its lines. 404 when it does not exist in the caller's organization.",
+                "operationId": "getCreditNote",
+                "parameters": [
+                    {
+                        "name": "creditNoteId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The credit note and its lines.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreditNote"
+                                },
+                                "example": {
+                                    "id": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d",
+                                    "invoice_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "credit_note_number": "CN-2026-00042",
+                                    "billing_party_type": "organization",
+                                    "billing_party_id": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
+                                    "status": "issued",
+                                    "reason": "order_change",
+                                    "credit_type": "pre_payment",
+                                    "subtotal": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "tax": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "total": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "out_of_band": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "memo": "Proration credit for plan downgrade",
+                                    "issuedAt": "2026-06-25T12:00:00Z",
+                                    "voided_at": "2026-06-26T09:00:00Z",
+                                    "created_at": "2026-06-25T12:00:00Z",
+                                    "lines": [
+                                        
+                                    ],
+                                    "object": "credit_note"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/credit-notes/{creditNoteId}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/credit-notes/{creditNoteId}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/credit-notes/{creditNoteId}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/credit-notes/{creditNoteId}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Credit note not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "credit_note.not_found": {
+                                        "summary": "Credit note not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/credit_note/not_found",
+                                            "title": "Credit note not found",
+                                            "status": 404,
+                                            "detail": "The requested credit note does not exist.",
+                                            "instance": "/v1/credit-notes/{creditNoteId}",
+                                            "code": "credit_note.not_found",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -14001,7 +14601,7 @@
                     "Merchant Payouts"
                 ],
                 "summary": "Build a merchant payout",
-                "description": "Builds a draft settlement statement for a merchant: pulls the merchant's reconcilable COD collections into source lines and reconciles them, appends any manual fee / adjustment lines, and foots gross/fees/net. 409 `merchant_payout.period_already_settled` if a live payout already covers the same merchant + period; 422 `merchant_payout.currency_mismatch` on a mixed-currency line.",
+                "description": "Builds a draft settlement statement for a merchant: pulls the merchant's reconcilable COD collections into source lines and reconciles them, appends any manual fee / adjustment lines, and foots gross/fees/net. 422 `billing_party.unknown` if the `merchant_id` does not belong to the organization; 409 `merchant_payout.period_already_settled` if a live payout already covers the same merchant + period; 422 `merchant_payout.currency_mismatch` on a mixed-currency line.",
                 "operationId": "buildMerchantPayout",
                 "parameters": [
                     {
@@ -14151,6 +14751,18 @@
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
                                 "examples": {
+                                    "billing_party.unknown": {
+                                        "summary": "Unknown billing party",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/billing_party/unknown",
+                                            "title": "Unknown billing party",
+                                            "status": 422,
+                                            "detail": "The referenced billing party does not exist in your organization.",
+                                            "instance": "/v1/merchant-payouts",
+                                            "code": "billing_party.unknown",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
                                     "merchant_payout.currency_mismatch": {
                                         "summary": "Mixed currencies in a payout",
                                         "value": {
@@ -19545,6 +20157,17 @@
                             "format": "uuid"
                         },
                         "example": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
                     }
                 ],
                 "responses": {
@@ -19679,6 +20302,78 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Invalid Idempotency-Key header",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/org-addons/{id}/cancel",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/org-addons/{id}/cancel",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/org-addons/{id}/cancel",
+                                            "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "org_addon.invalid_transition": {
+                                        "summary": "Invalid add-on transition",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/org_addon/invalid_transition",
+                                            "title": "Invalid add-on transition",
+                                            "status": 409,
+                                            "detail": "The add-on cannot make the requested lifecycle transition from its current status.",
+                                            "instance": "/v1/org-addons/{id}/cancel",
+                                            "code": "org_addon.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Add-on subscription not found",
                         "content": {
@@ -19696,30 +20391,6 @@
                                             "detail": "The requested add-on subscription does not exist.",
                                             "instance": "/v1/org-addons/{id}/cancel",
                                             "code": "org_addon.not_found",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Invalid add-on transition",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "examples": {
-                                    "org_addon.invalid_transition": {
-                                        "summary": "Invalid add-on transition",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/org_addon/invalid_transition",
-                                            "title": "Invalid add-on transition",
-                                            "status": 409,
-                                            "detail": "The add-on cannot make the requested lifecycle transition from its current status.",
-                                            "instance": "/v1/org-addons/{id}/cancel",
-                                            "code": "org_addon.invalid_transition",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -21688,6 +22359,19 @@
                 "summary": "Start a subscription",
                 "description": "Subscribes the organization to a plan and returns a hosted checkout URL to complete payment. Enforces one live subscription per organization. When the plan has a trial the subscription starts `trialing`, otherwise `incomplete` until the first charge.",
                 "operationId": "subscribe",
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -21730,6 +22414,7 @@
                                             "decimal": "10.5"
                                         },
                                         "currency": "USD",
+                                        "quantity": 5,
                                         "allowed_transitions": [
                                             "past_due",
                                             "paused",
@@ -21878,14 +22563,62 @@
                             }
                         }
                     },
-                    "409": {
-                        "description": "Organization already has a live subscription",
+                    "400": {
+                        "description": "Invalid Idempotency-Key header",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ProblemDetail"
                                 },
                                 "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/subscriptions",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/subscriptions",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/subscriptions",
+                                            "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
                                     "platform_subscription.already_subscribed": {
                                         "summary": "Organization already has a live subscription",
                                         "value": {
@@ -21963,6 +22696,7 @@
                                         "decimal": "10.5"
                                     },
                                     "currency": "USD",
+                                    "quantity": 5,
                                     "allowed_transitions": [
                                         "past_due",
                                         "paused",
@@ -22149,6 +22883,7 @@
                                         "decimal": "10.5"
                                     },
                                     "currency": "USD",
+                                    "quantity": 5,
                                     "allowed_transitions": [
                                         "past_due",
                                         "paused",
@@ -22311,6 +23046,17 @@
                             "format": "uuid"
                         },
                         "example": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
                     }
                 ],
                 "responses": {
@@ -22336,6 +23082,7 @@
                                         "decimal": "10.5"
                                     },
                                     "currency": "USD",
+                                    "quantity": 5,
                                     "allowed_transitions": [
                                         "past_due",
                                         "paused",
@@ -22450,6 +23197,78 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Invalid Idempotency-Key header",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/subscriptions/{id}/cancel",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/subscriptions/{id}/cancel",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/subscriptions/{id}/cancel",
+                                            "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "platform_subscription.invalid_transition": {
+                                        "summary": "Invalid subscription transition",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
+                                            "title": "Invalid subscription transition",
+                                            "status": 409,
+                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
+                                            "instance": "/v1/subscriptions/{id}/cancel",
+                                            "code": "platform_subscription.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Subscription not found",
                         "content": {
@@ -22467,30 +23286,6 @@
                                             "detail": "The requested subscription does not exist.",
                                             "instance": "/v1/subscriptions/{id}/cancel",
                                             "code": "platform_subscription.not_found",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Invalid subscription transition",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "examples": {
-                                    "platform_subscription.invalid_transition": {
-                                        "summary": "Invalid subscription transition",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
-                                            "title": "Invalid subscription transition",
-                                            "status": 409,
-                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
-                                            "instance": "/v1/subscriptions/{id}/cancel",
-                                            "code": "platform_subscription.invalid_transition",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -22522,6 +23317,17 @@
                             "format": "uuid"
                         },
                         "example": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
                     }
                 ],
                 "requestBody": {
@@ -22565,6 +23371,7 @@
                                         "decimal": "10.5"
                                     },
                                     "currency": "USD",
+                                    "quantity": 5,
                                     "allowed_transitions": [
                                         "past_due",
                                         "paused",
@@ -22710,6 +23517,78 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Invalid Idempotency-Key header",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/subscriptions/{id}/change-plan",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/subscriptions/{id}/change-plan",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/subscriptions/{id}/change-plan",
+                                            "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "platform_subscription.invalid_transition": {
+                                        "summary": "Invalid subscription transition",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
+                                            "title": "Invalid subscription transition",
+                                            "status": 409,
+                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
+                                            "instance": "/v1/subscriptions/{id}/change-plan",
+                                            "code": "platform_subscription.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Subscription not found",
                         "content": {
@@ -22727,30 +23606,6 @@
                                             "detail": "The requested subscription does not exist.",
                                             "instance": "/v1/subscriptions/{id}/change-plan",
                                             "code": "platform_subscription.not_found",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Invalid subscription transition",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "examples": {
-                                    "platform_subscription.invalid_transition": {
-                                        "summary": "Invalid subscription transition",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
-                                            "title": "Invalid subscription transition",
-                                            "status": 409,
-                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
-                                            "instance": "/v1/subscriptions/{id}/change-plan",
-                                            "code": "platform_subscription.invalid_transition",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -22806,6 +23661,17 @@
                             "format": "uuid"
                         },
                         "example": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
                     }
                 ],
                 "responses": {
@@ -22831,6 +23697,7 @@
                                         "decimal": "10.5"
                                     },
                                     "currency": "USD",
+                                    "quantity": 5,
                                     "allowed_transitions": [
                                         "past_due",
                                         "paused",
@@ -22945,6 +23812,78 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Invalid Idempotency-Key header",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/subscriptions/{id}/pause",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/subscriptions/{id}/pause",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/subscriptions/{id}/pause",
+                                            "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "platform_subscription.invalid_transition": {
+                                        "summary": "Invalid subscription transition",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
+                                            "title": "Invalid subscription transition",
+                                            "status": 409,
+                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
+                                            "instance": "/v1/subscriptions/{id}/pause",
+                                            "code": "platform_subscription.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Subscription not found",
                         "content": {
@@ -22962,30 +23901,6 @@
                                             "detail": "The requested subscription does not exist.",
                                             "instance": "/v1/subscriptions/{id}/pause",
                                             "code": "platform_subscription.not_found",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Invalid subscription transition",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "examples": {
-                                    "platform_subscription.invalid_transition": {
-                                        "summary": "Invalid subscription transition",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
-                                            "title": "Invalid subscription transition",
-                                            "status": 409,
-                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
-                                            "instance": "/v1/subscriptions/{id}/pause",
-                                            "code": "platform_subscription.invalid_transition",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -23017,6 +23932,17 @@
                             "format": "uuid"
                         },
                         "example": "00000000-0000-0000-0000-000000000000"
+                    },
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60"
                     }
                 ],
                 "responses": {
@@ -23042,6 +23968,7 @@
                                         "decimal": "10.5"
                                     },
                                     "currency": "USD",
+                                    "quantity": 5,
                                     "allowed_transitions": [
                                         "past_due",
                                         "paused",
@@ -23156,6 +24083,78 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Invalid Idempotency-Key header",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.invalid_key": {
+                                        "summary": "Invalid Idempotency-Key header",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/invalid_key",
+                                            "title": "Invalid Idempotency-Key header",
+                                            "status": 400,
+                                            "detail": "The Idempotency-Key header must be a well-formed UUID in canonical 8-4-4-4-12 form.",
+                                            "instance": "/v1/subscriptions/{id}/resume",
+                                            "code": "idempotency.invalid_key",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Idempotency key already used for a different request \u00b7 Idempotency key currently in flight",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "idempotency.key_conflict": {
+                                        "summary": "Idempotency key already used for a different request",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/key_conflict",
+                                            "title": "Idempotency key already used for a different request",
+                                            "status": 409,
+                                            "detail": "The Idempotency-Key has already been used for a request with a different body. Use a fresh key for this operation, or repeat the original request body verbatim.",
+                                            "instance": "/v1/subscriptions/{id}/resume",
+                                            "code": "idempotency.key_conflict",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "idempotency.in_progress": {
+                                        "summary": "Idempotency key currently in flight",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/idempotency/in_progress",
+                                            "title": "Idempotency key currently in flight",
+                                            "status": 409,
+                                            "detail": "Another request with this Idempotency-Key is still in flight.",
+                                            "instance": "/v1/subscriptions/{id}/resume",
+                                            "code": "idempotency.in_progress",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "platform_subscription.invalid_transition": {
+                                        "summary": "Invalid subscription transition",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
+                                            "title": "Invalid subscription transition",
+                                            "status": 409,
+                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
+                                            "instance": "/v1/subscriptions/{id}/resume",
+                                            "code": "platform_subscription.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "Subscription not found",
                         "content": {
@@ -23173,30 +24172,6 @@
                                             "detail": "The requested subscription does not exist.",
                                             "instance": "/v1/subscriptions/{id}/resume",
                                             "code": "platform_subscription.not_found",
-                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Invalid subscription transition",
-                        "content": {
-                            "application/problem+json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ProblemDetail"
-                                },
-                                "examples": {
-                                    "platform_subscription.invalid_transition": {
-                                        "summary": "Invalid subscription transition",
-                                        "value": {
-                                            "type": "https://docs.nizam.ai/errors/platform_subscription/invalid_transition",
-                                            "title": "Invalid subscription transition",
-                                            "status": 409,
-                                            "detail": "The subscription cannot make the requested lifecycle transition from its current status.",
-                                            "instance": "/v1/subscriptions/{id}/resume",
-                                            "code": "platform_subscription.invalid_transition",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -26033,6 +27008,12 @@
                         "description": "ISO-4217 settlement currency.",
                         "example": "USD"
                     },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Licensed seat quantity \u2014 the active-member count for a per-seat plan, 1 otherwise.",
+                        "example": 5
+                    },
                     "allowed_transitions": {
                         "type": "array",
                         "description": "Lifecycle statuses this subscription may legally transition to next.",
@@ -26086,6 +27067,7 @@
                     "id",
                     "object",
                     "plan_id",
+                    "quantity",
                     "status",
                     "updated_at"
                 ]
@@ -31136,6 +32118,7 @@
                                 "cod_collection:record",
                                 "cod_collection:settle",
                                 "cod_collection:write_off",
+                                "credit_note:read",
                                 "inbound-webhook:read",
                                 "invoice:read",
                                 "keycloak-projection:administer",
@@ -32723,6 +33706,217 @@
                         "example": 20
                     }
                 }
+            },
+            "CreditNote": {
+                "description": "A credit note: the invoice it adjusts, its money rollups, reason, lifecycle status and dates.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the credit note.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "invoice_id": {
+                        "type": "string",
+                        "description": "The invoice this credit note adjusts, when linked.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "credit_note_number": {
+                        "type": "string",
+                        "description": "The processor-assigned credit-note number, when assigned.",
+                        "example": "CN-2026-00042"
+                    },
+                    "billing_party_type": {
+                        "type": "string",
+                        "description": "The kind of party credited.",
+                        "enum": [
+                            "merchant",
+                            "customer",
+                            "carrier",
+                            "organization"
+                        ],
+                        "example": "organization"
+                    },
+                    "billing_party_id": {
+                        "type": "string",
+                        "description": "Identifier of the credited party.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Credit-note lifecycle status.",
+                        "enum": [
+                            "issued",
+                            "void"
+                        ],
+                        "example": "issued"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "description": "Why the credit note was issued, when supplied.",
+                        "enum": [
+                            "duplicate",
+                            "fraudulent",
+                            "order_change",
+                            "product_unsatisfactory"
+                        ],
+                        "example": "order_change"
+                    },
+                    "credit_type": {
+                        "type": "string",
+                        "description": "Whether the credit applied before or after payment, when supplied.",
+                        "enum": [
+                            "pre_payment",
+                            "post_payment"
+                        ],
+                        "example": "pre_payment"
+                    },
+                    "subtotal": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "tax": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "total": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "out_of_band": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "memo": {
+                        "type": "string",
+                        "description": "Free-text memo, when supplied.",
+                        "example": "Proration credit for plan downgrade"
+                    },
+                    "issuedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the credit note took effect.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "voided_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the credit note was voided, if voided.",
+                        "example": "2026-06-26T09:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the credit-note record was created.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "lines": {
+                        "type": "array",
+                        "description": "The credit note's lines (detail read only).",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/CreditNoteLine"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "credit_note"
+                        ],
+                        "example": "credit_note"
+                    }
+                },
+                "required": [
+                    "billing_party_id",
+                    "billing_party_type",
+                    "created_at",
+                    "id",
+                    "issuedAt",
+                    "object",
+                    "out_of_band",
+                    "status",
+                    "subtotal",
+                    "tax",
+                    "total"
+                ]
+            },
+            "CreditNoteLine": {
+                "description": "A single line of a credit note: its source reference, quantity and amount.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the credit-note line.",
+                        "example": "2b1c0a9f-8e7d-6c5b-4a39-281706f5e4d3"
+                    },
+                    "line_type": {
+                        "type": "string",
+                        "description": "The processor's line classification, or null.",
+                        "enum": [
+                            "invoice_line_item",
+                            "custom_line_item"
+                        ],
+                        "example": "invoice_line_item"
+                    },
+                    "invoice_line_item_ref": {
+                        "type": "string",
+                        "description": "The source invoice line this credits, when applicable.",
+                        "example": "il_1Mx..."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Human-readable line description.",
+                        "example": "Pro plan \u2014 proration credit"
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "description": "Credited quantity (fractional).",
+                        "example": "1"
+                    },
+                    "unit_amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "credit_note_line"
+                        ],
+                        "example": "credit_note_line"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "id",
+                    "object",
+                    "quantity",
+                    "unit_amount"
+                ]
+            },
+            "CustomerCreditBalance": {
+                "description": "The organization's customer credit balance (signed: negative = credit available, positive = owed).",
+                "properties": {
+                    "balance": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "as_of": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the balance was last synced from the processor.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "customer_credit_balance"
+                        ],
+                        "example": "customer_credit_balance"
+                    }
+                },
+                "required": [
+                    "object"
+                ]
             },
             "AssetListItem": {
                 "description": "An asset as returned by the list/search endpoint \u2014 the asset fields plus relevance metadata when the request was a search.",

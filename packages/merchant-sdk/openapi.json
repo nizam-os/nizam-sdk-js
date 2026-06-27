@@ -53,6 +53,14 @@
             "description": "Cash-on-delivery collections an organization records and settles."
         },
         {
+            "name": "Credit notes",
+            "description": "An organization's credit notes and customer credit balance."
+        },
+        {
+            "name": "Credit notes",
+            "description": "An organization's accounts-receivable credit notes, projected from the billing processor."
+        },
+        {
             "name": "Devices",
             "description": "The authenticated user's registered push devices."
         },
@@ -7142,6 +7150,12 @@
                         "description": "ISO-4217 settlement currency.",
                         "example": "USD"
                     },
+                    "quantity": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Licensed seat quantity \u2014 the active-member count for a per-seat plan, 1 otherwise.",
+                        "example": 5
+                    },
                     "allowed_transitions": {
                         "type": "array",
                         "description": "Lifecycle statuses this subscription may legally transition to next.",
@@ -7195,6 +7209,7 @@
                     "id",
                     "object",
                     "plan_id",
+                    "quantity",
                     "status",
                     "updated_at"
                 ]
@@ -12245,6 +12260,7 @@
                                 "cod_collection:record",
                                 "cod_collection:settle",
                                 "cod_collection:write_off",
+                                "credit_note:read",
                                 "inbound-webhook:read",
                                 "invoice:read",
                                 "keycloak-projection:administer",
@@ -13832,6 +13848,217 @@
                         "example": 20
                     }
                 }
+            },
+            "CreditNote": {
+                "description": "A credit note: the invoice it adjusts, its money rollups, reason, lifecycle status and dates.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the credit note.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "invoice_id": {
+                        "type": "string",
+                        "description": "The invoice this credit note adjusts, when linked.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "credit_note_number": {
+                        "type": "string",
+                        "description": "The processor-assigned credit-note number, when assigned.",
+                        "example": "CN-2026-00042"
+                    },
+                    "billing_party_type": {
+                        "type": "string",
+                        "description": "The kind of party credited.",
+                        "enum": [
+                            "merchant",
+                            "customer",
+                            "carrier",
+                            "organization"
+                        ],
+                        "example": "organization"
+                    },
+                    "billing_party_id": {
+                        "type": "string",
+                        "description": "Identifier of the credited party.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Credit-note lifecycle status.",
+                        "enum": [
+                            "issued",
+                            "void"
+                        ],
+                        "example": "issued"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "description": "Why the credit note was issued, when supplied.",
+                        "enum": [
+                            "duplicate",
+                            "fraudulent",
+                            "order_change",
+                            "product_unsatisfactory"
+                        ],
+                        "example": "order_change"
+                    },
+                    "credit_type": {
+                        "type": "string",
+                        "description": "Whether the credit applied before or after payment, when supplied.",
+                        "enum": [
+                            "pre_payment",
+                            "post_payment"
+                        ],
+                        "example": "pre_payment"
+                    },
+                    "subtotal": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "tax": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "total": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "out_of_band": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "memo": {
+                        "type": "string",
+                        "description": "Free-text memo, when supplied.",
+                        "example": "Proration credit for plan downgrade"
+                    },
+                    "issuedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the credit note took effect.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "voided_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the credit note was voided, if voided.",
+                        "example": "2026-06-26T09:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the credit-note record was created.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "lines": {
+                        "type": "array",
+                        "description": "The credit note's lines (detail read only).",
+                        "example": [
+                            
+                        ],
+                        "items": {
+                            "$ref": "#/components/schemas/CreditNoteLine"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "credit_note"
+                        ],
+                        "example": "credit_note"
+                    }
+                },
+                "required": [
+                    "billing_party_id",
+                    "billing_party_type",
+                    "created_at",
+                    "id",
+                    "issuedAt",
+                    "object",
+                    "out_of_band",
+                    "status",
+                    "subtotal",
+                    "tax",
+                    "total"
+                ]
+            },
+            "CreditNoteLine": {
+                "description": "A single line of a credit note: its source reference, quantity and amount.",
+                "example": [
+                    
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the credit-note line.",
+                        "example": "2b1c0a9f-8e7d-6c5b-4a39-281706f5e4d3"
+                    },
+                    "line_type": {
+                        "type": "string",
+                        "description": "The processor's line classification, or null.",
+                        "enum": [
+                            "invoice_line_item",
+                            "custom_line_item"
+                        ],
+                        "example": "invoice_line_item"
+                    },
+                    "invoice_line_item_ref": {
+                        "type": "string",
+                        "description": "The source invoice line this credits, when applicable.",
+                        "example": "il_1Mx..."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Human-readable line description.",
+                        "example": "Pro plan \u2014 proration credit"
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "description": "Credited quantity (fractional).",
+                        "example": "1"
+                    },
+                    "unit_amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "credit_note_line"
+                        ],
+                        "example": "credit_note_line"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "id",
+                    "object",
+                    "quantity",
+                    "unit_amount"
+                ]
+            },
+            "CustomerCreditBalance": {
+                "description": "The organization's customer credit balance (signed: negative = credit available, positive = owed).",
+                "properties": {
+                    "balance": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "as_of": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the balance was last synced from the processor.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "customer_credit_balance"
+                        ],
+                        "example": "customer_credit_balance"
+                    }
+                },
+                "required": [
+                    "object"
+                ]
             },
             "AssetListItem": {
                 "description": "An asset as returned by the list/search endpoint \u2014 the asset fields plus relevance metadata when the request was a search.",

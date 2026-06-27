@@ -429,6 +429,7 @@ export class OrgAddOnsClient {
      * @param {NizamDashboard.CancelOrgAddonRequest} request
      * @param {OrgAddOnsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
+     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
@@ -439,6 +440,7 @@ export class OrgAddOnsClient {
      *
      * @example
      *     await client.orgAddOns.cancelOrgAddon({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         id: "00000000-0000-0000-0000-000000000000"
      *     })
      */
@@ -453,11 +455,12 @@ export class OrgAddOnsClient {
         request: NizamDashboard.CancelOrgAddonRequest,
         requestOptions?: OrgAddOnsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.OrgAddon>> {
-        const { id } = request;
+        const { id, "Idempotency-Key": idempotencyKey } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -482,6 +485,11 @@ export class OrgAddOnsClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,
