@@ -85,6 +85,10 @@
             "description": "Platform-staff control plane for the durable Keycloak projection state machine."
         },
         {
+            "name": "Ledger",
+            "description": "The organization's double-entry journal: accounts, entries, and the trial balance."
+        },
+        {
             "name": "Lookups",
             "description": "Static reference data \u2014 business categories."
         },
@@ -11743,6 +11747,7 @@
                                 "inbound-webhook:read",
                                 "invoice:read",
                                 "keycloak-projection:administer",
+                                "ledger:read",
                                 "merchant_payout:adjust",
                                 "merchant_payout:build",
                                 "merchant_payout:read",
@@ -12425,6 +12430,210 @@
                         "example": 20
                     }
                 }
+            },
+            "TrialBalanceLine": {
+                "description": "One currency's total debits and credits for the organization's journal.",
+                "properties": {
+                    "currency": {
+                        "type": "string",
+                        "description": "The currency of this trial-balance line.",
+                        "example": "USD"
+                    },
+                    "debits": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "credits": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "balanced": {
+                        "type": "boolean",
+                        "description": "Whether debits equal credits (the ledger is balanced) for this currency.",
+                        "example": true
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "ledger_trial_balance_line"
+                        ],
+                        "example": "ledger_trial_balance_line"
+                    }
+                },
+                "required": [
+                    "balanced",
+                    "credits",
+                    "currency",
+                    "debits",
+                    "object"
+                ]
+            },
+            "LedgerEntry": {
+                "description": "A single immutable debit or credit line of the double-entry journal.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the entry.",
+                        "example": "8f7e6d5c-4b3a-2918-0765-5e4d3c2b1a09"
+                    },
+                    "transaction_id": {
+                        "type": "string",
+                        "description": "Groups the balanced set of lines that form one posting.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "account_id": {
+                        "type": "string",
+                        "description": "The account this line posts against.",
+                        "example": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765"
+                    },
+                    "account_code": {
+                        "type": "string",
+                        "description": "The account's chart code.",
+                        "example": "merchant_payable"
+                    },
+                    "direction": {
+                        "type": "string",
+                        "description": "Whether the line debits or credits the account.",
+                        "enum": [
+                            "debit",
+                            "credit"
+                        ],
+                        "example": "credit"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "source_type": {
+                        "type": "string",
+                        "description": "The kind of document that produced this line.",
+                        "enum": [
+                            "invoice",
+                            "payment",
+                            "cod_collection",
+                            "merchant_payout",
+                            "credit_note",
+                            "refund",
+                            "reversal"
+                        ],
+                        "example": "cod_collection"
+                    },
+                    "source_id": {
+                        "type": "string",
+                        "description": "The id of the source document (null for a manual adjustment).",
+                        "example": "1a2b3c4d-5e6f-7081-92a3-b4c5d6e7f809"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Free-text line memo.",
+                        "example": "COD collected"
+                    },
+                    "posted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the entry takes economic effect.",
+                        "example": "2026-06-27T00:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the entry row was written.",
+                        "example": "2026-06-27T00:00:05Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "ledger_entry"
+                        ],
+                        "example": "ledger_entry"
+                    }
+                },
+                "required": [
+                    "account_code",
+                    "account_id",
+                    "amount",
+                    "created_at",
+                    "direction",
+                    "id",
+                    "object",
+                    "posted_at",
+                    "source_type",
+                    "transaction_id"
+                ]
+            },
+            "LedgerAccount": {
+                "description": "A double-entry chart-of-accounts account and its current balance.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the account.",
+                        "example": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Stable account code (the chart-of-accounts key).",
+                        "example": "merchant_payable"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Human-readable account name.",
+                        "example": "Merchant Payable"
+                    },
+                    "account_type": {
+                        "type": "string",
+                        "description": "Accounting class.",
+                        "enum": [
+                            "asset",
+                            "liability",
+                            "equity",
+                            "revenue",
+                            "expense"
+                        ],
+                        "example": "liability"
+                    },
+                    "normal_balance": {
+                        "type": "string",
+                        "description": "The side that increases the account.",
+                        "enum": [
+                            "debit",
+                            "credit"
+                        ],
+                        "example": "credit"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "archived"
+                        ],
+                        "example": "active"
+                    },
+                    "balance": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the account was opened.",
+                        "example": "2026-06-27T00:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "ledger_account"
+                        ],
+                        "example": "ledger_account"
+                    }
+                },
+                "required": [
+                    "account_type",
+                    "balance",
+                    "code",
+                    "created_at",
+                    "id",
+                    "name",
+                    "normal_balance",
+                    "object",
+                    "status"
+                ]
             },
             "ListResponseJob": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",

@@ -28,6 +28,8 @@ export * as invoices from "./invoices/index.js";
 export * from "./jobs/client/requests/index.js";
 export * as jobs from "./jobs/index.js";
 export * from "./jobs/types/index.js";
+export * from "./ledger/client/requests/index.js";
+export * as ledger from "./ledger/index.js";
 export * as lookups from "./lookups/index.js";
 export * from "./memberships/client/requests/index.js";
 export * as memberships from "./memberships/index.js";

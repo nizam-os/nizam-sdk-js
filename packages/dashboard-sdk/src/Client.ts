@@ -13,6 +13,7 @@ import { ImportsClient } from "./api/resources/imports/client/Client.js";
 import { InvitesClient } from "./api/resources/invites/client/Client.js";
 import { InvoicesClient } from "./api/resources/invoices/client/Client.js";
 import { JobsClient } from "./api/resources/jobs/client/Client.js";
+import { LedgerClient } from "./api/resources/ledger/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
 import { MembershipsClient } from "./api/resources/memberships/client/Client.js";
 import { MerchantPayoutsClient } from "./api/resources/merchantPayouts/client/Client.js";
@@ -53,6 +54,7 @@ export class NizamDashboardClient {
     protected _invites: InvitesClient | undefined;
     protected _invoices: InvoicesClient | undefined;
     protected _jobs: JobsClient | undefined;
+    protected _ledger: LedgerClient | undefined;
     protected _lookups: LookupsClient | undefined;
     protected _users: UsersClient | undefined;
     protected _activeOrganization: ActiveOrganizationClient | undefined;
@@ -121,6 +123,10 @@ export class NizamDashboardClient {
 
     public get jobs(): JobsClient {
         return (this._jobs ??= new JobsClient(this._options));
+    }
+
+    public get ledger(): LedgerClient {
+        return (this._ledger ??= new LedgerClient(this._options));
     }
 
     public get lookups(): LookupsClient {

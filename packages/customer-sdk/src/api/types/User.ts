@@ -63,6 +63,7 @@ export namespace User {
             InboundWebhookRead: "inbound-webhook:read",
             InvoiceRead: "invoice:read",
             KeycloakProjectionAdminister: "keycloak-projection:administer",
+            LedgerRead: "ledger:read",
             MerchantPayoutAdjust: "merchant_payout:adjust",
             MerchantPayoutBuild: "merchant_payout:build",
             MerchantPayoutRead: "merchant_payout:read",

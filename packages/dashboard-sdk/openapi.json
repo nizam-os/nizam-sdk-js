@@ -85,6 +85,10 @@
             "description": "Platform-staff control plane for the durable Keycloak projection state machine."
         },
         {
+            "name": "Ledger",
+            "description": "The organization's double-entry journal: accounts, entries, and the trial balance."
+        },
+        {
             "name": "Lookups",
             "description": "Static reference data \u2014 business categories."
         },
@@ -12000,6 +12004,685 @@
                 "x-accessible-to": [
                     "dashboard",
                     "platform_staff"
+                ]
+            }
+        },
+        "/v1/ledger/accounts": {
+            "get": {
+                "tags": [
+                    "Ledger"
+                ],
+                "summary": "List ledger accounts (paginated)",
+                "description": "The caller's organization's chart of accounts, each with its current balance, newest first. Keyset-paginated (`starting_after` / `ending_before`); no sort parameter. Org-scoped (RLS).",
+                "operationId": "listLedgerAccounts",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A page of ledger accounts.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LedgerAccount"
+                                },
+                                "example": {
+                                    "id": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765",
+                                    "code": "merchant_payable",
+                                    "name": "Merchant Payable",
+                                    "account_type": "liability",
+                                    "normal_balance": "credit",
+                                    "status": "active",
+                                    "balance": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "created_at": "2026-06-27T00:00:00Z",
+                                    "object": "ledger_account"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/ledger/accounts",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/ledger/accounts",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/ledger/accounts",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/ledger/accounts",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/ledger/accounts/{accountId}": {
+            "get": {
+                "tags": [
+                    "Ledger"
+                ],
+                "summary": "Get a ledger account",
+                "description": "One ledger account with its current balance. 404 when it does not exist in the caller's organization.",
+                "operationId": "getLedgerAccount",
+                "parameters": [
+                    {
+                        "name": "accountId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The ledger account.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LedgerAccount"
+                                },
+                                "example": {
+                                    "id": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765",
+                                    "code": "merchant_payable",
+                                    "name": "Merchant Payable",
+                                    "account_type": "liability",
+                                    "normal_balance": "credit",
+                                    "status": "active",
+                                    "balance": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "created_at": "2026-06-27T00:00:00Z",
+                                    "object": "ledger_account"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/ledger/accounts/{accountId}",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/ledger/accounts/{accountId}",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/ledger/accounts/{accountId}",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/ledger/accounts/{accountId}",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ledger account not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "ledger.account_not_found": {
+                                        "summary": "Ledger account not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/ledger/account_not_found",
+                                            "title": "Ledger account not found",
+                                            "status": 404,
+                                            "detail": "The requested ledger account does not exist.",
+                                            "instance": "/v1/ledger/accounts/{accountId}",
+                                            "code": "ledger.account_not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/ledger/entries": {
+            "get": {
+                "tags": [
+                    "Ledger"
+                ],
+                "summary": "List ledger entries (paginated)",
+                "description": "The caller's organization's journal entries, newest posting first. Keyset-paginated (`starting_after` / `ending_before`); no sort parameter. Org-scoped (RLS).",
+                "operationId": "listLedgerEntries",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 20,
+                            "maximum": 100,
+                            "minimum": 1
+                        },
+                        "example": 20
+                    },
+                    {
+                        "name": "starting_after",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    {
+                        "name": "ending_before",
+                        "in": "query",
+                        "description": "Opaque cursor \u2014 return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A page of journal entries.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LedgerEntry"
+                                },
+                                "example": {
+                                    "id": "8f7e6d5c-4b3a-2918-0765-5e4d3c2b1a09",
+                                    "transaction_id": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d",
+                                    "account_id": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765",
+                                    "account_code": "merchant_payable",
+                                    "direction": "credit",
+                                    "amount": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "source_type": "cod_collection",
+                                    "source_id": "1a2b3c4d-5e6f-7081-92a3-b4c5d6e7f809",
+                                    "description": "COD collected",
+                                    "posted_at": "2026-06-27T00:00:00Z",
+                                    "created_at": "2026-06-27T00:00:05Z",
+                                    "object": "ledger_entry"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/ledger/entries",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/ledger/entries",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/ledger/entries",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/ledger/entries",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/ledger/trial-balance": {
+            "get": {
+                "tags": [
+                    "Ledger"
+                ],
+                "summary": "Get the trial balance",
+                "description": "Per-currency total debits vs total credits for the caller's organization. A balanced ledger reports equal totals for every currency.",
+                "operationId": "getLedgerTrialBalance",
+                "responses": {
+                    "200": {
+                        "description": "The trial balance, one line per currency.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TrialBalanceLine"
+                                },
+                                "example": {
+                                    "currency": "USD",
+                                    "debits": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "credits": {
+                                        "currency": "USD",
+                                        "minor_units": 1050,
+                                        "decimal": "10.5"
+                                    },
+                                    "balanced": true,
+                                    "object": "ledger_trial_balance_line"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/ledger/trial-balance",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/ledger/trial-balance",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/ledger/trial-balance",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/ledger/trial-balance",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
                 ]
             }
         },
@@ -32122,6 +32805,7 @@
                                 "inbound-webhook:read",
                                 "invoice:read",
                                 "keycloak-projection:administer",
+                                "ledger:read",
                                 "merchant_payout:adjust",
                                 "merchant_payout:build",
                                 "merchant_payout:read",
@@ -32804,6 +33488,210 @@
                         "example": 20
                     }
                 }
+            },
+            "TrialBalanceLine": {
+                "description": "One currency's total debits and credits for the organization's journal.",
+                "properties": {
+                    "currency": {
+                        "type": "string",
+                        "description": "The currency of this trial-balance line.",
+                        "example": "USD"
+                    },
+                    "debits": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "credits": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "balanced": {
+                        "type": "boolean",
+                        "description": "Whether debits equal credits (the ledger is balanced) for this currency.",
+                        "example": true
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "ledger_trial_balance_line"
+                        ],
+                        "example": "ledger_trial_balance_line"
+                    }
+                },
+                "required": [
+                    "balanced",
+                    "credits",
+                    "currency",
+                    "debits",
+                    "object"
+                ]
+            },
+            "LedgerEntry": {
+                "description": "A single immutable debit or credit line of the double-entry journal.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the entry.",
+                        "example": "8f7e6d5c-4b3a-2918-0765-5e4d3c2b1a09"
+                    },
+                    "transaction_id": {
+                        "type": "string",
+                        "description": "Groups the balanced set of lines that form one posting.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "account_id": {
+                        "type": "string",
+                        "description": "The account this line posts against.",
+                        "example": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765"
+                    },
+                    "account_code": {
+                        "type": "string",
+                        "description": "The account's chart code.",
+                        "example": "merchant_payable"
+                    },
+                    "direction": {
+                        "type": "string",
+                        "description": "Whether the line debits or credits the account.",
+                        "enum": [
+                            "debit",
+                            "credit"
+                        ],
+                        "example": "credit"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "source_type": {
+                        "type": "string",
+                        "description": "The kind of document that produced this line.",
+                        "enum": [
+                            "invoice",
+                            "payment",
+                            "cod_collection",
+                            "merchant_payout",
+                            "credit_note",
+                            "refund",
+                            "reversal"
+                        ],
+                        "example": "cod_collection"
+                    },
+                    "source_id": {
+                        "type": "string",
+                        "description": "The id of the source document (null for a manual adjustment).",
+                        "example": "1a2b3c4d-5e6f-7081-92a3-b4c5d6e7f809"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Free-text line memo.",
+                        "example": "COD collected"
+                    },
+                    "posted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the entry takes economic effect.",
+                        "example": "2026-06-27T00:00:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the entry row was written.",
+                        "example": "2026-06-27T00:00:05Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "ledger_entry"
+                        ],
+                        "example": "ledger_entry"
+                    }
+                },
+                "required": [
+                    "account_code",
+                    "account_id",
+                    "amount",
+                    "created_at",
+                    "direction",
+                    "id",
+                    "object",
+                    "posted_at",
+                    "source_type",
+                    "transaction_id"
+                ]
+            },
+            "LedgerAccount": {
+                "description": "A double-entry chart-of-accounts account and its current balance.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique identifier of the account.",
+                        "example": "5e4d3c2b-1a09-8f7e-6d5c-4b3a29180765"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Stable account code (the chart-of-accounts key).",
+                        "example": "merchant_payable"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Human-readable account name.",
+                        "example": "Merchant Payable"
+                    },
+                    "account_type": {
+                        "type": "string",
+                        "description": "Accounting class.",
+                        "enum": [
+                            "asset",
+                            "liability",
+                            "equity",
+                            "revenue",
+                            "expense"
+                        ],
+                        "example": "liability"
+                    },
+                    "normal_balance": {
+                        "type": "string",
+                        "description": "The side that increases the account.",
+                        "enum": [
+                            "debit",
+                            "credit"
+                        ],
+                        "example": "credit"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "archived"
+                        ],
+                        "example": "active"
+                    },
+                    "balance": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the account was opened.",
+                        "example": "2026-06-27T00:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "ledger_account"
+                        ],
+                        "example": "ledger_account"
+                    }
+                },
+                "required": [
+                    "account_type",
+                    "balance",
+                    "code",
+                    "created_at",
+                    "id",
+                    "name",
+                    "normal_balance",
+                    "object",
+                    "status"
+                ]
             },
             "ListResponseJob": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
