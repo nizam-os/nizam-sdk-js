@@ -5,11 +5,11 @@ import type * as NizamOperatorRuntime from "../index.js";
 /**
  * Envelope for paginated list responses (opaque cursor pagination).
  */
-export interface ListResponseSubscriptionPlan {
+export interface ListResponseSubscriptionPlanSummary {
     /** Object type discriminator. Always `list` for this envelope. */
-    object?: ListResponseSubscriptionPlan.Object_ | undefined;
+    object?: ListResponseSubscriptionPlanSummary.Object_ | undefined;
     /** Page of resources. Empty array when there are no matches. */
-    data?: NizamOperatorRuntime.SubscriptionPlan[] | undefined;
+    data?: NizamOperatorRuntime.SubscriptionPlanSummary[] | undefined;
     /** True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page. */
     has_more?: boolean | undefined;
     /** True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page. */
@@ -22,7 +22,7 @@ export interface ListResponseSubscriptionPlan {
     limit?: number | undefined;
 }
 
-export namespace ListResponseSubscriptionPlan {
+export namespace ListResponseSubscriptionPlanSummary {
     /** Object type discriminator. Always `list` for this envelope. */
     export const Object_ = {
         List: "list",

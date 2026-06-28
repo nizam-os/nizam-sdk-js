@@ -7598,7 +7598,8 @@
                         "type": "string",
                         "description": "The code of the plan to subscribe to.",
                         "example": "pro",
-                        "minLength": 1,
+                        "maxLength": 64,
+                        "minLength": 0,
                         "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
                     }
                 },
@@ -7613,7 +7614,8 @@
                         "type": "string",
                         "description": "The code of the plan to move to.",
                         "example": "enterprise",
-                        "minLength": 1,
+                        "maxLength": 64,
+                        "minLength": 0,
                         "pattern": "^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$"
                     }
                 },
@@ -8951,12 +8953,16 @@
                     "bank_name": {
                         "type": "string",
                         "description": "Destination bank name.",
-                        "example": "First National Bank"
+                        "example": "First National Bank",
+                        "maxLength": 191,
+                        "minLength": 0
                     },
                     "bank_account_name": {
                         "type": "string",
                         "description": "Destination account holder name.",
-                        "example": "Acme Logistics LLC"
+                        "example": "Acme Logistics LLC",
+                        "maxLength": 191,
+                        "minLength": 0
                     },
                     "account_last4": {
                         "type": "string",
@@ -8973,7 +8979,9 @@
                     "cheque_number": {
                         "type": "string",
                         "description": "Cheque number, for a cheque disbursement.",
-                        "example": "001234"
+                        "example": "001234",
+                        "maxLength": 64,
+                        "minLength": 0
                     }
                 },
                 "required": [
@@ -9026,12 +9034,16 @@
                     "description": {
                         "type": "string",
                         "description": "Human-readable line description.",
-                        "example": "Platform commission"
+                        "example": "Platform commission",
+                        "maxLength": 500,
+                        "minLength": 0
                     },
                     "code": {
                         "type": "string",
                         "description": "Optional billing code.",
-                        "example": "commission"
+                        "example": "commission",
+                        "maxLength": 64,
+                        "minLength": 0
                     },
                     "amount": {
                         "type": "integer",
@@ -9050,12 +9062,16 @@
                     "processor_transfer_id": {
                         "type": "string",
                         "description": "The processor transfer reference (record-only).",
-                        "example": "xfer_8f3a21bc9d"
+                        "example": "xfer_8f3a21bc9d",
+                        "maxLength": 255,
+                        "minLength": 0
                     },
                     "external_reference": {
                         "type": "string",
                         "description": "An external reference for the disbursement.",
-                        "example": "WIRE-2026-06-0042"
+                        "example": "WIRE-2026-06-0042",
+                        "maxLength": 255,
+                        "minLength": 0
                     }
                 }
             },
@@ -12017,7 +12033,7 @@
                     "setup_fee"
                 ]
             },
-            "ListResponseSubscriptionPlan": {
+            "ListResponseSubscriptionPlanSummary": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
                 "properties": {
                     "object": {
@@ -12032,7 +12048,7 @@
                         "type": "array",
                         "description": "Page of resources. Empty array when there are no matches.",
                         "items": {
-                            "$ref": "#/components/schemas/SubscriptionPlan"
+                            "$ref": "#/components/schemas/SubscriptionPlanSummary"
                         }
                     },
                     "has_more": {
@@ -12062,6 +12078,111 @@
                         "example": 20
                     }
                 }
+            },
+            "SubscriptionPlanSummary": {
+                "description": "A subscription plan in the platform catalog (list view).",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable plan id.",
+                        "example": "3c2d1b0a-9f8e-7d6c-5b4a-392817065e4d"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Stable plan code (natural key).",
+                        "example": "pro"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Pro"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Catalog lifecycle status.",
+                        "enum": [
+                            "draft",
+                            "active",
+                            "grandfathered",
+                            "retired",
+                            "archived"
+                        ],
+                        "example": "active"
+                    },
+                    "billing_model": {
+                        "type": "string",
+                        "description": "Billing model (the price shape).",
+                        "enum": [
+                            "free",
+                            "flat",
+                            "per_seat",
+                            "per_event",
+                            "tiered",
+                            "hybrid"
+                        ],
+                        "example": "per_seat"
+                    },
+                    "billing_period": {
+                        "type": "string",
+                        "description": "Billing cadence.",
+                        "enum": [
+                            "weekly",
+                            "biweekly",
+                            "monthly",
+                            "quarterly",
+                            "semiannual",
+                            "yearly"
+                        ],
+                        "example": "monthly"
+                    },
+                    "price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "description": "Whether the plan is sellable.",
+                        "example": true
+                    },
+                    "visible": {
+                        "type": "boolean",
+                        "description": "Whether the plan shows on the public pricing page.",
+                        "example": true
+                    },
+                    "position": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Display order on the catalog / pricing page.",
+                        "example": 10
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-06-25T12:00:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "plan"
+                        ],
+                        "example": "plan"
+                    }
+                },
+                "required": [
+                    "active",
+                    "billing_model",
+                    "billing_period",
+                    "code",
+                    "created_at",
+                    "id",
+                    "name",
+                    "object",
+                    "position",
+                    "price",
+                    "status",
+                    "visible"
+                ]
             },
             "Payment": {
                 "description": "A realized payment event: its owning invoice, rail, amount, refund state and status.",
@@ -13698,6 +13819,22 @@
                     "source_type": {
                         "type": "string",
                         "description": "The billable-origin kind, or null for an ad-hoc charge line.",
+                        "enum": [
+                            "order",
+                            "task",
+                            "parcel",
+                            "work_order",
+                            "cod_collection",
+                            "usage_record",
+                            "service_rate",
+                            "platform_subscription",
+                            "shipping",
+                            "fee",
+                            "tax",
+                            "adjustment",
+                            "discount",
+                            "credit"
+                        ],
                         "example": "platform_subscription"
                     },
                     "source_id": {
@@ -13943,17 +14080,17 @@
                     "provider": {
                         "type": "string",
                         "description": "The source provider.",
-                        "example": "stripe"
+                        "example": "acme"
                     },
                     "event_id": {
                         "type": "string",
                         "description": "The provider's event id.",
-                        "example": "evt_1QabcXYZ0123456789"
+                        "example": "wh_evt_123"
                     },
                     "type": {
                         "type": "string",
                         "description": "The event type that failed.",
-                        "example": "customer.subscription.updated"
+                        "example": "resource.updated"
                     },
                     "attempt_count": {
                         "type": "integer",

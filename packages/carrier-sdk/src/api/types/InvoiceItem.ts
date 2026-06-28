@@ -9,7 +9,7 @@ export interface InvoiceItem {
     /** Unique identifier of the line item. */
     id: string;
     /** The billable-origin kind, or null for an ad-hoc charge line. */
-    source_type?: string | undefined;
+    source_type?: InvoiceItem.SourceType | undefined;
     /** The originating entity id, when the line is entity-backed. */
     source_id?: string | undefined;
     /** Human-readable line description. */
@@ -27,6 +27,24 @@ export interface InvoiceItem {
 }
 
 export namespace InvoiceItem {
+    /** The billable-origin kind, or null for an ad-hoc charge line. */
+    export const SourceType = {
+        Order: "order",
+        Task: "task",
+        Parcel: "parcel",
+        WorkOrder: "work_order",
+        CodCollection: "cod_collection",
+        UsageRecord: "usage_record",
+        ServiceRate: "service_rate",
+        PlatformSubscription: "platform_subscription",
+        Shipping: "shipping",
+        Fee: "fee",
+        Tax: "tax",
+        Adjustment: "adjustment",
+        Discount: "discount",
+        Credit: "credit",
+    } as const;
+    export type SourceType = (typeof SourceType)[keyof typeof SourceType];
     export const Object_ = {
         InvoiceItem: "invoice_item",
     } as const;
