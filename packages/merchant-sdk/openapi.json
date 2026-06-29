@@ -11158,7 +11158,7 @@
                 ]
             },
             "MembershipChoice": {
-                "description": "One of the caller's active memberships \u2014 surfaced in the organization.select_required picker body.",
+                "description": "One of the caller's active memberships \u2014 surfaced in the tenant.scope_required picker body.",
                 "example": [
                     {
                         "organization_id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
