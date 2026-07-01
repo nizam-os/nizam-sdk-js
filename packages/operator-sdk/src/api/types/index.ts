@@ -37,6 +37,7 @@ export * from "./Currency.js";
 export * from "./CustomerCreditBalance.js";
 export * from "./Device.js";
 export * from "./Devices.js";
+export * from "./EmbeddingBackfill.js";
 export * from "./ExportAssetsRequest.js";
 export * from "./FailMerchantPayoutRequest.js";
 export * from "./File_.js";

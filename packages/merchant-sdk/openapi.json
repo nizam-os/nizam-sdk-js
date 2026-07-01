@@ -65,6 +65,10 @@
             "description": "The authenticated user's registered push devices."
         },
         {
+            "name": "Embeddings",
+            "description": "Vector embeddings + semantic search (epic #96): platform-staff backfill of a subject_type into a new model. The read path is the per-resource search endpoints (e.g. Assets)."
+        },
+        {
             "name": "Inbound webhooks",
             "description": "Platform-staff dead-letter triage for the inbound-webhook inbox."
         },
@@ -8929,7 +8933,9 @@
                             "service_account_api_key_regeneration",
                             "file_virus_scan",
                             "file_thumbnail_generation",
-                            "import_fleet_assets_xlsx"
+                            "import_fleet_assets_xlsx",
+                            "generate_embedding",
+                            "backfill_embeddings"
                         ]
                     },
                     "status": {
@@ -9328,6 +9334,28 @@
                             "job_submission"
                         ],
                         "example": "job_submission"
+                    }
+                },
+                "required": [
+                    "job_id",
+                    "object"
+                ]
+            },
+            "EmbeddingBackfill": {
+                "description": "Acknowledgement that an embedding backfill was enqueued.",
+                "properties": {
+                    "job_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Id of the enqueued BACKFILL_EMBEDDINGS orchestrator job \u2014 poll it to observe progress as it fans out the per-subject embedding jobs.",
+                        "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "embedding_backfill"
+                        ],
+                        "example": "embedding_backfill"
                     }
                 },
                 "required": [

@@ -15,8 +15,12 @@ import type * as NizamDashboard from "../../../../index.js";
 export interface ListAssetsRequest {
     /** Free-text search query (max 200 chars). */
     q?: string;
-    /** Include a highlighted match snippet per hit (search mode only). */
+    /** Include a highlighted match snippet per hit (relevance/text mode only). */
     highlight?: boolean;
+    /** Ranking mode for `q`: `text` (keyword hybrid FTS, the default) or `semantic` (embedding cosine similarity, #145). Semantic is always relevance-ranked — `sort` does not apply. */
+    mode?: NizamDashboard.ListAssetsRequestMode;
+    /** Top-K hits for `mode=semantic` (1–100); ignored in text mode. */
+    k?: number;
     /** Filter by lifecycle status. Comma-separated; matched case-insensitively. */
     status?: NizamDashboard.ListAssetsRequestStatusItem | NizamDashboard.ListAssetsRequestStatusItem[];
     /** Filter by top-level kind. Comma-separated; matched case-insensitively. */

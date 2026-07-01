@@ -60,6 +60,8 @@ export class AssetsClient {
         const {
             q,
             highlight,
+            mode,
+            k,
             status,
             kind,
             created_on_or_after: createdOnOrAfter,
@@ -72,6 +74,8 @@ export class AssetsClient {
         const _queryParams: Record<string, unknown> = {
             q,
             highlight,
+            mode: mode != null ? mode : undefined,
+            k,
             status: Array.isArray(status) ? status.map((item) => item) : status != null ? status : undefined,
             kind: Array.isArray(kind) ? kind.map((item) => item) : kind != null ? kind : undefined,
             created_on_or_after: createdOnOrAfter != null ? createdOnOrAfter : undefined,

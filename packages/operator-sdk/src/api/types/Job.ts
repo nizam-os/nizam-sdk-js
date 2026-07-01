@@ -53,6 +53,8 @@ export namespace Job {
         FileVirusScan: "file_virus_scan",
         FileThumbnailGeneration: "file_thumbnail_generation",
         ImportFleetAssetsXlsx: "import_fleet_assets_xlsx",
+        GenerateEmbedding: "generate_embedding",
+        BackfillEmbeddings: "backfill_embeddings",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
     /** Lifecycle status. Terminal states are `completed`, `failed`, `cancelled`. */
