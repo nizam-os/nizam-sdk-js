@@ -55,6 +55,8 @@ export namespace Job {
         ImportFleetAssetsXlsx: "import_fleet_assets_xlsx",
         GenerateEmbedding: "generate_embedding",
         BackfillEmbeddings: "backfill_embeddings",
+        IndexKnowledgeDocument: "index_knowledge_document",
+        BackfillKnowledge: "backfill_knowledge",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
     /** Lifecycle status. Terminal states are `completed`, `failed`, `cancelled`. */

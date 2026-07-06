@@ -43,6 +43,7 @@ export namespace InitiateFileUploadRequest {
         SignedDocument: "signed_document",
         ProductImage: "product_image",
         DataExport: "data_export",
+        KnowledgeDocument: "knowledge_document",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
 }

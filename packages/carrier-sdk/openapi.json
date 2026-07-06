@@ -89,6 +89,10 @@
             "description": "Platform-staff control plane for the durable Keycloak projection state machine."
         },
         {
+            "name": "Knowledge",
+            "description": "Knowledge base \u2014 documents and collections ingested, chunked, and embedded for retrieval-augmented answering (epic #428). CRUD, lifecycle, and DSAR erasure."
+        },
+        {
             "name": "Ledger",
             "description": "The organization's double-entry journal: accounts, entries, and the trial balance."
         },
@@ -184,7 +188,8 @@
                                     "import_report",
                                     "signed_document",
                                     "product_image",
-                                    "data_export"
+                                    "data_export",
+                                    "knowledge_document"
                                 ]
                             }
                         },
@@ -9259,6 +9264,279 @@
                     "status"
                 ]
             },
+            "KnowledgeCollectionSummary": {
+                "description": "A lightweight reference to a collection \u2014 its id and display name \u2014 inlined into a document via `?expand[]=collection`.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "a2b3c4d5-6e7f-4809-9a0b-1c2d3e4f5a6b"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name (unique per organization, case-insensitive).",
+                        "example": "People Ops"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "knowledge_collection"
+                        ],
+                        "example": "knowledge_collection"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "object"
+                ]
+            },
+            "KnowledgeDocument": {
+                "description": "A document in a knowledge base \u2014 its metadata and ingestion status. Content is extracted, chunked, and embedded so it can ground retrieval-augmented answers.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "d1f8c2a4-9b3e-4c7a-8f21-6e5d4c3b2a10"
+                    },
+                    "collection_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The collection this document is filed under, or null if ungrouped.",
+                        "example": "a2b3c4d5-6e7f-4809-9a0b-1c2d3e4f5a6b"
+                    },
+                    "collection": {
+                        "$ref": "#/components/schemas/KnowledgeCollectionSummary"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Display title.",
+                        "example": "Employee Handbook 2026"
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "How the content was supplied.",
+                        "enum": [
+                            "upload",
+                            "url",
+                            "inline",
+                            "connector"
+                        ]
+                    },
+                    "content_type": {
+                        "type": "string",
+                        "description": "Detected MIME type of the source content.",
+                        "example": "application/pdf"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Ingestion lifecycle status.",
+                        "enum": [
+                            "pending",
+                            "extracting",
+                            "chunking",
+                            "indexed",
+                            "failed",
+                            "archived"
+                        ]
+                    },
+                    "failure_reason": {
+                        "type": "string",
+                        "description": "Why extraction or indexing failed \u2014 present only when status is `failed`.",
+                        "example": "no extractable text"
+                    },
+                    "chunk_count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of embedded chunks (0 until indexed).",
+                        "example": 42
+                    },
+                    "source_file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The bound source file, or null before an upload completes.",
+                        "example": "f0e1d2c3-b4a5-4968-8778-695a4b3c2d1e"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Source file size in bytes \u2014 present on list projections; null on the single-document read and before an upload binds a file.",
+                        "example": 254104
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "description": "Free-form metadata. Returned on the single-document read; omitted from list projections.",
+                            "example": {
+                                "department": "people-ops"
+                            }
+                        },
+                        "description": "Free-form metadata. Returned on the single-document read; omitted from list projections.",
+                        "example": {
+                            "department": "people-ops"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the document was registered.",
+                        "example": "2026-05-17T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the document was last modified.",
+                        "example": "2026-05-17T12:05:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "knowledge_document"
+                        ],
+                        "example": "knowledge_document"
+                    }
+                },
+                "required": [
+                    "chunk_count",
+                    "created_at",
+                    "id",
+                    "object",
+                    "source",
+                    "status",
+                    "title",
+                    "updated_at"
+                ]
+            },
+            "CreateKnowledgeDocumentRequest": {
+                "description": "Registers a document, then upload its content via the file-upload API (`kind=knowledge_document`, `subject_type=knowledge_document`, `subject_id=`the returned document id). Once the upload completes and passes scanning, the document is extracted, chunked, and embedded.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Display title.",
+                        "example": "Employee Handbook 2026",
+                        "maxLength": 512,
+                        "minLength": 0
+                    },
+                    "collection_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Collection to file the document under, or null to leave it ungrouped.",
+                        "example": "a2b3c4d5-6e7f-4809-9a0b-1c2d3e4f5a6b"
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "description": "Optional free-form metadata.",
+                            "example": {
+                                "department": "people-ops"
+                            }
+                        },
+                        "description": "Optional free-form metadata.",
+                        "example": {
+                            "department": "people-ops"
+                        }
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
+            "MoveKnowledgeDocumentRequest": {
+                "description": "The collection to file a document under. To un-group a document instead, use DELETE /v1/knowledge/documents/{id}/collection.",
+                "properties": {
+                    "collection_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The collection to move the document into. Required \u2014 clearing the grouping is the separate un-group verb, not a null here.",
+                        "example": "a2b3c4d5-6e7f-4809-9a0b-1c2d3e4f5a6b"
+                    }
+                },
+                "required": [
+                    "collection_id"
+                ]
+            },
+            "KnowledgeCollection": {
+                "description": "A folder grouping related knowledge documents within an organization.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable UUID.",
+                        "example": "a2b3c4d5-6e7f-4809-9a0b-1c2d3e4f5a6b"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name (unique per organization, case-insensitive).",
+                        "example": "People Ops"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Optional description.",
+                        "example": "HR policies, handbooks, and onboarding guides."
+                    },
+                    "document_count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of live documents filed under the collection. Returned in list projections; null on the single-collection read.",
+                        "example": 12
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the collection was created.",
+                        "example": "2026-05-17T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the collection was last modified.",
+                        "example": "2026-05-17T12:05:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "knowledge_collection"
+                        ],
+                        "example": "knowledge_collection"
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "name",
+                    "object",
+                    "updated_at"
+                ]
+            },
+            "CreateKnowledgeCollectionRequest": {
+                "description": "Creates a collection (a folder for related documents) in the active organization.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Display name \u2014 unique per organization, case-insensitive.",
+                        "example": "People Ops",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Optional description.",
+                        "example": "HR policies, handbooks, and onboarding guides.",
+                        "maxLength": 2000,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            },
             "Job": {
                 "description": "A long-running, retryable, operator-visible unit of work \u2014 bulk imports, exports, backfills, cache rebuilds. The job row is the persistent handle; the executing engine (Temporal workflow or lease worker, declared per kind) reports progress into it. Cancellation is cooperative: already-running work continues until the engine's next checkpoint.",
                 "properties": {
@@ -9284,7 +9562,9 @@
                             "file_thumbnail_generation",
                             "import_fleet_assets_xlsx",
                             "generate_embedding",
-                            "backfill_embeddings"
+                            "backfill_embeddings",
+                            "index_knowledge_document",
+                            "backfill_knowledge"
                         ]
                     },
                     "status": {
@@ -9690,6 +9970,28 @@
                     "object"
                 ]
             },
+            "KnowledgeBackfill": {
+                "description": "Acknowledgement that a knowledge corpus backfill was enqueued.",
+                "properties": {
+                    "job_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Id of the enqueued BACKFILL_KNOWLEDGE orchestrator job \u2014 poll it to observe progress as it fans out the per-document re-index jobs.",
+                        "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "knowledge_backfill"
+                        ],
+                        "example": "knowledge_backfill"
+                    }
+                },
+                "required": [
+                    "job_id",
+                    "object"
+                ]
+            },
             "EmbeddingBackfill": {
                 "description": "Acknowledgement that an embedding backfill was enqueued.",
                 "properties": {
@@ -9776,7 +10078,8 @@
                             "import_report",
                             "signed_document",
                             "product_image",
-                            "data_export"
+                            "data_export",
+                            "knowledge_document"
                         ]
                     },
                     "status": {
@@ -9967,7 +10270,8 @@
                             "import_report",
                             "signed_document",
                             "product_image",
-                            "data_export"
+                            "data_export",
+                            "knowledge_document"
                         ]
                     },
                     "subject_type": {
@@ -10051,7 +10355,8 @@
                             "import_report",
                             "signed_document",
                             "product_image",
-                            "data_export"
+                            "data_export",
+                            "knowledge_document"
                         ]
                     },
                     "subject_type": {
@@ -11576,6 +11881,57 @@
                     }
                 }
             },
+            "UpdateKnowledgeDocumentRequest": {
+                "description": "Set-only partial update of a document's title, collection, and metadata. Omitted or null fields are left unchanged.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "New title. Omit to leave unchanged.",
+                        "example": "Employee Handbook 2026 (rev B)",
+                        "maxLength": 512,
+                        "minLength": 0
+                    },
+                    "collection_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Move the document into this collection. Omit to leave unchanged.",
+                        "example": "a2b3c4d5-6e7f-4809-9a0b-1c2d3e4f5a6b"
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "description": "Replace the free-form metadata wholesale. Omit to leave unchanged.",
+                            "example": {
+                                "department": "people-ops"
+                            }
+                        },
+                        "description": "Replace the free-form metadata wholesale. Omit to leave unchanged.",
+                        "example": {
+                            "department": "people-ops"
+                        }
+                    }
+                }
+            },
+            "UpdateKnowledgeCollectionRequest": {
+                "description": "Set-only partial update of a collection's name and description. Omitted or null fields are left unchanged.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "New name. Omit to leave unchanged.",
+                        "example": "People & Culture",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "New description. Omit to leave unchanged.",
+                        "example": "HR policies and handbooks.",
+                        "maxLength": 2000,
+                        "minLength": 0
+                    }
+                }
+            },
             "InternalUserUpdateRequest": {
                 "description": "Platform-staff partial update (contact + lifecycle status).",
                 "properties": {
@@ -12766,6 +13122,14 @@
                                 "inbound-webhook:read",
                                 "invoice:read",
                                 "keycloak-projection:administer",
+                                "knowledge:archive",
+                                "knowledge:create",
+                                "knowledge:delete",
+                                "knowledge:manage_collections",
+                                "knowledge:purge",
+                                "knowledge:read",
+                                "knowledge:reindex",
+                                "knowledge:update",
                                 "ledger:read",
                                 "merchant_payout:adjust",
                                 "merchant_payout:build",
@@ -13653,6 +14017,98 @@
                     "object",
                     "status"
                 ]
+            },
+            "ListResponseKnowledgeDocument": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/KnowledgeDocument"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "ListResponseKnowledgeCollection": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/KnowledgeCollection"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
             },
             "ListResponseJob": {
                 "description": "Envelope for paginated list responses (opaque cursor pagination).",
@@ -15125,19 +15581,6 @@
             }
         },
         "parameters": {
-            "expandParam": {
-                "name": "expand[]",
-                "in": "query",
-                "description": "Inline related resources instead of returning id references. Dot-notation for nested (e.g., `order.merchant`). Max depth 4.",
-                "required": false,
-                "schema": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "example": "[\"worker\", \"order.merchant\"]"
-            },
             "fieldsParam": {
                 "name": "fields[<type>]",
                 "in": "query",

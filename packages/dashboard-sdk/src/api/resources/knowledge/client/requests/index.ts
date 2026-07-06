@@ -1,0 +1,15 @@
+export type { ArchiveKnowledgeDocumentRequest } from "./ArchiveKnowledgeDocumentRequest.js";
+export type { CreateKnowledgeCollectionRequest } from "./CreateKnowledgeCollectionRequest.js";
+export type { CreateKnowledgeDocumentRequest } from "./CreateKnowledgeDocumentRequest.js";
+export type { DeleteKnowledgeCollectionRequest } from "./DeleteKnowledgeCollectionRequest.js";
+export type { DeleteKnowledgeDocumentRequest } from "./DeleteKnowledgeDocumentRequest.js";
+export type { GetKnowledgeCollectionRequest } from "./GetKnowledgeCollectionRequest.js";
+export type { GetKnowledgeDocumentRequest } from "./GetKnowledgeDocumentRequest.js";
+export type { ListKnowledgeCollectionsRequest } from "./ListKnowledgeCollectionsRequest.js";
+export type { ListKnowledgeDocumentsRequest } from "./ListKnowledgeDocumentsRequest.js";
+export type { MoveKnowledgeDocumentRequest } from "./MoveKnowledgeDocumentRequest.js";
+export type { PurgeKnowledgeDocumentRequest } from "./PurgeKnowledgeDocumentRequest.js";
+export type { ReindexKnowledgeDocumentRequest } from "./ReindexKnowledgeDocumentRequest.js";
+export type { UngroupKnowledgeDocumentRequest } from "./UngroupKnowledgeDocumentRequest.js";
+export type { UpdateKnowledgeCollectionRequest } from "./UpdateKnowledgeCollectionRequest.js";
+export type { UpdateKnowledgeDocumentRequest } from "./UpdateKnowledgeDocumentRequest.js";

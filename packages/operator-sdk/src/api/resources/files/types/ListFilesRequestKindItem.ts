@@ -9,5 +9,6 @@ export const ListFilesRequestKindItem = {
     SignedDocument: "signed_document",
     ProductImage: "product_image",
     DataExport: "data_export",
+    KnowledgeDocument: "knowledge_document",
 } as const;
 export type ListFilesRequestKindItem = (typeof ListFilesRequestKindItem)[keyof typeof ListFilesRequestKindItem];
