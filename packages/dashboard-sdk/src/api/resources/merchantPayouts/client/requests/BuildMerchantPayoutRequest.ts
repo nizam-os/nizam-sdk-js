@@ -20,7 +20,12 @@ import type * as NizamDashboard from "../../../../index.js";
  *             cheque_number: "001234"
  *         },
  *         lines: [{
- *                 line_type: "source"
+ *                 line_type: "fee",
+ *                 source_type: "fee",
+ *                 source_id: "9f8e7d6c-5b4a-3210-fedc-ba9876543210",
+ *                 description: "Platform commission",
+ *                 code: "commission",
+ *                 amount: -1500
  *             }],
  *         notes: "June COD settlement"
  *     }

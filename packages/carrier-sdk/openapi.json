@@ -41,12 +41,20 @@
             "description": "Organization activity feed \u2014 the append-only timeline of what happened, and the durable source of truth behind realtime dashboard updates."
         },
         {
+            "name": "Agent Profiles",
+            "description": "An organization's versioned agent personas (definition = model + prompt + tools + knowledge + autonomy)."
+        },
+        {
             "name": "Assets",
             "description": "Universal physical-hardware master \u2014 vehicles, drones, robots, trailers, containers, equipment. Kind-discriminated."
         },
         {
             "name": "Assignments",
             "description": "Time-bound bindings between assets and operators in a role. Append a new row to reassign; never mutate in place."
+        },
+        {
+            "name": "Assistant Analytics",
+            "description": "Platform-staff analytics over the assistant interaction sink \u2014 counts and token sums by interaction type, across tenants. Metadata only; never conversation content."
         },
         {
             "name": "COD Collections",
@@ -3199,7 +3207,14 @@
                                 },
                                 "example": {
                                     "devices": [
-                                        
+                                        {
+                                            "id": "8b1f0a2e-3c4d-4e5f-9a0b-1c2d3e4f5a6b",
+                                            "platform": "android",
+                                            "status": "active",
+                                            "registered_at": "2026-06-13T10:15:30Z",
+                                            "last_seen_at": "2026-06-13T14:22:05Z",
+                                            "object": "device"
+                                        }
                                     ],
                                     "object": "device_list"
                                 }
@@ -3709,7 +3724,16 @@
                                 },
                                 "example": {
                                     "preferences": [
-                                        
+                                        {
+                                            "kind": "membership.joined",
+                                            "channel": "email",
+                                            "enabled": false,
+                                            "quiet_hours": {
+                                                "start": "22:00",
+                                                "end": "07:00",
+                                                "timezone": "America/Toronto"
+                                            }
+                                        }
                                     ],
                                     "object": "notification_preferences"
                                 }
@@ -3846,7 +3870,16 @@
                                     "summary": "Update the current user's notification preferences",
                                     "value": {
                                         "preferences": [
-                                            
+                                            {
+                                                "kind": "membership.joined",
+                                                "channel": "email",
+                                                "enabled": false,
+                                                "quiet_hours": {
+                                                    "start": "22:00",
+                                                    "end": "07:00",
+                                                    "timezone": "America/Toronto"
+                                                }
+                                            }
                                         ]
                                     }
                                 }
@@ -3865,7 +3898,16 @@
                                 },
                                 "example": {
                                     "preferences": [
-                                        
+                                        {
+                                            "kind": "membership.joined",
+                                            "channel": "email",
+                                            "enabled": false,
+                                            "quiet_hours": {
+                                                "start": "22:00",
+                                                "end": "07:00",
+                                                "timezone": "America/Toronto"
+                                            }
+                                        }
                                     ],
                                     "object": "notification_preferences"
                                 }
@@ -4730,7 +4772,11 @@
                                     "unread": 3,
                                     "archived": 5,
                                     "categories": [
-                                        
+                                        {
+                                            "category": "operational",
+                                            "total": 8,
+                                            "unread": 2
+                                        }
                                     ],
                                     "object": "notification_counts"
                                 }
@@ -8778,9 +8824,6 @@
                     "lines": {
                         "type": "array",
                         "description": "The settlement lines (detail read only).",
-                        "example": [
-                            
-                        ],
                         "items": {
                             "$ref": "#/components/schemas/MerchantPayoutLine"
                         }
@@ -8808,9 +8851,6 @@
             },
             "MerchantPayoutLine": {
                 "description": "A single settlement line of a merchant payout: its kind, source, quantity and signed total.",
-                "example": [
-                    
-                ],
                 "properties": {
                     "id": {
                         "type": "string",
@@ -8920,9 +8960,6 @@
                     "lines": {
                         "type": "array",
                         "description": "Manual fee / adjustment / credit lines to add (optional).",
-                        "example": [
-                            
-                        ],
                         "items": {
                             "$ref": "#/components/schemas/MerchantPayoutLineInput"
                         }
@@ -8999,9 +9036,6 @@
             },
             "MerchantPayoutLineInput": {
                 "description": "A manual fee / adjustment line to add to a settlement build.",
-                "example": [
-                    
-                ],
                 "properties": {
                     "line_type": {
                         "type": "string",
@@ -9851,9 +9885,6 @@
             },
             "MembershipDriftResponse": {
                 "description": "One org with divergent membership sets.",
-                "example": [
-                    
-                ],
                 "properties": {
                     "organization_id": {
                         "type": "string",
@@ -9925,9 +9956,6 @@
                     "membership_divergent": {
                         "type": "array",
                         "description": "Per-org membership-set divergences (KC vs Nizam).",
-                        "example": [
-                            
-                        ],
                         "items": {
                             "$ref": "#/components/schemas/MembershipDriftResponse"
                         }
@@ -10526,6 +10554,214 @@
                 },
                 "required": [
                     "etag"
+                ]
+            },
+            "CreateConversationRequest": {
+                "description": "Start a new assistant conversation.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Optional title; a conversation is untitled until named.",
+                        "example": "Trip planning",
+                        "maxLength": 200,
+                        "minLength": 0
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "description": "Who else in the org may read it (default private).",
+                        "enum": [
+                            "private",
+                            "workspace",
+                            "org"
+                        ],
+                        "example": "private"
+                    }
+                }
+            },
+            "Conversation": {
+                "description": "An assistant conversation.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Conversation id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "owner_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The member who owns the conversation.",
+                        "example": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Title, or null if untitled.",
+                        "example": "Trip planning"
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "description": "Who else in the org may read it.",
+                        "enum": [
+                            "private",
+                            "workspace",
+                            "org"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "archived"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation timestamp.",
+                        "example": "2026-07-08T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last-updated timestamp.",
+                        "example": "2026-07-08T12:34:56Z"
+                    },
+                    "allowed_transitions": {
+                        "type": "array",
+                        "description": "Statuses this conversation may move to next \u2014 the wire projection of the transition matrix, derived from `status`.",
+                        "example": [
+                            "archived"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "A legal next status.",
+                            "enum": [
+                                "active",
+                                "archived"
+                            ],
+                            "example": "archived"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "conversation"
+                        ],
+                        "example": "conversation"
+                    }
+                },
+                "required": [
+                    "allowed_transitions",
+                    "created_at",
+                    "id",
+                    "object",
+                    "owner_id",
+                    "status",
+                    "updated_at",
+                    "visibility"
+                ]
+            },
+            "Message": {
+                "description": "One message on a conversation's active path, with its branch navigation.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Message id.",
+                        "example": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6"
+                    },
+                    "parent_message_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Parent message id, or null for the root/first message.",
+                        "example": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "Who authored this message.",
+                        "enum": [
+                            "user",
+                            "assistant",
+                            "system",
+                            "tool"
+                        ]
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The message body.",
+                        "example": "What's the fastest route to the depot?"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation timestamp.",
+                        "example": "2026-07-08T12:34:56Z"
+                    },
+                    "sibling_ids": {
+                        "type": "array",
+                        "description": "Ids of every branch alternative at this point (siblings sharing the parent), creation-ordered and including this message. Switch to one via POST .../messages/{id}/switch-branch.",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "A sibling message id.",
+                            "example": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                        }
+                    },
+                    "sibling_index": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "This message's 1-based position among its siblings.",
+                        "example": 2
+                    },
+                    "sibling_count": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Number of branch alternatives at this point (1 = no alternate branch).",
+                        "example": 3
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "message"
+                        ],
+                        "example": "message"
+                    }
+                },
+                "required": [
+                    "content",
+                    "created_at",
+                    "id",
+                    "object",
+                    "role",
+                    "sibling_count",
+                    "sibling_ids",
+                    "sibling_index"
+                ]
+            },
+            "MessageThread": {
+                "description": "A conversation's active message path \u2014 the active messages root\u2192leaf, each with branch navigation.",
+                "properties": {
+                    "messages": {
+                        "type": "array",
+                        "description": "The active path \u2014 messages from the root to the leaf, in order.",
+                        "items": {
+                            "$ref": "#/components/schemas/Message"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "message_thread"
+                        ],
+                        "example": "message_thread"
+                    }
+                },
+                "required": [
+                    "messages",
+                    "object"
                 ]
             },
             "CodCollection": {
@@ -11222,6 +11458,416 @@
                     "ids"
                 ]
             },
+            "AgentAutonomyPolicy": {
+                "description": "The autonomy envelope of an agent persona version.",
+                "properties": {
+                    "autonomous_allowed": {
+                        "type": "boolean",
+                        "description": "Whether this persona may run autonomously.",
+                        "example": false
+                    },
+                    "max_steps": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Cap on steps per run; absent for no cap.",
+                        "example": 20
+                    },
+                    "token_budget": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Per-run token cap; absent for no cap.",
+                        "example": 100000
+                    },
+                    "credit_budget": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Per-run AI-credit cap; absent for no cap.",
+                        "example": 50
+                    },
+                    "tool_approval_mode": {
+                        "type": "string",
+                        "description": "Whether tool calls need human approval.",
+                        "enum": [
+                            "auto",
+                            "manual"
+                        ],
+                        "example": "manual"
+                    },
+                    "allowed_triggers": {
+                        "type": "array",
+                        "description": "Allowed run triggers.",
+                        "example": [
+                            "manual"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "Allowed run triggers.",
+                            "enum": [
+                                "manual",
+                                "cron",
+                                "event"
+                            ],
+                            "example": "[\"manual\"]"
+                        }
+                    }
+                }
+            },
+            "AgentModelSettings": {
+                "description": "Generation knobs pinned by an agent persona version.",
+                "properties": {
+                    "model": {
+                        "type": "string",
+                        "description": "Model id; null means the engine default.",
+                        "example": "gemini-3-flash-preview"
+                    },
+                    "temperature": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Sampling temperature in [0.0, 2.0]; null means the vendor default.",
+                        "example": 0.2
+                    },
+                    "max_output_tokens": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Cap on generated tokens; null means the vendor default.",
+                        "example": 1024
+                    }
+                }
+            },
+            "AgentProfile": {
+                "description": "An agent persona with its active configuration version.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable persona id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Support \u2014 Tier 1"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "Handles first-line delivery questions."
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Reserved category.",
+                        "enum": [
+                            "customer_support",
+                            "sales_outreach",
+                            "call_center",
+                            "operations",
+                            "general"
+                        ],
+                        "example": "customer_support"
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "Whether platform-provisioned or org-authored.",
+                        "enum": [
+                            "builtin",
+                            "custom"
+                        ],
+                        "example": "custom"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "archived"
+                        ],
+                        "example": "active"
+                    },
+                    "is_default": {
+                        "type": "boolean",
+                        "description": "Whether this is the org's default persona.",
+                        "example": false
+                    },
+                    "active_version": {
+                        "$ref": "#/components/schemas/AgentProfileVersion"
+                    },
+                    "allowed_transitions": {
+                        "type": "array",
+                        "description": "Statuses this persona may legally transition to next.",
+                        "example": [
+                            "archived"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "Statuses this persona may legally transition to next.",
+                            "enum": [
+                                "active",
+                                "archived"
+                            ],
+                            "example": "[\"archived\"]"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-07-07T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last update time.",
+                        "example": "2026-07-07T12:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "agent_profile"
+                        ],
+                        "example": "agent_profile"
+                    }
+                },
+                "required": [
+                    "active_version",
+                    "allowed_transitions",
+                    "category",
+                    "created_at",
+                    "id",
+                    "is_default",
+                    "name",
+                    "object",
+                    "source",
+                    "status",
+                    "updated_at"
+                ]
+            },
+            "AgentProfileVersion": {
+                "description": "An immutable configuration version of an agent persona.",
+                "properties": {
+                    "version_number": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Monotonic version number.",
+                        "example": 3
+                    },
+                    "model_settings": {
+                        "$ref": "#/components/schemas/AgentModelSettings"
+                    },
+                    "base_system_prompt": {
+                        "type": "string",
+                        "description": "Platform base prompt (from the category), frozen at author time.",
+                        "example": "You are a customer support agent for a fleet and logistics platform."
+                    },
+                    "instructions": {
+                        "type": "string",
+                        "description": "The org's custom instructions.",
+                        "example": "Escalate refunds and disputes to a human."
+                    },
+                    "effective_system_prompt": {
+                        "type": "string",
+                        "description": "The composed prompt the engine uses (base + instructions).",
+                        "example": "You are a customer support agent for a fleet and logistics platform."
+                    },
+                    "tools": {
+                        "type": "array",
+                        "description": "Tool names the persona may use.",
+                        "example": [
+                            "knowledge.search"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "Tool names the persona may use.",
+                            "example": "[\"knowledge.search\"]"
+                        }
+                    },
+                    "knowledge_collection_ids": {
+                        "type": "array",
+                        "description": "Knowledge collection ids the persona grounds on.",
+                        "example": [
+                            "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Knowledge collection ids the persona grounds on."
+                        }
+                    },
+                    "autonomy": {
+                        "$ref": "#/components/schemas/AgentAutonomyPolicy"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When this version was authored.",
+                        "example": "2026-07-07T12:00:00Z"
+                    }
+                }
+            },
+            "AgentAutonomyPolicyInput": {
+                "description": "The autonomy envelope for an agent persona.",
+                "properties": {
+                    "autonomous_allowed": {
+                        "type": "boolean",
+                        "description": "Whether this persona may run autonomously at all.",
+                        "example": false
+                    },
+                    "max_steps": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Positive cap on steps per run; null for no cap.",
+                        "example": 20
+                    },
+                    "token_budget": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Positive per-run token cap; null for no cap.",
+                        "example": 100000
+                    },
+                    "credit_budget": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Positive per-run AI-credit cap; null for no cap.",
+                        "example": 50
+                    },
+                    "tool_approval_mode": {
+                        "type": "string",
+                        "description": "Whether tool calls need human approval; defaults to manual.",
+                        "enum": [
+                            "auto",
+                            "manual"
+                        ],
+                        "example": "manual"
+                    },
+                    "allowed_triggers": {
+                        "type": "array",
+                        "description": "Allowed run triggers; empty when not autonomous.",
+                        "example": [
+                            "manual"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "Allowed run triggers; empty when not autonomous.",
+                            "enum": [
+                                "manual",
+                                "cron",
+                                "event"
+                            ],
+                            "example": "[\"manual\"]"
+                        },
+                        "uniqueItems": true
+                    }
+                }
+            },
+            "AgentModelSettingsInput": {
+                "description": "Generation knobs for an agent persona (all optional).",
+                "properties": {
+                    "model": {
+                        "type": "string",
+                        "description": "Model id; null uses the engine default.",
+                        "example": "gemini-3-flash-preview"
+                    },
+                    "temperature": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "Sampling temperature in [0.0, 2.0]; null uses the vendor default.",
+                        "example": 0.2,
+                        "maximum": 2.0,
+                        "minimum": 0.0
+                    },
+                    "max_output_tokens": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Positive cap on generated tokens; null uses the vendor default.",
+                        "example": 1024
+                    }
+                }
+            },
+            "AgentProfileConfigInput": {
+                "description": "Editable configuration of an agent persona.",
+                "properties": {
+                    "model_settings": {
+                        "$ref": "#/components/schemas/AgentModelSettingsInput"
+                    },
+                    "instructions": {
+                        "type": "string",
+                        "description": "The org's custom instructions, appended after the category base prompt.",
+                        "example": "Always confirm the delivery address before rescheduling.",
+                        "maxLength": 20000,
+                        "minLength": 0
+                    },
+                    "tools": {
+                        "type": "array",
+                        "description": "Tool names the persona may use (opaque; resolved at the consuming edge).",
+                        "example": [
+                            "knowledge.search"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "description": "Tool names the persona may use (opaque; resolved at the consuming edge).",
+                            "example": "[\"knowledge.search\"]",
+                            "maxLength": 200,
+                            "minLength": 0
+                        },
+                        "maxItems": 100,
+                        "minItems": 0,
+                        "uniqueItems": true
+                    },
+                    "knowledge_collection_ids": {
+                        "type": "array",
+                        "description": "Knowledge collection ids the persona grounds on (opaque #428 ids).",
+                        "example": [
+                            "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Knowledge collection ids the persona grounds on (opaque #428 ids)."
+                        },
+                        "maxItems": 100,
+                        "minItems": 0,
+                        "uniqueItems": true
+                    },
+                    "autonomy": {
+                        "$ref": "#/components/schemas/AgentAutonomyPolicyInput"
+                    }
+                }
+            },
+            "CreateAgentProfileRequest": {
+                "description": "Author a new agent persona.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Support \u2014 Tier 1",
+                        "maxLength": 191,
+                        "minLength": 0
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Optional description.",
+                        "example": "Handles first-line delivery questions."
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Reserved category \u2014 selects the base prompt preset.",
+                        "enum": [
+                            "customer_support",
+                            "sales_outreach",
+                            "call_center",
+                            "operations",
+                            "general"
+                        ],
+                        "example": "customer_support"
+                    },
+                    "config": {
+                        "$ref": "#/components/schemas/AgentProfileConfigInput"
+                    }
+                },
+                "required": [
+                    "category",
+                    "name"
+                ]
+            },
             "Addon": {
                 "description": "A first-party paid add-on in the platform billing catalog (admin view).",
                 "properties": {
@@ -11669,9 +12315,6 @@
             },
             "NotificationPreferenceItem": {
                 "description": "Desired state of one (kind, channel) preference.",
-                "example": [
-                    
-                ],
                 "properties": {
                     "kind": {
                         "type": "string",
@@ -11719,9 +12362,6 @@
                     "preferences": {
                         "type": "array",
                         "description": "The overrides to apply; each fully declares one (kind, channel).",
-                        "example": [
-                            
-                        ],
                         "items": {
                             "$ref": "#/components/schemas/NotificationPreferenceItem"
                         }
@@ -11730,9 +12370,6 @@
             },
             "NotificationPreference": {
                 "description": "A user's explicit per-kind \u00d7 channel override.",
-                "example": [
-                    
-                ],
                 "properties": {
                     "kind": {
                         "type": "string",
@@ -11760,9 +12397,6 @@
                     "preferences": {
                         "type": "array",
                         "description": "The user's explicit per-kind \u00d7 channel overrides.",
-                        "example": [
-                            
-                        ],
                         "items": {
                             "$ref": "#/components/schemas/NotificationPreference"
                         }
@@ -11960,6 +12594,146 @@
                     }
                 }
             },
+            "UpdateConversationRequest": {
+                "description": "Update a conversation's title or visibility.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "New title; \"\" clears it, omit to leave unchanged.",
+                        "example": "Q3 logistics review",
+                        "maxLength": 200,
+                        "minLength": 0
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "description": "New visibility; omit to leave unchanged.",
+                        "enum": [
+                            "private",
+                            "workspace",
+                            "org"
+                        ],
+                        "example": "workspace"
+                    }
+                }
+            },
+            "AssistantFeatureToggles": {
+                "description": "Per-feature assistant toggles.",
+                "properties": {
+                    "rag": {
+                        "type": "boolean",
+                        "description": "Whether the assistant may ground on the knowledge corpus.",
+                        "example": true
+                    },
+                    "tools": {
+                        "type": "boolean",
+                        "description": "Whether the assistant may call tools.",
+                        "example": true
+                    },
+                    "attachments": {
+                        "type": "boolean",
+                        "description": "Whether a member may attach files to a turn.",
+                        "example": true
+                    },
+                    "sharing": {
+                        "type": "boolean",
+                        "description": "Whether conversations may be shared beyond their owner.",
+                        "example": true
+                    }
+                }
+            },
+            "UpdateAssistantSettingsRequest": {
+                "description": "Update organization assistant settings.",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Enable/disable the assistant for the org.",
+                        "example": true
+                    },
+                    "persona_allowlist": {
+                        "type": "array",
+                        "description": "Allowed persona ids (empty = no restriction).",
+                        "example": [
+                            "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "A persona id.",
+                            "example": "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+                        },
+                        "maxItems": 100,
+                        "minItems": 0,
+                        "uniqueItems": true
+                    },
+                    "retention_days": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Conversation retention in days (positive).",
+                        "example": 90
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/AssistantFeatureToggles"
+                    },
+                    "instructions": {
+                        "type": "string",
+                        "description": "Org instructions; \"\" clears them, omit to leave unchanged.",
+                        "example": "Always confirm the delivery address before rescheduling.",
+                        "maxLength": 20000,
+                        "minLength": 0
+                    }
+                }
+            },
+            "AssistantSettings": {
+                "description": "Organization-scoped assistant configuration.",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Whether the assistant is enabled for the organization.",
+                        "example": true
+                    },
+                    "persona_allowlist": {
+                        "type": "array",
+                        "description": "Allowed persona (agent-profile) ids; empty = no restriction.",
+                        "example": [
+                            "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "A persona id.",
+                            "example": "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+                        }
+                    },
+                    "retention_days": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Conversation retention in days; null = keep forever.",
+                        "example": 90
+                    },
+                    "features": {
+                        "$ref": "#/components/schemas/AssistantFeatureToggles"
+                    },
+                    "instructions": {
+                        "type": "string",
+                        "description": "Org-level instructions prepended to every turn; null = none.",
+                        "example": "Always confirm the delivery address before rescheduling."
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "assistant_settings"
+                        ],
+                        "example": "assistant_settings"
+                    }
+                },
+                "required": [
+                    "enabled",
+                    "features",
+                    "object",
+                    "persona_allowlist"
+                ]
+            },
             "UpdateAssetRequest": {
                 "description": "Update mutable fields on an asset (set-only partial update).",
                 "properties": {
@@ -12017,6 +12791,26 @@
                         "description": "New model year \u2014 1900 or later, no later than next year. Omit to leave unchanged.",
                         "example": 2024,
                         "minimum": 1900
+                    }
+                }
+            },
+            "UpdateAgentProfileRequest": {
+                "description": "Edit an agent persona (partial).",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "New display name.",
+                        "example": "Support \u2014 Tier 1",
+                        "maxLength": 191,
+                        "minLength": 1
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "New description.",
+                        "example": "Handles first-line delivery questions."
+                    },
+                    "config": {
+                        "$ref": "#/components/schemas/AgentProfileConfigInput"
                     }
                 }
             },
@@ -12981,9 +13775,6 @@
             },
             "NotificationCategoryCount": {
                 "description": "Active total/unread for one category.",
-                "example": [
-                    
-                ],
                 "properties": {
                     "category": {
                         "type": "string",
@@ -13036,9 +13827,6 @@
                     "categories": {
                         "type": "array",
                         "description": "Per-category active counts; categories with no active row are omitted.",
-                        "example": [
-                            
-                        ],
                         "items": {
                             "$ref": "#/components/schemas/NotificationCategoryCount"
                         }
@@ -13105,6 +13893,8 @@
                                 "activity:read:all",
                                 "addon:manage",
                                 "addon:read",
+                                "ai:agent_profile_manage",
+                                "ai:agent_profile_read",
                                 "asset:create",
                                 "asset:delete",
                                 "asset:dispose",
@@ -13113,11 +13903,19 @@
                                 "asset:read",
                                 "asset:transition",
                                 "asset:update",
+                                "assistant_interaction:read_analytics",
+                                "assistant_settings:manage",
+                                "assistant_settings:read",
                                 "cod_collection:adjust",
                                 "cod_collection:read",
                                 "cod_collection:record",
                                 "cod_collection:settle",
                                 "cod_collection:write_off",
+                                "conversation:archive",
+                                "conversation:create",
+                                "conversation:delete",
+                                "conversation:read",
+                                "conversation:update",
                                 "credit_note:read",
                                 "inbound-webhook:read",
                                 "invoice:read",
@@ -13135,6 +13933,8 @@
                                 "merchant_payout:build",
                                 "merchant_payout:read",
                                 "merchant_payout:settle",
+                                "message:read",
+                                "message:switch_branch",
                                 "notification-delivery:read",
                                 "org-maintenance:administer",
                                 "org_addon:manage",
@@ -13285,9 +14085,6 @@
                     "devices": {
                         "type": "array",
                         "description": "The caller's live device registrations.",
-                        "example": [
-                            
-                        ],
                         "items": {
                             "$ref": "#/components/schemas/Device"
                         }
@@ -14219,7 +15016,7 @@
                     "amount_due": {
                         "$ref": "#/components/schemas/Money"
                     },
-                    "issuedAt": {
+                    "issued_at": {
                         "type": "string",
                         "format": "date-time",
                         "description": "When the invoice was issued/finalized.",
@@ -14258,9 +15055,6 @@
                     "items": {
                         "type": "array",
                         "description": "The invoice's line items (detail read only).",
-                        "example": [
-                            
-                        ],
                         "items": {
                             "$ref": "#/components/schemas/InvoiceItem"
                         }
@@ -14282,7 +15076,6 @@
                     "created_at",
                     "discount",
                     "id",
-                    "issuedAt",
                     "object",
                     "status",
                     "subtotal",
@@ -14291,9 +15084,6 @@
             },
             "InvoiceItem": {
                 "description": "A single line item of an invoice: its source, quantity and money rollups.",
-                "example": [
-                    
-                ],
                 "properties": {
                     "id": {
                         "type": "string",
@@ -14623,6 +15413,102 @@
                     "received_at",
                     "type"
                 ]
+            },
+            "InteractionEventStats": {
+                "description": "Aggregated assistant interaction metrics over a window \u2014 metadata only (counts and token sums by interaction type); never conversation content.",
+                "properties": {
+                    "from": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start of the window (inclusive).",
+                        "example": "2026-06-08T00:00:00Z"
+                    },
+                    "to": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "End of the window (exclusive).",
+                        "example": "2026-07-08T00:00:00Z"
+                    },
+                    "by_type": {
+                        "type": "array",
+                        "description": "Per-interaction-type counts and token sums; empty when the window had no interactions.",
+                        "items": {
+                            "$ref": "#/components/schemas/InteractionTypeBreakdown"
+                        }
+                    },
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator.",
+                        "enum": [
+                            "interaction_event_stats"
+                        ],
+                        "example": "interaction_event_stats"
+                    }
+                },
+                "required": [
+                    "by_type",
+                    "from",
+                    "object",
+                    "to"
+                ]
+            },
+            "InteractionTypeBreakdown": {
+                "description": "Count and token sums for one interaction type.",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "The interaction type.",
+                        "enum": [
+                            "turn_started",
+                            "turn_completed",
+                            "tool_call",
+                            "tool_resolved",
+                            "message_edited",
+                            "branch_switched",
+                            "feedback",
+                            "artifact_edited",
+                            "rag_grounded",
+                            "error"
+                        ],
+                        "example": "turn_completed"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Number of interactions of this type in the window.",
+                        "example": 128
+                    },
+                    "input_tokens": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Sum of input (prompt) tokens.",
+                        "example": 40960
+                    },
+                    "output_tokens": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Sum of output (completion) tokens.",
+                        "example": 20480
+                    },
+                    "reasoning_tokens": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Sum of hidden-reasoning tokens.",
+                        "example": 1024
+                    },
+                    "cached_tokens": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Sum of cache-read prompt tokens.",
+                        "example": 8192
+                    },
+                    "total_tokens": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Sum of billable tokens (input + output).",
+                        "example": 61440
+                    }
+                }
             },
             "ImportError": {
                 "description": "One validation error against one import row: the row number, the offending field (null for a whole-row error), the stable code/message and the raw value.",
@@ -15108,7 +15994,7 @@
                         "description": "Free-text memo, when supplied.",
                         "example": "Proration credit for plan downgrade"
                     },
-                    "issuedAt": {
+                    "issued_at": {
                         "type": "string",
                         "format": "date-time",
                         "description": "When the credit note took effect.",
@@ -15129,9 +16015,6 @@
                     "lines": {
                         "type": "array",
                         "description": "The credit note's lines (detail read only).",
-                        "example": [
-                            
-                        ],
                         "items": {
                             "$ref": "#/components/schemas/CreditNoteLine"
                         }
@@ -15149,7 +16032,6 @@
                     "billing_party_type",
                     "created_at",
                     "id",
-                    "issuedAt",
                     "object",
                     "out_of_band",
                     "status",
@@ -15160,9 +16042,6 @@
             },
             "CreditNoteLine": {
                 "description": "A single line of a credit note: its source reference, quantity and amount.",
-                "example": [
-                    
-                ],
                 "properties": {
                     "id": {
                         "type": "string",
@@ -15238,6 +16117,52 @@
                 "required": [
                     "object"
                 ]
+            },
+            "ListResponseConversation": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/Conversation"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
             },
             "AssetListItem": {
                 "description": "An asset as returned by the list/search endpoint \u2014 the asset fields plus relevance metadata when the request was a search.",
@@ -15380,6 +16305,144 @@
                         "description": "Page of resources. Empty array when there are no matches.",
                         "items": {
                             "$ref": "#/components/schemas/AssetListItem"
+                        }
+                    },
+                    "has_more": {
+                        "type": "boolean",
+                        "description": "True when more pages exist; pass `next_cursor` as `?starting_after=` to fetch the next page.",
+                        "example": true
+                    },
+                    "has_previous": {
+                        "type": "boolean",
+                        "description": "True when earlier pages exist; pass `prev_cursor` as `?ending_before=` to fetch the previous page.",
+                        "example": false
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the next page. `null` on the last page.",
+                        "example": "Y3Vyc29yX25leHRfMDFKNVE="
+                    },
+                    "prev_cursor": {
+                        "type": "string",
+                        "description": "Opaque cursor for the previous page. `null` on the first page.",
+                        "example": "Y3Vyc29yX3ByZXZfMDFKNVE="
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Page size that produced this response.",
+                        "example": 20
+                    }
+                }
+            },
+            "AgentProfileSummary": {
+                "description": "An agent persona in the list view.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable persona id.",
+                        "example": "7a1d2c3b-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name.",
+                        "example": "Support \u2014 Tier 1"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description.",
+                        "example": "Handles first-line delivery questions."
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Reserved category.",
+                        "enum": [
+                            "customer_support",
+                            "sales_outreach",
+                            "call_center",
+                            "operations",
+                            "general"
+                        ],
+                        "example": "customer_support"
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "Whether platform-provisioned or org-authored.",
+                        "enum": [
+                            "builtin",
+                            "custom"
+                        ],
+                        "example": "builtin"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Lifecycle status.",
+                        "enum": [
+                            "active",
+                            "archived"
+                        ],
+                        "example": "active"
+                    },
+                    "is_default": {
+                        "type": "boolean",
+                        "description": "Whether this is the org's default persona.",
+                        "example": true
+                    },
+                    "active_version_number": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "The active version number.",
+                        "example": 3
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Creation time.",
+                        "example": "2026-07-07T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Last update time.",
+                        "example": "2026-07-07T12:30:00Z"
+                    },
+                    "object": {
+                        "type": "string",
+                        "enum": [
+                            "agent_profile"
+                        ],
+                        "example": "agent_profile"
+                    }
+                },
+                "required": [
+                    "category",
+                    "created_at",
+                    "id",
+                    "is_default",
+                    "name",
+                    "object",
+                    "source",
+                    "status",
+                    "updated_at"
+                ]
+            },
+            "ListResponseAgentProfileSummary": {
+                "description": "Envelope for paginated list responses (opaque cursor pagination).",
+                "properties": {
+                    "object": {
+                        "type": "string",
+                        "description": "Object type discriminator. Always `list` for this envelope.",
+                        "enum": [
+                            "list"
+                        ],
+                        "example": "list"
+                    },
+                    "data": {
+                        "type": "array",
+                        "description": "Page of resources. Empty array when there are no matches.",
+                        "items": {
+                            "$ref": "#/components/schemas/AgentProfileSummary"
                         }
                     },
                     "has_more": {

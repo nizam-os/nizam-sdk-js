@@ -5,7 +5,16 @@ import type * as NizamMerchant from "../../../../index.js";
 /**
  * @example
  *     {
- *         preferences: [{}]
+ *         preferences: [{
+ *                 kind: "membership.joined",
+ *                 channel: "email",
+ *                 enabled: false,
+ *                 quiet_hours: {
+ *                     start: "22:00",
+ *                     end: "07:00",
+ *                     timezone: "America/Toronto"
+ *                 }
+ *             }]
  *     }
  */
 export interface UpdateNotificationPreferences {

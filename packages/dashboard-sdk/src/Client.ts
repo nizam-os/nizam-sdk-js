@@ -2,10 +2,13 @@
 
 import { ActiveOrganizationClient } from "./api/resources/activeOrganization/client/Client.js";
 import { ActivityClient } from "./api/resources/activity/client/Client.js";
+import { AgentProfilesClient } from "./api/resources/agentProfiles/client/Client.js";
 import { AssetsClient } from "./api/resources/assets/client/Client.js";
 import { AssignmentsClient } from "./api/resources/assignments/client/Client.js";
+import { AssistantSettingsClient } from "./api/resources/assistantSettings/client/Client.js";
 import { BillingPortalClient } from "./api/resources/billingPortal/client/Client.js";
 import { CodCollectionsClient } from "./api/resources/codCollections/client/Client.js";
+import { ConversationsClient } from "./api/resources/conversations/client/Client.js";
 import { CreditNotesClient } from "./api/resources/creditNotes/client/Client.js";
 import { DevicesClient } from "./api/resources/devices/client/Client.js";
 import { FilesClient } from "./api/resources/files/client/Client.js";
@@ -18,6 +21,7 @@ import { LedgerClient } from "./api/resources/ledger/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
 import { MembershipsClient } from "./api/resources/memberships/client/Client.js";
 import { MerchantPayoutsClient } from "./api/resources/merchantPayouts/client/Client.js";
+import { MessagesClient } from "./api/resources/messages/client/Client.js";
 import { NotificationPreferencesClient } from "./api/resources/notificationPreferences/client/Client.js";
 import { NotificationsClient } from "./api/resources/notifications/client/Client.js";
 import { OperatorsClient } from "./api/resources/operators/client/Client.js";
@@ -44,10 +48,14 @@ export declare namespace NizamDashboardClient {
 export class NizamDashboardClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<NizamDashboardClient.Options>;
     protected _activity: ActivityClient | undefined;
+    protected _agentProfiles: AgentProfilesClient | undefined;
     protected _assets: AssetsClient | undefined;
     protected _assignments: AssignmentsClient | undefined;
+    protected _assistantSettings: AssistantSettingsClient | undefined;
     protected _billingPortal: BillingPortalClient | undefined;
     protected _codCollections: CodCollectionsClient | undefined;
+    protected _conversations: ConversationsClient | undefined;
+    protected _messages: MessagesClient | undefined;
     protected _creditNotes: CreditNotesClient | undefined;
     protected _files: FilesClient | undefined;
     protected _positions: PositionsClient | undefined;
@@ -83,6 +91,10 @@ export class NizamDashboardClient {
         return (this._activity ??= new ActivityClient(this._options));
     }
 
+    public get agentProfiles(): AgentProfilesClient {
+        return (this._agentProfiles ??= new AgentProfilesClient(this._options));
+    }
+
     public get assets(): AssetsClient {
         return (this._assets ??= new AssetsClient(this._options));
     }
@@ -91,12 +103,24 @@ export class NizamDashboardClient {
         return (this._assignments ??= new AssignmentsClient(this._options));
     }
 
+    public get assistantSettings(): AssistantSettingsClient {
+        return (this._assistantSettings ??= new AssistantSettingsClient(this._options));
+    }
+
     public get billingPortal(): BillingPortalClient {
         return (this._billingPortal ??= new BillingPortalClient(this._options));
     }
 
     public get codCollections(): CodCollectionsClient {
         return (this._codCollections ??= new CodCollectionsClient(this._options));
+    }
+
+    public get conversations(): ConversationsClient {
+        return (this._conversations ??= new ConversationsClient(this._options));
+    }
+
+    public get messages(): MessagesClient {
+        return (this._messages ??= new MessagesClient(this._options));
     }
 
     public get creditNotes(): CreditNotesClient {

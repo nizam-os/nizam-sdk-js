@@ -23,7 +23,7 @@ export interface Invoice {
     amount_paid: NizamDashboard.Money;
     amount_due: NizamDashboard.Money;
     /** When the invoice was issued/finalized. */
-    issuedAt: string;
+    issued_at?: string | undefined;
     /** When payment is due. */
     due_at?: string | undefined;
     /** When the balance first reached zero. */

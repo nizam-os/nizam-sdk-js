@@ -29,7 +29,7 @@ export interface CreditNote {
     /** Free-text memo, when supplied. */
     memo?: string | undefined;
     /** When the credit note took effect. */
-    issuedAt: string;
+    issued_at?: string | undefined;
     /** When the credit note was voided, if voided. */
     voided_at?: string | undefined;
     /** When the credit-note record was created. */
