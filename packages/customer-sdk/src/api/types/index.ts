@@ -150,6 +150,7 @@ export * from "./ReconcileCodCollectionRequest.js";
 export * from "./ReconcileResponse.js";
 export * from "./RecordCodCollectionRequest.js";
 export * from "./ScheduleMerchantPayoutRequest.js";
+export * from "./SelectConversationProfileRequest.js";
 export * from "./SetActiveOrganizationRequest.js";
 export * from "./SubscribeRequest.js";
 export * from "./SubscriptionCheckout.js";

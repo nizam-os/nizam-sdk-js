@@ -14,6 +14,8 @@ export interface Conversation {
     visibility: Conversation.Visibility;
     /** Lifecycle status. */
     status: Conversation.Status;
+    /** The selected persona (agent profile) the conversation converses as, or null to follow the organization's default persona. */
+    agent_profile_id?: string | undefined;
     /** Creation timestamp. */
     created_at: string;
     /** Last-updated timestamp. */

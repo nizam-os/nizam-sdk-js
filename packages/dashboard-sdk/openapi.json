@@ -1182,7 +1182,7 @@
                     "Agent Profiles"
                 ],
                 "summary": "Delete an agent persona",
-                "description": "Soft-deletes the persona: it disappears from lists and frees its default slot. Its immutable versions are retained.",
+                "description": "Soft-deletes the persona: it disappears from lists. Its immutable versions are retained. The organization's default persona cannot be deleted \u2014 set another persona as the default first.",
                 "operationId": "deleteAgentProfile",
                 "parameters": [
                     {
@@ -1319,6 +1319,30 @@
                                             "detail": "The requested agent profile does not exist.",
                                             "instance": "/v1/agent-profiles/{id}",
                                             "code": "agent_profile.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Default persona cannot be removed",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "agent_profile.default_not_removable": {
+                                        "summary": "Default persona cannot be removed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/agent_profile/default_not_removable",
+                                            "title": "Default persona cannot be removed",
+                                            "status": 409,
+                                            "detail": "The organization's default persona cannot be archived or deleted. Set another persona as the default first, then retry.",
+                                            "instance": "/v1/agent-profiles/{id}",
+                                            "code": "agent_profile.default_not_removable",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -1640,7 +1664,7 @@
                     "Agent Profiles"
                 ],
                 "summary": "Archive an agent persona",
-                "description": "Retires an `active` persona to `archived` \u2014 hidden from pickers, and cleared as the org default. Idempotent no-op if already archived.",
+                "description": "Retires an `active` persona to `archived` \u2014 hidden from pickers. Idempotent no-op if already archived. The organization's default persona cannot be archived \u2014 set another persona as the default first.",
                 "operationId": "archiveAgentProfile",
                 "parameters": [
                     {
@@ -1835,7 +1859,7 @@
                         }
                     },
                     "409": {
-                        "description": "Invalid agent profile transition",
+                        "description": "Invalid agent profile transition \u00b7 Default persona cannot be removed",
                         "content": {
                             "application/problem+json": {
                                 "schema": {
@@ -1851,6 +1875,18 @@
                                             "detail": "The agent profile cannot make the requested lifecycle transition from its current status.",
                                             "instance": "/v1/agent-profiles/{id}/archive",
                                             "code": "agent_profile.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    },
+                                    "agent_profile.default_not_removable": {
+                                        "summary": "Default persona cannot be removed",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/agent_profile/default_not_removable",
+                                            "title": "Default persona cannot be removed",
+                                            "status": 409,
+                                            "detail": "The organization's default persona cannot be archived or deleted. Set another persona as the default first, then retry.",
+                                            "instance": "/v1/agent-profiles/{id}/archive",
+                                            "code": "agent_profile.default_not_removable",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -8885,6 +8921,7 @@
                                             "title": "Trip planning",
                                             "visibility": "private",
                                             "status": "active",
+                                            "agent_profile_id": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7",
                                             "created_at": "2026-07-08T12:34:56Z",
                                             "updated_at": "2026-07-08T12:34:56Z",
                                             "allowed_transitions": [
@@ -9097,6 +9134,7 @@
                                     "title": "Trip planning",
                                     "visibility": "private",
                                     "status": "active",
+                                    "agent_profile_id": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7",
                                     "created_at": "2026-07-08T12:34:56Z",
                                     "updated_at": "2026-07-08T12:34:56Z",
                                     "allowed_transitions": [
@@ -9735,6 +9773,7 @@
                                     "title": "Trip planning",
                                     "visibility": "private",
                                     "status": "active",
+                                    "agent_profile_id": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7",
                                     "created_at": "2026-07-08T12:34:56Z",
                                     "updated_at": "2026-07-08T12:34:56Z",
                                     "allowed_transitions": [
@@ -10080,6 +10119,7 @@
                                     "title": "Trip planning",
                                     "visibility": "private",
                                     "status": "active",
+                                    "agent_profile_id": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7",
                                     "created_at": "2026-07-08T12:34:56Z",
                                     "updated_at": "2026-07-08T12:34:56Z",
                                     "allowed_transitions": [
@@ -10287,6 +10327,7 @@
                                     "title": "Trip planning",
                                     "visibility": "private",
                                     "status": "active",
+                                    "agent_profile_id": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7",
                                     "created_at": "2026-07-08T12:34:56Z",
                                     "updated_at": "2026-07-08T12:34:56Z",
                                     "allowed_transitions": [
@@ -10440,6 +10481,402 @@
                                             "detail": "The conversation cannot make the requested lifecycle transition from its current status.",
                                             "instance": "/v1/conversations/{id}/archive",
                                             "code": "conversation.invalid_transition",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/conversations/{id}/clear-profile": {
+            "post": {
+                "tags": [
+                    "Conversations"
+                ],
+                "summary": "Clear the conversation's persona",
+                "description": "Clears the selection back to the organization's default persona (owner-only). Idempotent. No body.",
+                "operationId": "clearConversationProfile",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Conversation"
+                                },
+                                "example": {
+                                    "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "owner_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                    "title": "Trip planning",
+                                    "visibility": "private",
+                                    "status": "active",
+                                    "agent_profile_id": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7",
+                                    "created_at": "2026-07-08T12:34:56Z",
+                                    "updated_at": "2026-07-08T12:34:56Z",
+                                    "allowed_transitions": [
+                                        "archived"
+                                    ],
+                                    "object": "conversation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/conversations/{id}/clear-profile",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/conversations/{id}/clear-profile",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/conversations/{id}/clear-profile",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/conversations/{id}/clear-profile",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Conversation not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "conversation.not_found": {
+                                        "summary": "Conversation not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/conversation/not_found",
+                                            "title": "Conversation not found",
+                                            "status": 404,
+                                            "detail": "The requested conversation does not exist or is not visible to the caller.",
+                                            "instance": "/v1/conversations/{id}/clear-profile",
+                                            "code": "conversation.not_found",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-accessible-to": [
+                    "dashboard"
+                ]
+            }
+        },
+        "/v1/conversations/{id}/select-profile": {
+            "post": {
+                "tags": [
+                    "Conversations"
+                ],
+                "summary": "Select the conversation's persona",
+                "description": "Sets the agent profile the conversation converses as (owner-only). The persona must be an active profile of the caller's organization, permitted by the organization's assistant settings (the organization's default persona is always selectable); turns follow the persona's active version. Re-selection replaces.",
+                "operationId": "selectConversationProfile",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "example": "00000000-0000-0000-0000-000000000000"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SelectConversationProfileRequest"
+                            },
+                            "examples": {
+                                "default": {
+                                    "summary": "Select the conversation's persona",
+                                    "value": {
+                                        "agent_profile_id": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Conversation"
+                                },
+                                "example": {
+                                    "id": "8f55f0eb-7d3a-4f2c-9c8d-a1b2c3d4e5f6",
+                                    "owner_id": "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                                    "title": "Trip planning",
+                                    "visibility": "private",
+                                    "status": "active",
+                                    "agent_profile_id": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7",
+                                    "created_at": "2026-07-08T12:34:56Z",
+                                    "updated_at": "2026-07-08T12:34:56Z",
+                                    "allowed_transitions": [
+                                        "archived"
+                                    ],
+                                    "object": "conversation"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized \u2014 missing, expired, or invalid bearer token.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/unauthorized",
+                                    "title": "Unauthorized",
+                                    "status": 401,
+                                    "detail": "Missing, expired, or invalid bearer token.",
+                                    "instance": "/v1/conversations/{id}/select-profile",
+                                    "code": "unauthorized",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden \u2014 the authenticated caller lacks the permission required for this operation.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/forbidden",
+                                    "title": "Forbidden",
+                                    "status": 403,
+                                    "detail": "Authenticated, but the role lacks the required scope for this operation.",
+                                    "instance": "/v1/conversations/{id}/select-profile",
+                                    "code": "forbidden",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed \u2014 request body didn't satisfy `@Valid` constraints.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "conversation.profile_not_selectable": {
+                                        "summary": "Persona not selectable",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/conversation/profile_not_selectable",
+                                            "title": "Persona not selectable",
+                                            "status": 422,
+                                            "detail": "The persona does not exist, is not active, or is not permitted by the organization's assistant settings.",
+                                            "instance": "/v1/conversations/{id}/select-profile",
+                                            "code": "conversation.profile_not_selectable",
+                                            "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests \u2014 the caller's rate-limit bucket is exhausted. Honor `Retry-After`, then retry with exponential backoff + jitter.",
+                        "headers": {
+                            "RateLimit-Limit": {
+                                "description": "Bucket capacity for the caller's (scope, route-class) bucket.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Remaining": {
+                                "description": "Tokens remaining after this request.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "RateLimit-Reset": {
+                                "description": "Seconds until the bucket refills to capacity.",
+                                "schema": {
+                                    
+                                }
+                            },
+                            "Retry-After": {
+                                "description": "Seconds until at least one token is available (always \u2265 1).",
+                                "schema": {
+                                    
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/rate_limited",
+                                    "title": "Too Many Requests",
+                                    "status": 429,
+                                    "detail": "Rate limit exceeded. Retry after the Retry-After window.",
+                                    "instance": "/v1/conversations/{id}/select-profile",
+                                    "code": "rate_limited",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error \u2014 the cause is logged with the response's `trace_id`.",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "example": {
+                                    "type": "https://docs.nizam.ai/errors/internal",
+                                    "title": "Internal Server Error",
+                                    "status": 500,
+                                    "detail": "An unexpected error occurred. The cause is logged with the response's trace_id.",
+                                    "instance": "/v1/conversations/{id}/select-profile",
+                                    "code": "internal",
+                                    "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Conversation not found",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProblemDetail"
+                                },
+                                "examples": {
+                                    "conversation.not_found": {
+                                        "summary": "Conversation not found",
+                                        "value": {
+                                            "type": "https://docs.nizam.ai/errors/conversation/not_found",
+                                            "title": "Conversation not found",
+                                            "status": 404,
+                                            "detail": "The requested conversation does not exist or is not visible to the caller.",
+                                            "instance": "/v1/conversations/{id}/select-profile",
+                                            "code": "conversation.not_found",
                                             "trace_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-d2c2c1b1f1e1a1b1-01"
                                         }
                                     }
@@ -38515,6 +38952,12 @@
                             "archived"
                         ]
                     },
+                    "agent_profile_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The selected persona (agent profile) the conversation converses as, or null to follow the organization's default persona.",
+                        "example": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7"
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -38561,6 +39004,20 @@
                     "status",
                     "updated_at",
                     "visibility"
+                ]
+            },
+            "SelectConversationProfileRequest": {
+                "description": "Select the persona a conversation converses as.",
+                "properties": {
+                    "agent_profile_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Id of the agent profile to converse as. Must be an active persona of the caller's organization, permitted by the organization's assistant settings (the organization's default persona is always permitted).",
+                        "example": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7"
+                    }
+                },
+                "required": [
+                    "agent_profile_id"
                 ]
             },
             "Message": {

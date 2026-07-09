@@ -11183,6 +11183,12 @@
                             "archived"
                         ]
                     },
+                    "agent_profile_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "The selected persona (agent profile) the conversation converses as, or null to follow the organization's default persona.",
+                        "example": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7"
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -11229,6 +11235,20 @@
                     "status",
                     "updated_at",
                     "visibility"
+                ]
+            },
+            "SelectConversationProfileRequest": {
+                "description": "Select the persona a conversation converses as.",
+                "properties": {
+                    "agent_profile_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Id of the agent profile to converse as. Must be an active persona of the caller's organization, permitted by the organization's assistant settings (the organization's default persona is always permitted).",
+                        "example": "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7"
+                    }
+                },
+                "required": [
+                    "agent_profile_id"
                 ]
             },
             "Message": {

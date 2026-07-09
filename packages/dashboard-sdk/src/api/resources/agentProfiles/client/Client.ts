@@ -354,7 +354,7 @@ export class AgentProfilesClient {
     }
 
     /**
-     * Soft-deletes the persona: it disappears from lists and frees its default slot. Its immutable versions are retained.
+     * Soft-deletes the persona: it disappears from lists. Its immutable versions are retained. The organization's default persona cannot be deleted — set another persona as the default first.
      *
      * @param {NizamDashboard.DeleteAgentProfileRequest} request
      * @param {AgentProfilesClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -362,6 +362,7 @@ export class AgentProfilesClient {
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
      * @throws {@link NizamDashboard.TooManyRequestsError}
      * @throws {@link NizamDashboard.InternalServerError}
      *
@@ -422,6 +423,11 @@ export class AgentProfilesClient {
                     );
                 case 404:
                     throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
@@ -577,7 +583,7 @@ export class AgentProfilesClient {
     }
 
     /**
-     * Retires an `active` persona to `archived` — hidden from pickers, and cleared as the org default. Idempotent no-op if already archived.
+     * Retires an `active` persona to `archived` — hidden from pickers. Idempotent no-op if already archived. The organization's default persona cannot be archived — set another persona as the default first.
      *
      * @param {NizamDashboard.ArchiveAgentProfileRequest} request
      * @param {AgentProfilesClient.RequestOptions} requestOptions - Request-specific configuration.

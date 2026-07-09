@@ -630,4 +630,212 @@ export class ConversationsClient {
             "/v1/conversations/{id}/archive",
         );
     }
+
+    /**
+     * Clears the selection back to the organization's default persona (owner-only). Idempotent. No body.
+     *
+     * @param {NizamDashboard.ClearConversationProfileRequest} request
+     * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.conversations.clearConversationProfile({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public clearConversationProfile(
+        request: NizamDashboard.ClearConversationProfileRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Conversation> {
+        return core.HttpResponsePromise.fromPromise(this.__clearConversationProfile(request, requestOptions));
+    }
+
+    private async __clearConversationProfile(
+        request: NizamDashboard.ClearConversationProfileRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Conversation>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/conversations/${core.url.encodePathParam(id)}/clear-profile`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Conversation, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/conversations/{id}/clear-profile",
+        );
+    }
+
+    /**
+     * Sets the agent profile the conversation converses as (owner-only). The persona must be an active profile of the caller's organization, permitted by the organization's assistant settings (the organization's default persona is always selectable); turns follow the persona's active version. Re-selection replaces.
+     *
+     * @param {NizamDashboard.SelectConversationProfileRequest} request
+     * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.conversations.selectConversationProfile({
+     *         id: "00000000-0000-0000-0000-000000000000",
+     *         agent_profile_id: "3e9a1f04-2b6c-4d8e-9f01-a2b3c4d5e6f7"
+     *     })
+     */
+    public selectConversationProfile(
+        request: NizamDashboard.SelectConversationProfileRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Conversation> {
+        return core.HttpResponsePromise.fromPromise(this.__selectConversationProfile(request, requestOptions));
+    }
+
+    private async __selectConversationProfile(
+        request: NizamDashboard.SelectConversationProfileRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Conversation>> {
+        const { id, ..._body } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/conversations/${core.url.encodePathParam(id)}/select-profile`,
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: _body,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Conversation, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/conversations/{id}/select-profile",
+        );
+    }
 }
