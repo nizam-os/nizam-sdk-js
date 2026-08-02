@@ -5,8 +5,6 @@ export interface CreateOrganizationRequest {
     name: string;
     /** Optional URL-safe slug. When omitted, the server derives one from the name. */
     slug?: string | undefined;
-    /** Optional primary email domain. When set, Keycloak attaches it to the new Organization so per-domain IdP discovery works. */
-    primary_domain?: string | undefined;
     /** Optional self-selected vertical from /v1/lookups/business-categories. Lowercase slug (e.g. 'restaurant', 'third_party_logistics'). Drives downstream personalization. */
     business_category?: string | undefined;
     /** Optional contact phone number in E.164 format (leading +, country code, then digits). */

@@ -6,7 +6,7 @@ import type * as NizamDashboard from "../../../../index.js";
  * @example
  *     {
  *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
- *         name: "Support \u2014 Tier 1",
+ *         name: "Support (Tier 1)",
  *         description: "Handles first-line delivery questions.",
  *         category: "customer_support",
  *         config: {
@@ -36,13 +36,13 @@ export interface CreateAgentProfileRequest {
     name: string;
     /** Optional description. */
     description?: string;
-    /** Reserved category — selects the base prompt preset. */
+    /** Reserved category: selects the base prompt preset. */
     category: CreateAgentProfileRequest.Category;
     config?: NizamDashboard.AgentProfileConfigInput;
 }
 
 export namespace CreateAgentProfileRequest {
-    /** Reserved category — selects the base prompt preset. */
+    /** Reserved category: selects the base prompt preset. */
     export const Category = {
         CustomerSupport: "customer_support",
         SalesOutreach: "sales_outreach",

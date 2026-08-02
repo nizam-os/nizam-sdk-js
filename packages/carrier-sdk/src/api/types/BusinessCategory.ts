@@ -4,7 +4,7 @@
  * Self-selected vertical an organization operates in. Picker option for the onboarding flow.
  */
 export interface BusinessCategory {
-    /** Stable slug — matches the DB CHECK constraint on `organizations.business_category`. */
+    /** Stable slug: matches the DB CHECK constraint on `organizations.business_category`. */
     slug: string;
     /** Human-readable label for picker UIs. */
     display_name: string;

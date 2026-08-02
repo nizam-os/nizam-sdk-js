@@ -3,10 +3,10 @@
 import type * as NizamDashboard from "../index.js";
 
 /**
- * A resumable multipart upload in flight. The browser PUTs each part directly to the presigned URL (echoing the part's `headers` verbatim), persists the returned ETags, and completes the session with the full part list. `file_id` is the id the finished file WILL carry — safe to build optimistic UI against.
+ * A resumable multipart upload in flight. The browser PUTs each part directly to the presigned URL (echoing the part's `headers` verbatim), persists the returned ETags, and completes the session with the full part list. `file_id` is the id the finished file WILL carry, safe to build optimistic UI against.
  */
 export interface FileUploadSession {
-    /** Session id — the handle for resume / complete / cancel. */
+    /** Session id: the handle for resume / complete / cancel. */
     id: string;
     /** Pre-reserved id of the file this upload will become. */
     file_id: string;
@@ -39,6 +39,9 @@ export namespace FileUploadSession {
         ProductImage: "product_image",
         DataExport: "data_export",
         KnowledgeDocument: "knowledge_document",
+        AssistantAttachment: "assistant_attachment",
+        AssistantDocument: "assistant_document",
+        AssistantArtifact: "assistant_artifact",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
     /** Session lifecycle. */

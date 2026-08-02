@@ -124,7 +124,7 @@ export class CodCollectionsClient {
     }
 
     /**
-     * Records cash collected at delivery — a new `collected` COD collection owned by the active organization. Must reference the task or parcel it was collected against (else 400). 422 `billing_party.unknown` if a `merchant_id` is given that does not belong to the organization.
+     * Records cash collected at delivery, a new `collected` COD collection owned by the active organization. Must reference the task or parcel it was collected against (else 400). 422 `billing_party.unknown` if a `merchant_id` is given that does not belong to the organization.
      *
      * @param {NizamDashboard.RecordCodCollectionRequest} request
      * @param {CodCollectionsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -550,7 +550,7 @@ export class CodCollectionsClient {
     }
 
     /**
-     * Matches the collection into a merchant payout (`reconciled`, terminal) — sets the payout link + timestamp. 422 `cod_collection.unknown_payout` if the payout does not exist; an illegal edge → 409 `cod_collection.invalid_transition`.
+     * Matches the collection into a merchant payout (`reconciled`, terminal); sets the payout link + timestamp. 422 `cod_collection.unknown_payout` if the payout does not exist; an illegal edge → 409 `cod_collection.invalid_transition`.
      *
      * @param {NizamDashboard.ReconcileCodCollectionRequest} request
      * @param {CodCollectionsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -770,7 +770,7 @@ export class CodCollectionsClient {
     }
 
     /**
-     * Writes off an uncollectable shortfall (`written_off`, terminal) — lost operator float or a lost dispute. An illegal edge → 409 `cod_collection.invalid_transition`. No body.
+     * Writes off an uncollectable shortfall (`written_off`, terminal), lost operator float or a lost dispute. An illegal edge → 409 `cod_collection.invalid_transition`. No body.
      *
      * @param {NizamDashboard.WriteOffCodCollectionRequest} request
      * @param {CodCollectionsClient.RequestOptions} requestOptions - Request-specific configuration.

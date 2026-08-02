@@ -10,7 +10,7 @@ export interface File_ {
     organization_id: string;
     /** Uploading user. Null for system-generated artifacts. */
     uploader_id?: string | undefined;
-    /** What the bytes are for the platform — fixes the size/type/visibility/scan/retention policy applied to this file. */
+    /** What the bytes are for the platform: fixes the size/type/visibility/scan/retention policy applied to this file. */
     kind: File_.Kind;
     /** Type of the business entity this file documents. */
     subject_type?: string | undefined;
@@ -48,7 +48,7 @@ export interface File_ {
 }
 
 export namespace File_ {
-    /** What the bytes are for the platform — fixes the size/type/visibility/scan/retention policy applied to this file. */
+    /** What the bytes are for the platform: fixes the size/type/visibility/scan/retention policy applied to this file. */
     export const Kind = {
         ProfilePicture: "profile_picture",
         ChatAttachment: "chat_attachment",
@@ -59,6 +59,9 @@ export namespace File_ {
         ProductImage: "product_image",
         DataExport: "data_export",
         KnowledgeDocument: "knowledge_document",
+        AssistantAttachment: "assistant_attachment",
+        AssistantDocument: "assistant_document",
+        AssistantArtifact: "assistant_artifact",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
     /** Lifecycle: `active` (serving), `quarantined` (malware-positive), `deleted` (bytes purged, row retained under regulatory hold). */

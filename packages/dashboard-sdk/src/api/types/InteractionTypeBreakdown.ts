@@ -32,6 +32,11 @@ export namespace InteractionTypeBreakdown {
         Feedback: "feedback",
         ArtifactEdited: "artifact_edited",
         RagGrounded: "rag_grounded",
+        SafetyFlagged: "safety_flagged",
+        ConversationExported: "conversation_exported",
+        ShareCreated: "share_created",
+        ShareRevoked: "share_revoked",
+        ShareViewed: "share_viewed",
         Error: "error",
     } as const;
     export type Type = (typeof Type)[keyof typeof Type];

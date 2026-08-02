@@ -16,7 +16,7 @@ export declare namespace OrganizationsClient {
 }
 
 /**
- * Tenants — the top-level container for users, merchants, and operations.
+ * Tenants: the top-level container for users, merchants, and operations.
  */
 export class OrganizationsClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<OrganizationsClient.Options>;
@@ -26,7 +26,7 @@ export class OrganizationsClient {
     }
 
     /**
-     * Dashboard callers see exactly the organizations they can read — their own memberships plus any cross-tenant read grants (3PL / delegated), resolved via SpiceDB `lookupResources(read)`. Platform staff see every tenant. The sortable fields and direction grammar are on the `sort` parameter. RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.
+     * Dashboard callers see exactly the organizations they can read: their own memberships plus any cross-tenant read grants (3PL / delegated), resolved via SpiceDB `lookupResources(read)`. Platform staff see every tenant. The sortable fields and direction grammar are on the `sort` parameter. RFC 8288 Link header carries `first`, `prev`, `next` rels alongside the body's bidirectional cursors.
      *
      * @param {NizamDashboard.ListOrganizationsRequest} request
      * @param {OrganizationsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -152,7 +152,6 @@ export class OrganizationsClient {
      *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         name: "Acme Logistics",
      *         slug: "acme-logistics",
-     *         primary_domain: "acme.com",
      *         business_category: "third_party_logistics",
      *         phone: "+15551234567",
      *         country: "US",
@@ -251,7 +250,7 @@ export class OrganizationsClient {
     }
 
     /**
-     * Returns one organization. Visible to members, platform staff, and L4-granted cross-tenant readers; everyone else gets 404 — indistinguishable from a non-existent id (prevents tenant probing).
+     * Returns one organization. Visible to members, platform staff, and L4-granted cross-tenant readers; everyone else gets 404, indistinguishable from a non-existent id (prevents tenant probing).
      *
      * @param {NizamDashboard.GetOrganizationRequest} request
      * @param {OrganizationsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -345,7 +344,7 @@ export class OrganizationsClient {
     }
 
     /**
-     * Owner-only. Sets `deleted_at` on the organizations row; subsequent reads filter it out. The Keycloak Organization is intentionally left in place — restore is just an UPDATE un-setting `deleted_at`. Members are not removed; their memberships persist alongside the soft-deleted row in case a restore path is added later. L4 @RequirePermission ensures the caller is an admin; the owner-only check inside the handler narrows further.
+     * Owner-only. Sets `deleted_at` on the organizations row; subsequent reads filter it out. The Keycloak Organization is intentionally left in place; restore is just an UPDATE un-setting `deleted_at`. Members are not removed; their memberships persist alongside the soft-deleted row in case a restore path is added later. L4 @RequirePermission ensures the caller is an admin; the owner-only check inside the handler narrows further.
      *
      * > **Requires** `administer` on `organization` (SpiceDB permission expression).
      *
@@ -441,7 +440,7 @@ export class OrganizationsClient {
     }
 
     /**
-     * Set-only partial update. Null/omitted fields stay unchanged. The slug is a Nizam-side handle; Keycloak Organizations are addressed by their immutable KC id, so a slug rename needs no Keycloak change. Gated by L4 — admins of the org are allowed; non-admins surface as 403 from Spring Security's access-denied handler.
+     * Set-only partial update. Null/omitted fields stay unchanged. The slug is a Nizam-side handle; Keycloak Organizations are addressed by their immutable KC id, so a slug rename needs no Keycloak change. Gated by L4: admins of the org are allowed; non-admins surface as 403 from Spring Security's access-denied handler.
      *
      * > **Requires** `administer` on `organization` (SpiceDB permission expression).
      *

@@ -18,6 +18,7 @@ import type * as NizamDashboard from "../../../../index.js";
  *             kind: "autonomous",
  *             vendor: "Waymo",
  *             product: "Waymo Driver",
+ *             instance_id: "van-4711",
  *             version: "7.3",
  *             responsible_party: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
  *         }

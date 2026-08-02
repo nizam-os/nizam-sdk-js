@@ -3,7 +3,7 @@
 import type * as NizamCustomer from "../index.js";
 
 /**
- * Aggregated assistant interaction metrics over a window — metadata only (counts and token sums by interaction type); never conversation content.
+ * Aggregated assistant interaction metrics over a window, metadata only (counts and token sums by interaction type); never conversation content.
  */
 export interface InteractionEventStats {
     /** Start of the window (inclusive). */

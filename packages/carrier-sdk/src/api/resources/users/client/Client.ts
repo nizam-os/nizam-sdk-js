@@ -16,7 +16,7 @@ export declare namespace UsersClient {
 }
 
 /**
- * User aggregate — current session (`/me`) and user-entity operations (invite, list, lifecycle, platform-staff admin).
+ * User aggregate: current session (`/me`) and user-entity operations (invite, list, lifecycle, platform-staff admin).
  */
 export class UsersClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<UsersClient.Options>;
@@ -119,7 +119,505 @@ export class UsersClient {
     }
 
     /**
-     * Declares a profile-picture upload for the AUTHENTICATED user (the subject is pinned server-side) and returns presigned part URLs. PUT the bytes to the URLs, then complete via the generic file-uploads endpoint — completion re-points the profile and soft-deletes the replaced picture; thumbnails (256/128/64 px) render asynchronously. The reference upload flow of epic #151 (#166).
+     * Self-service partial update of the authenticated user's OWN profile: display name plus the app-managed phone, locale, and timezone. The subject is pinned server-side to the caller; there is no id in the path or body. Set-only: an omitted or null field is left unchanged (clearing a field is not supported). Email is NOT editable here; it stays Keycloak-managed (verification is a Keycloak Application-Initiated Action, #594).
+     *
+     * A name change is written to the local shadow immediately (so this response and the next GET /me carry it) and projected asynchronously to Keycloak, the identity source of truth. A phone already registered to another user returns 409 `user.phone_already_taken`.
+     *
+     * @param {NizamCarrier.UpdateMeRequest} request
+     * @param {UsersClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCarrier.UnauthorizedError}
+     * @throws {@link NizamCarrier.ForbiddenError}
+     * @throws {@link NizamCarrier.NotFoundError}
+     * @throws {@link NizamCarrier.ConflictError}
+     * @throws {@link NizamCarrier.UnprocessableEntityError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
+     * @throws {@link NizamCarrier.InternalServerError}
+     *
+     * @example
+     *     await client.users.updateMe({
+     *         name: "Ali Issa",
+     *         phone: "+15551234567",
+     *         locale: "en",
+     *         timezone: "America/Toronto"
+     *     })
+     */
+    public updateMe(
+        request: NizamCarrier.UpdateMeRequest = {},
+        requestOptions?: UsersClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamCarrier.User> {
+        return core.HttpResponsePromise.fromPromise(this.__updateMe(request, requestOptions));
+    }
+
+    private async __updateMe(
+        request: NizamCarrier.UpdateMeRequest = {},
+        requestOptions?: UsersClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamCarrier.User>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCarrierEnvironment.Production,
+                "v1/me",
+            ),
+            method: "PATCH",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: request,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamCarrier.User, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCarrier.UnauthorizedError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamCarrier.ForbiddenError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamCarrier.NotFoundError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamCarrier.ConflictError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamCarrier.UnprocessableEntityError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCarrier.InternalServerError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCarrierError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "PATCH", "/v1/me");
+    }
+
+    /**
+     * Returns every credential registered on the AUTHENTICATED user's account — password, authenticator app, recovery codes, and passkeys — each with the name the member gave it and when it was registered. The subject is pinned server-side; there is no id in the path.
+     *
+     * Read this to decide what to offer on a security screen: whether to prompt for a first authenticator or an additional one, whether recovery codes are worth offering (they are only useful once a second factor exists), and which credentials can be removed.
+     *
+     * Registering and removing credentials both happen at the identity provider rather than through this API, via Keycloak's application-initiated actions — so the member re-authenticates on the provider's own hardened pages and no credential material ever transits this API. The `id` here is what identifies a credential to those flows.
+     *
+     * Secret material is never returned: the shared secret, password hash parameters and passkey public key are dropped server-side and are not part of this shape.
+     *
+     * @param {UsersClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCarrier.UnauthorizedError}
+     * @throws {@link NizamCarrier.ForbiddenError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
+     * @throws {@link NizamCarrier.InternalServerError}
+     *
+     * @example
+     *     await client.users.meCredentials()
+     */
+    public meCredentials(
+        requestOptions?: UsersClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamCarrier.UserCredentials> {
+        return core.HttpResponsePromise.fromPromise(this.__meCredentials(requestOptions));
+    }
+
+    private async __meCredentials(
+        requestOptions?: UsersClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamCarrier.UserCredentials>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCarrierEnvironment.Production,
+                "v1/me/credentials",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamCarrier.UserCredentials, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCarrier.UnauthorizedError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamCarrier.ForbiddenError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCarrier.InternalServerError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCarrierError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/me/credentials");
+    }
+
+    /**
+     * Turns two-step verification OFF for the AUTHENTICATED user by removing every second-factor credential they hold: all authenticator apps AND the recovery-code set. The subject is pinned server-side; there is no id in the path.
+     *
+     * Both go, because the identity provider has no "second factor: off" switch — the second step is required whenever the account holds any credential that can satisfy it. Removing the authenticators alone would not disable anything; it would promote the recovery codes from a fallback to the only accepted factor, and since each code works exactly once the account becomes unreachable when the set runs out. Removing a single credential (one authenticator among several) is a different operation and happens at the identity provider, not here.
+     *
+     * Idempotent: an account that already has two-step off answers 204, as does a repeated or retried request. Sign-in falls back to the password, plus any passkey the member has registered.
+     *
+     * @param {UsersClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCarrier.UnauthorizedError}
+     * @throws {@link NizamCarrier.ForbiddenError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
+     * @throws {@link NizamCarrier.InternalServerError}
+     *
+     * @example
+     *     await client.users.disableTwoStepVerification()
+     */
+    public disableTwoStepVerification(requestOptions?: UsersClient.RequestOptions): core.HttpResponsePromise<void> {
+        return core.HttpResponsePromise.fromPromise(this.__disableTwoStepVerification(requestOptions));
+    }
+
+    private async __disableTwoStepVerification(
+        requestOptions?: UsersClient.RequestOptions,
+    ): Promise<core.WithRawResponse<void>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCarrierEnvironment.Production,
+                "v1/me/credentials/two-step",
+            ),
+            method: "DELETE",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: undefined, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCarrier.UnauthorizedError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamCarrier.ForbiddenError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCarrier.InternalServerError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCarrierError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "DELETE",
+            "/v1/me/credentials/two-step",
+        );
+    }
+
+    /**
+     * Completes the change: the account signs in with the new number from now on, the previous number is notified, every existing session is ended (the caller's included — the app signs in again on the new number), and a cool-down holds sensitive actions for a period afterwards. 409 when another account has already proven that number; 422 when the code is wrong, expired, or the number was never sent one.
+     *
+     * @param {NizamCarrier.ConfirmPhoneChangeRequest} request
+     * @param {UsersClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCarrier.UnauthorizedError}
+     * @throws {@link NizamCarrier.ForbiddenError}
+     * @throws {@link NizamCarrier.NotFoundError}
+     * @throws {@link NizamCarrier.ConflictError}
+     * @throws {@link NizamCarrier.UnprocessableEntityError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
+     * @throws {@link NizamCarrier.InternalServerError}
+     *
+     * @example
+     *     await client.users.confirmPhoneChange({
+     *         phone: "+14155550142",
+     *         code: "123456"
+     *     })
+     */
+    public confirmPhoneChange(
+        request: NizamCarrier.ConfirmPhoneChangeRequest,
+        requestOptions?: UsersClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamCarrier.PhoneChangedResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__confirmPhoneChange(request, requestOptions));
+    }
+
+    private async __confirmPhoneChange(
+        request: NizamCarrier.ConfirmPhoneChangeRequest,
+        requestOptions?: UsersClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamCarrier.PhoneChangedResponse>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCarrierEnvironment.Production,
+                "v1/me/phone/change/confirm",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: request,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamCarrier.PhoneChangedResponse, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCarrier.UnauthorizedError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamCarrier.ForbiddenError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamCarrier.NotFoundError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamCarrier.ConflictError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamCarrier.UnprocessableEntityError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCarrier.InternalServerError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCarrierError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/me/phone/change/confirm");
+    }
+
+    /**
+     * Begins a change of the number this account signs in with. Requires a stronger, recent sign-in (see `auth.step_up_required`) before any code is sent — an attacker who could change the number could re-point every future sign-in at themselves. Accepts every well-formed number identically; delivery is not confirmed through this response.
+     *
+     * @param {NizamCarrier.PhoneChangeRequest} request
+     * @param {UsersClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCarrier.UnauthorizedError}
+     * @throws {@link NizamCarrier.ForbiddenError}
+     * @throws {@link NizamCarrier.UnprocessableEntityError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
+     * @throws {@link NizamCarrier.InternalServerError}
+     *
+     * @example
+     *     await client.users.startPhoneChange({
+     *         phone: "+14155550142"
+     *     })
+     */
+    public startPhoneChange(
+        request: NizamCarrier.PhoneChangeRequest,
+        requestOptions?: UsersClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamCarrier.StartPhoneChangeResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__startPhoneChange(request, requestOptions));
+    }
+
+    private async __startPhoneChange(
+        request: NizamCarrier.PhoneChangeRequest,
+        requestOptions?: UsersClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamCarrier.StartPhoneChangeResponse>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCarrierEnvironment.Production,
+                "v1/me/phone/change/start",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: request,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as NizamCarrier.StartPhoneChangeResponse,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCarrier.UnauthorizedError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamCarrier.ForbiddenError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamCarrier.UnprocessableEntityError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCarrier.InternalServerError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCarrierError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/me/phone/change/start");
+    }
+
+    /**
+     * Declares a profile-picture upload for the AUTHENTICATED user (the subject is pinned server-side) and returns presigned part URLs. PUT the bytes to the URLs, then complete via the generic file-uploads endpoint. Completion re-points the profile and soft-deletes the replaced picture; thumbnails (256/128/64 px) render asynchronously. The reference upload flow of epic #151 (#166).
      *
      * @param {NizamCarrier.InitiateProfilePictureUploadRequest} request
      * @param {UsersClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -227,6 +725,98 @@ export class UsersClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/me/profile-picture");
+    }
+
+    /**
+     * Clears the AUTHENTICATED user's profile picture (the subject is pinned server-side) and disposes the stored file. Idempotent; a user with no picture still answers 204. The account falls back to its initials avatar across the workspace. There is no undo; re-uploading is the way back.
+     *
+     * @param {UsersClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCarrier.BadRequestError}
+     * @throws {@link NizamCarrier.UnauthorizedError}
+     * @throws {@link NizamCarrier.ForbiddenError}
+     * @throws {@link NizamCarrier.NotFoundError}
+     * @throws {@link NizamCarrier.TooManyRequestsError}
+     * @throws {@link NizamCarrier.InternalServerError}
+     *
+     * @example
+     *     await client.users.deleteProfilePicture()
+     */
+    public deleteProfilePicture(requestOptions?: UsersClient.RequestOptions): core.HttpResponsePromise<void> {
+        return core.HttpResponsePromise.fromPromise(this.__deleteProfilePicture(requestOptions));
+    }
+
+    private async __deleteProfilePicture(
+        requestOptions?: UsersClient.RequestOptions,
+    ): Promise<core.WithRawResponse<void>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCarrierEnvironment.Production,
+                "v1/me/profile-picture",
+            ),
+            method: "DELETE",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: undefined, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamCarrier.BadRequestError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamCarrier.UnauthorizedError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamCarrier.ForbiddenError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamCarrier.NotFoundError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCarrier.TooManyRequestsError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCarrier.InternalServerError(
+                        _response.error.body as NizamCarrier.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCarrierError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "DELETE", "/v1/me/profile-picture");
     }
 
     /**

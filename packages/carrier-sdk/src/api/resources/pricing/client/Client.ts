@@ -26,7 +26,7 @@ export class PricingClient {
     }
 
     /**
-     * The active, visible subscription plans for the public pricing page, ordered for display. Anonymous — no authentication required.
+     * The active, visible subscription plans for the public pricing page, ordered for display. Anonymous: no authentication required.
      *
      * @param {PricingClient.RequestOptions} requestOptions - Request-specific configuration.
      *

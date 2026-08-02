@@ -26,7 +26,7 @@ export class NotificationsClient {
     }
 
     /**
-     * The caller's own notifications ordered by `created_at` descending by default. `status` selects the segment — `all` (default; the active inbox, non-archived), `unread`, `read`, or `archived`. `category` and `kind` accept comma-separated values and AND on top of the segment; `q` matches the notification title/body. `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.
+     * The caller's own notifications ordered by `created_at` descending by default. `status` selects the segment: `all` (default; the active inbox, non-archived), `unread`, `read`, or `archived`. `category` and `kind` accept comma-separated values and AND on top of the segment; `q` matches the notification title/body. `since=` (RFC 3339) returns only items at/after the instant for incremental catch-up after a reconnect. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort direction that minted them.
      *
      * @param {NizamMerchant.ListNotificationsRequest} request
      * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -520,7 +520,7 @@ export class NotificationsClient {
     }
 
     /**
-     * Moves a single notification to the archive ("Done") — reversible, not a delete: it leaves the active inbox but stays listable under `status=archived`. Idempotent. 404 if the notification is not the caller's.
+     * Moves a single notification to the archive ("Done"), reversible, not a delete: it leaves the active inbox but stays listable under `status=archived`. Idempotent. 404 if the notification is not the caller's.
      *
      * @param {NizamMerchant.ArchiveNotificationRequest} request
      * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -619,7 +619,7 @@ export class NotificationsClient {
     }
 
     /**
-     * Flips a single notification to read. Idempotent — a second call is a no-op that preserves the original read timestamp. 404 if the notification is not the caller's.
+     * Flips a single notification to read. Idempotent; a second call is a no-op that preserves the original read timestamp. 404 if the notification is not the caller's.
      *
      * @param {NizamMerchant.MarkNotificationReadRequest} request
      * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -713,7 +713,7 @@ export class NotificationsClient {
     }
 
     /**
-     * Restores an archived notification to the active inbox — the inverse of archive. Idempotent. 404 if the notification is not the caller's.
+     * Restores an archived notification to the active inbox, the inverse of archive. Idempotent. 404 if the notification is not the caller's.
      *
      * @param {NizamMerchant.UnarchiveNotificationRequest} request
      * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -812,7 +812,7 @@ export class NotificationsClient {
     }
 
     /**
-     * Flips a single notification back to unread — the inverse of mark-read. Idempotent. 404 if the notification is not the caller's.
+     * Flips a single notification back to unread, the inverse of mark-read. Idempotent. 404 if the notification is not the caller's.
      *
      * @param {NizamMerchant.MarkNotificationUnreadRequest} request
      * @param {NotificationsClient.RequestOptions} requestOptions - Request-specific configuration.

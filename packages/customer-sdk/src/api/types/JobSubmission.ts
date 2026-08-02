@@ -4,7 +4,7 @@
  * Acknowledgement that a job was submitted to its engine.
  */
 export interface JobSubmission {
-    /** The created job — poll/cancel it via /v1/jobs/{id}. */
+    /** The created job: poll/cancel it via /v1/jobs/{id}. */
     job_id: string;
     object: JobSubmission.Object_;
 }

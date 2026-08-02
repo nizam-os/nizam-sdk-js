@@ -26,6 +26,125 @@ export class AssignmentsClient {
     }
 
     /**
+     * The organization's asset ↔ operator bindings, most recently started first, each carrying the display name of both ends so the page is readable without a second lookup. Narrow with `asset_id` (who has driven this vehicle), `operator_id` (what this driver is on), or both. `active` restricts to bindings still in force; omitted, the page includes closed ones, because the closed rows ARE the history. Pagination is bidirectional (`starting_after` / `ending_before`).
+     *
+     * @param {NizamDashboard.ListAssignmentsRequest} request
+     * @param {AssignmentsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assignments.listAssignments({
+     *         asset_id: "00000000-0000-0000-0000-000000000000",
+     *         operator_id: "00000000-0000-0000-0000-000000000000",
+     *         starting_after: "Y3Vyc29yX25leHRfMDFKNVE=",
+     *         ending_before: "Y3Vyc29yX25leHRfMDFKNVE="
+     *     })
+     */
+    public listAssignments(
+        request: NizamDashboard.ListAssignmentsRequest = {},
+        requestOptions?: AssignmentsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.ListResponseAssignment> {
+        return core.HttpResponsePromise.fromPromise(this.__listAssignments(request, requestOptions));
+    }
+
+    private async __listAssignments(
+        request: NizamDashboard.ListAssignmentsRequest = {},
+        requestOptions?: AssignmentsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.ListResponseAssignment>> {
+        const {
+            asset_id: assetId,
+            operator_id: operatorId,
+            active,
+            limit,
+            starting_after: startingAfter,
+            ending_before: endingBefore,
+        } = request;
+        const _queryParams: Record<string, unknown> = {
+            asset_id: assetId,
+            operator_id: operatorId,
+            active,
+            limit,
+            starting_after: startingAfter,
+            ending_before: endingBefore,
+        };
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/assignments",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url
+                .queryBuilder()
+                .addMany(_queryParams)
+                .mergeAdditional(requestOptions?.queryParams)
+                .build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as NizamDashboard.ListResponseAssignment,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/assignments");
+    }
+
+    /**
      * Binds an operator to an asset in a role. Partial unique index enforces at-most-one active assignment per (asset, role).
      *
      * @param {NizamDashboard.OpenAssignmentRequest} request
@@ -239,7 +358,7 @@ export class AssignmentsClient {
     }
 
     /**
-     * Closes an active assignment. One-way transition — reassignment is open new + close old.
+     * Closes an active assignment. One-way transition; reassignment is open new + close old.
      *
      * @param {NizamDashboard.CloseAssignmentRequest} request
      * @param {AssignmentsClient.RequestOptions} requestOptions - Request-specific configuration.

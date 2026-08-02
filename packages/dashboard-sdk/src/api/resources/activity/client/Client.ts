@@ -16,7 +16,7 @@ export declare namespace ActivityClient {
 }
 
 /**
- * Organization activity feed — the append-only timeline of what happened, and the durable source of truth behind realtime dashboard updates.
+ * Organization activity feed: the append-only timeline of what happened, and the durable source of truth behind realtime dashboard updates.
  */
 export class ActivityClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<ActivityClient.Options>;

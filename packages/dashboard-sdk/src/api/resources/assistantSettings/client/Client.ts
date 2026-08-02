@@ -128,9 +128,22 @@ export class AssistantSettingsClient {
      *             rag: true,
      *             tools: true,
      *             attachments: true,
-     *             sharing: true
+     *             sharing: true,
+     *             "export": true,
+     *             auto_title: true,
+     *             follow_ups: true
      *         },
-     *         instructions: "Always confirm the delivery address before rescheduling."
+     *         instructions: "Always confirm the delivery address before rescheduling.",
+     *         safety: {
+     *             input: "block",
+     *             output: "block",
+     *             rag: "flag",
+     *             tools: "flag",
+     *             attachments: "flag",
+     *             judge: false
+     *         },
+     *         reasoning_capture: false,
+     *         eval_consent: false
      *     })
      */
     public updateAssistantSettings(
@@ -215,5 +228,111 @@ export class AssistantSettingsClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "PATCH", "/v1/assistant/settings");
+    }
+
+    /**
+     * Live conversation and message counts plus per-interaction-type counts and token totals over the window (default: the last 30 days). Token figures are analytics (the ai.chat.tokens meter); the billable unit is AI credits, charged per turn.
+     *
+     * @param {NizamDashboard.GetAssistantStatsRequest} request
+     * @param {AssistantSettingsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.assistantSettings.getAssistantStats({
+     *         from: "2026-05-20T14:00:00Z",
+     *         to: "2026-05-20T14:00:00Z"
+     *     })
+     */
+    public getAssistantStats(
+        request: NizamDashboard.GetAssistantStatsRequest = {},
+        requestOptions?: AssistantSettingsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.AssistantStatsResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getAssistantStats(request, requestOptions));
+    }
+
+    private async __getAssistantStats(
+        request: NizamDashboard.GetAssistantStatsRequest = {},
+        requestOptions?: AssistantSettingsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.AssistantStatsResponse>> {
+        const { from: from_, to } = request;
+        const _queryParams: Record<string, unknown> = {
+            from: from_ != null ? from_ : undefined,
+            to: to != null ? to : undefined,
+        };
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/assistant/stats",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url
+                .queryBuilder()
+                .addMany(_queryParams)
+                .mergeAdditional(requestOptions?.queryParams)
+                .build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as NizamDashboard.AssistantStatsResponse,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/assistant/stats");
     }
 }

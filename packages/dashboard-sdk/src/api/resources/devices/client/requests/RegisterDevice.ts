@@ -10,7 +10,7 @@
 export interface RegisterDevice {
     /** Push transport. */
     platform: RegisterDevice.Platform;
-    /** The raw APNs/FCM/web-push token. Treated as a secret — never logged. */
+    /** The raw APNs/FCM/web-push token. Treated as a secret, never logged. */
     token: string;
 }
 

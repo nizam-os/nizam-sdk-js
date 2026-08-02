@@ -16,7 +16,7 @@ export declare namespace AssetsClient {
 }
 
 /**
- * Universal physical-hardware master — vehicles, drones, robots, trailers, containers, equipment. Kind-discriminated.
+ * Universal physical-hardware master: vehicles, drones, robots, trailers, containers, equipment. Kind-discriminated.
  */
 export class AssetsClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<AssetsClient.Options>;
@@ -26,7 +26,7 @@ export class AssetsClient {
     }
 
     /**
-     * Returns the assets the authenticated operator is currently assigned to operate — and only those. Deny-by-default: an operator with no active assignment sees an empty list. Resolved through the narrow `operate` (assigned-operator) relation, never the owning-org `view` surface, so it never exposes a whole tenant. Ordered by `created_at` descending; bidirectional cursor pagination (`starting_after` / `ending_before`).
+     * Returns the assets the authenticated operator is currently assigned to operate, and only those. Deny-by-default: an operator with no active assignment sees an empty list. Resolved through the narrow `operate` (assigned-operator) relation, never the owning-org `view` surface, so it never exposes a whole tenant. Ordered by `created_at` descending; bidirectional cursor pagination (`starting_after` / `ending_before`).
      *
      * @param {NizamOperatorRuntime.ListMyAssetsRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -124,7 +124,7 @@ export class AssetsClient {
     }
 
     /**
-     * Returns one asset the authenticated operator is assigned to operate. Resolved through the `operate` (assigned-operator) relation only — never the owning-org `view` surface. An asset the operator is not assigned to (or that does not exist) returns 404, indistinguishable from a missing id so the endpoint can't be used to probe for assets.
+     * Returns one asset the authenticated operator is assigned to operate. Resolved through the `operate` (assigned-operator) relation only, never the owning-org `view` surface. An asset the operator is not assigned to (or that does not exist) returns 404, indistinguishable from a missing id so the endpoint can't be used to probe for assets.
      *
      * @param {NizamOperatorRuntime.GetMyAssetRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.

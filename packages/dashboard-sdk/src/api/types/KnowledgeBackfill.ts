@@ -4,7 +4,7 @@
  * Acknowledgement that a knowledge corpus backfill was enqueued.
  */
 export interface KnowledgeBackfill {
-    /** Id of the enqueued BACKFILL_KNOWLEDGE orchestrator job — poll it to observe progress as it fans out the per-document re-index jobs. */
+    /** Id of the enqueued BACKFILL_KNOWLEDGE orchestrator job; poll it to observe progress as it fans out the per-document re-index jobs. */
     job_id: string;
     object: KnowledgeBackfill.Object_;
 }

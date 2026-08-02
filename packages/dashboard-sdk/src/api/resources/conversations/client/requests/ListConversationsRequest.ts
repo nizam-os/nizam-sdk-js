@@ -5,19 +5,29 @@ import type * as NizamDashboard from "../../../../index.js";
 /**
  * @example
  *     {
+ *         q: "<string>",
+ *         project_id: "00000000-0000-0000-0000-000000000000",
  *         starting_after: "Y3Vyc29yX25leHRfMDFKNVE=",
  *         ending_before: "Y3Vyc29yX25leHRfMDFKNVE="
  *     }
  */
 export interface ListConversationsRequest {
+    /** Free-text title filter (max 200 chars). */
+    q?: string;
     /** Filter by lifecycle status. Comma-separated; matched case-insensitively. */
     status?: NizamDashboard.ListConversationsRequestStatusItem | NizamDashboard.ListConversationsRequestStatusItem[];
+    /** Only conversations filed into this project. */
+    project_id?: string;
+    /** Only pinned (true) or only unpinned (false) conversations. Pinning is a filter, not a sort field — `pinned_at` is nullable and a nullable sort key cannot take part in the keyset seek. */
+    pinned?: boolean;
+    /** Only conversations carrying EVERY listed tag. Comma-separated or repeated; matched after lower-casing. */
+    tag?: string | string[];
     /** Sort order. Allowed fields: `created_at`, `updated_at`, `title`. Append `:asc` or `:desc` to each field (direction required, e.g. `created_at:desc`), comma-separated for multi-sort; unknown fields or directions are rejected with `400 validation_failed`. */
     sort?: NizamDashboard.ListConversationsRequestSortItem | NizamDashboard.ListConversationsRequestSortItem[];
     /** Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied. */
     limit?: number;
-    /** Opaque cursor — return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`. */
+    /** Opaque cursor: return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`. */
     starting_after?: string;
-    /** Opaque cursor — return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`. */
+    /** Opaque cursor: return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`. */
     ending_before?: string;
 }

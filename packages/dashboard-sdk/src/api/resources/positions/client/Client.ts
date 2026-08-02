@@ -23,7 +23,7 @@ export class PositionsClient {
     }
 
     /**
-     * Keyset-paginated track over a required [start, end) device-time window (max 31 days — the window drives partition pruning). Optionally narrowed to one operator.
+     * Keyset-paginated track over a required [start, end) device-time window (max 31 days; the window drives partition pruning). Optionally narrowed to one operator.
      *
      * @param {NizamDashboard.ListPositionsRequest} request
      * @param {PositionsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -231,7 +231,7 @@ export class PositionsClient {
     }
 
     /**
-     * Counts recorded positions per H3 hex cell (resolution 9 ≈ 150 m or 11 ≈ 24 m) inside a `bbox` viewport over a device-time window (default: the last 24 hours). Cells are returned as hex strings — H3 indexes exceed the JavaScript safe-integer range. Unpaginated: bounded by the viewport's cell cover (max 4096 cells).
+     * Counts recorded positions per H3 hex cell (resolution 9 ≈ 150 m or 11 ≈ 24 m) inside a `bbox` viewport over a device-time window (default: the last 24 hours). Cells are returned as hex strings; H3 indexes exceed the JavaScript safe-integer range. Unpaginated: bounded by the viewport's cell cover (max 4096 cells).
      *
      * @param {NizamDashboard.GetPositionsHeatmapRequest} request
      * @param {PositionsClient.RequestOptions} requestOptions - Request-specific configuration.

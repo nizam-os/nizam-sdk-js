@@ -6,7 +6,7 @@ import type * as NizamMerchant from "../index.js";
  * Acknowledgement that an import was submitted: the job handle, the reserved source-file id, and the presigned upload session to push the file's bytes through.
  */
 export interface ImportSubmission {
-    /** The created import job — poll/cancel it via /v1/jobs/{id}. */
+    /** The created import job: poll/cancel it via /v1/jobs/{id}. */
     job_id: string;
     /** The id the uploaded source file will carry. */
     file_id: string;

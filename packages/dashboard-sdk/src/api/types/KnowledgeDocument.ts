@@ -3,7 +3,7 @@
 import type * as NizamDashboard from "../index.js";
 
 /**
- * A document in a knowledge base — its metadata and ingestion status. Content is extracted, chunked, and embedded so it can ground retrieval-augmented answers.
+ * A document in a knowledge base: its metadata and ingestion status. Content is extracted, chunked, and embedded so it can ground retrieval-augmented answers.
  */
 export interface KnowledgeDocument {
     /** Stable UUID. */
@@ -19,13 +19,13 @@ export interface KnowledgeDocument {
     content_type?: string | undefined;
     /** Ingestion lifecycle status. */
     status: KnowledgeDocument.Status;
-    /** Why extraction or indexing failed — present only when status is `failed`. */
+    /** Why extraction or indexing failed; present only when status is `failed`. */
     failure_reason?: string | undefined;
     /** Number of embedded chunks (0 until indexed). */
     chunk_count: number;
     /** The bound source file, or null before an upload completes. */
     source_file_id?: string | undefined;
-    /** Source file size in bytes — present on list projections; null on the single-document read and before an upload binds a file. */
+    /** Source file size in bytes, present on list projections; null on the single-document read and before an upload binds a file. */
     size?: number | undefined;
     /** Free-form metadata. Returned on the single-document read; omitted from list projections. */
     metadata?: Record<string, Record<string, unknown>> | undefined;

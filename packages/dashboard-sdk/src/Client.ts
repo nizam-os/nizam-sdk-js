@@ -3,14 +3,17 @@
 import { ActiveOrganizationClient } from "./api/resources/activeOrganization/client/Client.js";
 import { ActivityClient } from "./api/resources/activity/client/Client.js";
 import { AgentProfilesClient } from "./api/resources/agentProfiles/client/Client.js";
+import { ArtifactsClient } from "./api/resources/artifacts/client/Client.js";
 import { AssetsClient } from "./api/resources/assets/client/Client.js";
 import { AssignmentsClient } from "./api/resources/assignments/client/Client.js";
+import { AssistantProjectsClient } from "./api/resources/assistantProjects/client/Client.js";
 import { AssistantSettingsClient } from "./api/resources/assistantSettings/client/Client.js";
 import { BillingPortalClient } from "./api/resources/billingPortal/client/Client.js";
 import { CodCollectionsClient } from "./api/resources/codCollections/client/Client.js";
 import { ConversationsClient } from "./api/resources/conversations/client/Client.js";
 import { CreditNotesClient } from "./api/resources/creditNotes/client/Client.js";
 import { DevicesClient } from "./api/resources/devices/client/Client.js";
+import { FeedbackClient } from "./api/resources/feedback/client/Client.js";
 import { FilesClient } from "./api/resources/files/client/Client.js";
 import { ImportsClient } from "./api/resources/imports/client/Client.js";
 import { InvitesClient } from "./api/resources/invites/client/Client.js";
@@ -19,6 +22,8 @@ import { JobsClient } from "./api/resources/jobs/client/Client.js";
 import { KnowledgeClient } from "./api/resources/knowledge/client/Client.js";
 import { LedgerClient } from "./api/resources/ledger/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
+import { MachineCredentialsClient } from "./api/resources/machineCredentials/client/Client.js";
+import { MembersClient } from "./api/resources/members/client/Client.js";
 import { MembershipsClient } from "./api/resources/memberships/client/Client.js";
 import { MerchantPayoutsClient } from "./api/resources/merchantPayouts/client/Client.js";
 import { MessagesClient } from "./api/resources/messages/client/Client.js";
@@ -26,14 +31,19 @@ import { NotificationPreferencesClient } from "./api/resources/notificationPrefe
 import { NotificationsClient } from "./api/resources/notifications/client/Client.js";
 import { OperatorsClient } from "./api/resources/operators/client/Client.js";
 import { OrgAddOnsClient } from "./api/resources/orgAddOns/client/Client.js";
+import { OrganizationDomainsClient } from "./api/resources/organizationDomains/client/Client.js";
 import { OrganizationsClient } from "./api/resources/organizations/client/Client.js";
 import { PaymentsClient } from "./api/resources/payments/client/Client.js";
 import { PositionsClient } from "./api/resources/positions/client/Client.js";
 import { PricingClient } from "./api/resources/pricing/client/Client.js";
 import { RealtimeClient } from "./api/resources/realtime/client/Client.js";
+import { SharedConversationsClient } from "./api/resources/sharedConversations/client/Client.js";
+import { SsoConnectionClient } from "./api/resources/ssoConnection/client/Client.js";
 import { SubscriptionsClient } from "./api/resources/subscriptions/client/Client.js";
 import { TaskAttemptsClient } from "./api/resources/taskAttempts/client/Client.js";
 import { TasksClient } from "./api/resources/tasks/client/Client.js";
+import { ToolCallsClient } from "./api/resources/toolCalls/client/Client.js";
+import { TurnsClient } from "./api/resources/turns/client/Client.js";
 import { UsersClient } from "./api/resources/users/client/Client.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "./BaseClient.js";
@@ -49,13 +59,18 @@ export class NizamDashboardClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<NizamDashboardClient.Options>;
     protected _activity: ActivityClient | undefined;
     protected _agentProfiles: AgentProfilesClient | undefined;
+    protected _artifacts: ArtifactsClient | undefined;
     protected _assets: AssetsClient | undefined;
     protected _assignments: AssignmentsClient | undefined;
+    protected _assistantProjects: AssistantProjectsClient | undefined;
+    protected _conversations: ConversationsClient | undefined;
     protected _assistantSettings: AssistantSettingsClient | undefined;
     protected _billingPortal: BillingPortalClient | undefined;
     protected _codCollections: CodCollectionsClient | undefined;
-    protected _conversations: ConversationsClient | undefined;
+    protected _feedback: FeedbackClient | undefined;
     protected _messages: MessagesClient | undefined;
+    protected _toolCalls: ToolCallsClient | undefined;
+    protected _turns: TurnsClient | undefined;
     protected _creditNotes: CreditNotesClient | undefined;
     protected _files: FilesClient | undefined;
     protected _positions: PositionsClient | undefined;
@@ -71,14 +86,19 @@ export class NizamDashboardClient {
     protected _devices: DevicesClient | undefined;
     protected _memberships: MembershipsClient | undefined;
     protected _notificationPreferences: NotificationPreferencesClient | undefined;
+    protected _members: MembersClient | undefined;
     protected _merchantPayouts: MerchantPayoutsClient | undefined;
     protected _notifications: NotificationsClient | undefined;
     protected _operators: OperatorsClient | undefined;
     protected _orgAddOns: OrgAddOnsClient | undefined;
+    protected _organizationDomains: OrganizationDomainsClient | undefined;
     protected _organizations: OrganizationsClient | undefined;
     protected _payments: PaymentsClient | undefined;
+    protected _machineCredentials: MachineCredentialsClient | undefined;
     protected _pricing: PricingClient | undefined;
     protected _realtime: RealtimeClient | undefined;
+    protected _sharedConversations: SharedConversationsClient | undefined;
+    protected _ssoConnection: SsoConnectionClient | undefined;
     protected _subscriptions: SubscriptionsClient | undefined;
     protected _taskAttempts: TaskAttemptsClient | undefined;
     protected _tasks: TasksClient | undefined;
@@ -95,12 +115,24 @@ export class NizamDashboardClient {
         return (this._agentProfiles ??= new AgentProfilesClient(this._options));
     }
 
+    public get artifacts(): ArtifactsClient {
+        return (this._artifacts ??= new ArtifactsClient(this._options));
+    }
+
     public get assets(): AssetsClient {
         return (this._assets ??= new AssetsClient(this._options));
     }
 
     public get assignments(): AssignmentsClient {
         return (this._assignments ??= new AssignmentsClient(this._options));
+    }
+
+    public get assistantProjects(): AssistantProjectsClient {
+        return (this._assistantProjects ??= new AssistantProjectsClient(this._options));
+    }
+
+    public get conversations(): ConversationsClient {
+        return (this._conversations ??= new ConversationsClient(this._options));
     }
 
     public get assistantSettings(): AssistantSettingsClient {
@@ -115,12 +147,20 @@ export class NizamDashboardClient {
         return (this._codCollections ??= new CodCollectionsClient(this._options));
     }
 
-    public get conversations(): ConversationsClient {
-        return (this._conversations ??= new ConversationsClient(this._options));
+    public get feedback(): FeedbackClient {
+        return (this._feedback ??= new FeedbackClient(this._options));
     }
 
     public get messages(): MessagesClient {
         return (this._messages ??= new MessagesClient(this._options));
+    }
+
+    public get toolCalls(): ToolCallsClient {
+        return (this._toolCalls ??= new ToolCallsClient(this._options));
+    }
+
+    public get turns(): TurnsClient {
+        return (this._turns ??= new TurnsClient(this._options));
     }
 
     public get creditNotes(): CreditNotesClient {
@@ -183,6 +223,10 @@ export class NizamDashboardClient {
         return (this._notificationPreferences ??= new NotificationPreferencesClient(this._options));
     }
 
+    public get members(): MembersClient {
+        return (this._members ??= new MembersClient(this._options));
+    }
+
     public get merchantPayouts(): MerchantPayoutsClient {
         return (this._merchantPayouts ??= new MerchantPayoutsClient(this._options));
     }
@@ -199,6 +243,10 @@ export class NizamDashboardClient {
         return (this._orgAddOns ??= new OrgAddOnsClient(this._options));
     }
 
+    public get organizationDomains(): OrganizationDomainsClient {
+        return (this._organizationDomains ??= new OrganizationDomainsClient(this._options));
+    }
+
     public get organizations(): OrganizationsClient {
         return (this._organizations ??= new OrganizationsClient(this._options));
     }
@@ -207,12 +255,24 @@ export class NizamDashboardClient {
         return (this._payments ??= new PaymentsClient(this._options));
     }
 
+    public get machineCredentials(): MachineCredentialsClient {
+        return (this._machineCredentials ??= new MachineCredentialsClient(this._options));
+    }
+
     public get pricing(): PricingClient {
         return (this._pricing ??= new PricingClient(this._options));
     }
 
     public get realtime(): RealtimeClient {
         return (this._realtime ??= new RealtimeClient(this._options));
+    }
+
+    public get sharedConversations(): SharedConversationsClient {
+        return (this._sharedConversations ??= new SharedConversationsClient(this._options));
+    }
+
+    public get ssoConnection(): SsoConnectionClient {
+        return (this._ssoConnection ??= new SsoConnectionClient(this._options));
     }
 
     public get subscriptions(): SubscriptionsClient {

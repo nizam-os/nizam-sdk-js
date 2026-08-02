@@ -16,11 +16,17 @@ export interface Conversation {
     status: Conversation.Status;
     /** The selected persona (agent profile) the conversation converses as, or null to follow the organization's default persona. */
     agent_profile_id?: string | undefined;
+    /** The project this conversation is filed into, or null when unfiled. */
+    project_id?: string | undefined;
+    /** When the member pinned this conversation, or null when it is not pinned. */
+    pinned_at?: string | undefined;
+    /** Member-authored labels, lower-cased. */
+    tags: string[];
     /** Creation timestamp. */
     created_at: string;
     /** Last-updated timestamp. */
     updated_at: string;
-    /** Statuses this conversation may move to next — the wire projection of the transition matrix, derived from `status`. */
+    /** Statuses this conversation may move to next, the wire projection of the transition matrix, derived from `status`. */
     allowed_transitions: Conversation.AllowedTransitions.Item[];
     /** Object type discriminator. */
     object: Conversation.Object_;

@@ -16,7 +16,7 @@ export declare namespace JobsClient {
 }
 
 /**
- * Async jobs — persistent handles for long-running, retryable work (imports, exports, backfills, cache rebuilds): status, progress, cooperative cancellation.
+ * Async jobs: persistent handles for long-running, retryable work (imports, exports, backfills, cache rebuilds): status, progress, cooperative cancellation.
  */
 export class JobsClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<JobsClient.Options>;
@@ -227,7 +227,7 @@ export class JobsClient {
     }
 
     /**
-     * Requests cancellation. A `pending` job cancels immediately; a `running` job moves to `cancelling` and the engine winds down cooperatively at its next checkpoint — already-running work may still finish. Idempotent: cancelling an already- cancelling or cancelled job is a no-op returning the current state. A `completed` or `failed` job conflicts (409). Org admins can cancel any job; members only their own.
+     * Requests cancellation. A `pending` job cancels immediately; a `running` job moves to `cancelling` and the engine winds down cooperatively at its next checkpoint; already-running work may still finish. Idempotent: cancelling an already- cancelling or cancelled job is a no-op returning the current state. A `completed` or `failed` job conflicts (409). Org admins can cancel any job; members only their own.
      *
      * @param {NizamDashboard.CancelJobRequest} request
      * @param {JobsClient.RequestOptions} requestOptions - Request-specific configuration.

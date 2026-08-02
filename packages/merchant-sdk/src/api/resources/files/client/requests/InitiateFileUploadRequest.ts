@@ -16,7 +16,7 @@
 export interface InitiateFileUploadRequest {
     /** Optional. Supply a UUID (canonical 8-4-4-4-12 form; lowercase v4 recommended) to make this operation idempotent: the same key on a retry replays the original outcome instead of creating a second resource. 2xx successes and deliberate 4xx domain rejections are cached and replayed for 24h when the request body matches; transient 5xx responses are never cached, so a retry with the same key re-executes. A malformed key is rejected with 400 `idempotency.invalid_key`; reusing a key with a different request body is 409 `idempotency.key_conflict`; a key still in flight is 409 `idempotency.in_progress`. Omit the header and the operation behaves like any other write. */
     "Idempotency-Key"?: string;
-    /** What the bytes are for the platform — fixes the policy applied to them. */
+    /** What the bytes are for the platform: fixes the policy applied to them. */
     kind: InitiateFileUploadRequest.Kind;
     /** Type of the business entity this file documents (optional at upload time; can also be attached later). */
     subject_type?: string;
@@ -33,7 +33,7 @@ export interface InitiateFileUploadRequest {
 }
 
 export namespace InitiateFileUploadRequest {
-    /** What the bytes are for the platform — fixes the policy applied to them. */
+    /** What the bytes are for the platform: fixes the policy applied to them. */
     export const Kind = {
         ProfilePicture: "profile_picture",
         ChatAttachment: "chat_attachment",
@@ -44,6 +44,9 @@ export namespace InitiateFileUploadRequest {
         ProductImage: "product_image",
         DataExport: "data_export",
         KnowledgeDocument: "knowledge_document",
+        AssistantAttachment: "assistant_attachment",
+        AssistantDocument: "assistant_document",
+        AssistantArtifact: "assistant_artifact",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
 }

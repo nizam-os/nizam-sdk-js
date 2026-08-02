@@ -1,8 +1,16 @@
 export type { ArchiveConversationRequest } from "./ArchiveConversationRequest.js";
 export type { ClearConversationProfileRequest } from "./ClearConversationProfileRequest.js";
+export type { ClearConversationProjectRequest } from "./ClearConversationProjectRequest.js";
 export { CreateConversationRequest } from "./CreateConversationRequest.js";
+export type { CreateConversationShareRequest } from "./CreateConversationShareRequest.js";
 export type { DeleteConversationRequest } from "./DeleteConversationRequest.js";
+export type { ExportConversationRequest } from "./ExportConversationRequest.js";
 export type { GetConversationRequest } from "./GetConversationRequest.js";
+export type { ListConversationSharesRequest } from "./ListConversationSharesRequest.js";
 export type { ListConversationsRequest } from "./ListConversationsRequest.js";
+export type { RestoreConversationRequest } from "./RestoreConversationRequest.js";
+export type { RevokeConversationShareRequest } from "./RevokeConversationShareRequest.js";
+export type { SearchAssistantRequest } from "./SearchAssistantRequest.js";
 export type { SelectConversationProfileRequest } from "./SelectConversationProfileRequest.js";
+export type { SelectConversationProjectRequest } from "./SelectConversationProjectRequest.js";
 export { UpdateConversationRequest } from "./UpdateConversationRequest.js";

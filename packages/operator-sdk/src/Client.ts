@@ -5,11 +5,13 @@ import { DevicesClient } from "./api/resources/devices/client/Client.js";
 import { FilesClient } from "./api/resources/files/client/Client.js";
 import { InvitesClient } from "./api/resources/invites/client/Client.js";
 import { LookupsClient } from "./api/resources/lookups/client/Client.js";
+import { MachineCredentialsClient } from "./api/resources/machineCredentials/client/Client.js";
 import { NotificationPreferencesClient } from "./api/resources/notificationPreferences/client/Client.js";
 import { NotificationsClient } from "./api/resources/notifications/client/Client.js";
 import { PositionsClient } from "./api/resources/positions/client/Client.js";
 import { PricingClient } from "./api/resources/pricing/client/Client.js";
 import { RealtimeClient } from "./api/resources/realtime/client/Client.js";
+import { SharedConversationsClient } from "./api/resources/sharedConversations/client/Client.js";
 import { TaskAttemptsClient } from "./api/resources/taskAttempts/client/Client.js";
 import { UsersClient } from "./api/resources/users/client/Client.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
@@ -33,8 +35,10 @@ export class NizamOperatorRuntimeClient {
     protected _positions: PositionsClient | undefined;
     protected _notificationPreferences: NotificationPreferencesClient | undefined;
     protected _notifications: NotificationsClient | undefined;
+    protected _machineCredentials: MachineCredentialsClient | undefined;
     protected _pricing: PricingClient | undefined;
     protected _realtime: RealtimeClient | undefined;
+    protected _sharedConversations: SharedConversationsClient | undefined;
     protected _taskAttempts: TaskAttemptsClient | undefined;
 
     constructor(options: NizamOperatorRuntimeClient.Options) {
@@ -77,12 +81,20 @@ export class NizamOperatorRuntimeClient {
         return (this._notifications ??= new NotificationsClient(this._options));
     }
 
+    public get machineCredentials(): MachineCredentialsClient {
+        return (this._machineCredentials ??= new MachineCredentialsClient(this._options));
+    }
+
     public get pricing(): PricingClient {
         return (this._pricing ??= new PricingClient(this._options));
     }
 
     public get realtime(): RealtimeClient {
         return (this._realtime ??= new RealtimeClient(this._options));
+    }
+
+    public get sharedConversations(): SharedConversationsClient {
+        return (this._sharedConversations ??= new SharedConversationsClient(this._options));
     }
 
     public get taskAttempts(): TaskAttemptsClient {

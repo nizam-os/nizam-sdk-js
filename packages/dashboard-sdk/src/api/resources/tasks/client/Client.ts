@@ -23,7 +23,7 @@ export class TasksClient {
     }
 
     /**
-     * Lists the tasks the caller may read — their organization's tasks plus any they own or whose executor org they belong to (cross-tenant). The filtering is enforced entirely by RLS + the read bridge, never an app-layer predicate.
+     * Lists the tasks the caller may read: their organization's tasks plus any they own or whose executor org they belong to (cross-tenant). The filtering is enforced entirely by RLS + the read bridge, never an app-layer predicate.
      *
      * @param {NizamDashboard.ListTasksRequest} request
      * @param {TasksClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -235,7 +235,7 @@ export class TasksClient {
     }
 
     /**
-     * Returns one task. Visible to the task's owner, members of its owning org, and members of a delegated executor org (cross-tenant); anyone else gets 404 — indistinguishable from a non-existent id (prevents probing).
+     * Returns one task. Visible to the task's owner, members of its owning org, and members of a delegated executor org (cross-tenant); anyone else gets 404, indistinguishable from a non-existent id (prevents probing).
      *
      * @param {NizamDashboard.GetTaskRequest} request
      * @param {TasksClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -329,7 +329,7 @@ export class TasksClient {
     }
 
     /**
-     * Soft-deletes the task. Authorized for the task's owner or an admin/staff of its owning org only (a delegated executor cannot delete) — the `task:delete` relation.
+     * Soft-deletes the task. Authorized for the task's owner or an admin/staff of its owning org only (a delegated executor cannot delete), the `task:delete` relation.
      *
      * > **Requires** `delete` on `task` (SpiceDB permission expression).
      *
@@ -425,7 +425,7 @@ export class TasksClient {
     }
 
     /**
-     * Set-only partial update. Authorized for the task's owner or an admin/staff of its owning or executor org (a plain member cannot edit) — the `task:update` relation.
+     * Set-only partial update. Authorized for the task's owner or an admin/staff of its owning or executor org (a plain member cannot edit), the `task:update` relation.
      *
      * > **Requires** `update` on `task` (SpiceDB permission expression).
      *

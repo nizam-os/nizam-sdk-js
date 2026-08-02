@@ -16,7 +16,7 @@ export declare namespace MembershipsClient {
 }
 
 /**
- * User ↔ organization memberships — list the caller's memberships, join, leave, role checks.
+ * User ↔ organization memberships: list the caller's memberships, join, leave, role checks.
  */
 export class MembershipsClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<MembershipsClient.Options>;
@@ -26,7 +26,7 @@ export class MembershipsClient {
     }
 
     /**
-     * Returns the caller's organization memberships — each entry is a `{organization, role}` pair, so the role per org is available without a second fetch. Bounded by the caller's own memberships — typically under 50 — and returned in a single page; the response carries the standard `ListResponse` envelope and a `first` Link header rel for wire-shape consistency with paginated endpoints, but the `starting_after` / `ending_before` cursors are no-ops here. Promote to keyset pagination when membership counts grow to where a single page is no longer enough.
+     * Returns the caller's organization memberships: each entry is a `{organization, role}` pair, so the role per org is available without a second fetch. Bounded by the caller's own memberships (typically under 50) and returned in a single page; the response carries the standard `ListResponse` envelope and a `first` Link header rel for wire-shape consistency with paginated endpoints, but the `starting_after` / `ending_before` cursors are no-ops here. Promote to keyset pagination when membership counts grow to where a single page is no longer enough.
      *
      * @param {NizamDashboard.ListMyMembershipsRequest} request
      * @param {MembershipsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -127,7 +127,7 @@ export class MembershipsClient {
     }
 
     /**
-     * Removes the caller's membership from the organization. The owner cannot leave — they must transfer ownership (future endpoint) or delete the org instead.
+     * Removes the caller's membership from the organization. The owner cannot leave; they must transfer ownership (future endpoint) or delete the org instead.
      *
      * @param {NizamDashboard.LeaveOrganizationRequest} request
      * @param {MembershipsClient.RequestOptions} requestOptions - Request-specific configuration.

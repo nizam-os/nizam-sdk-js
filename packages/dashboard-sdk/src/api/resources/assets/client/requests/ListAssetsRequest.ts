@@ -17,7 +17,7 @@ export interface ListAssetsRequest {
     q?: string;
     /** Include a highlighted match snippet per hit (relevance/text mode only). */
     highlight?: boolean;
-    /** Ranking mode for `q`: `text` (keyword hybrid FTS, the default) or `semantic` (embedding cosine similarity, #145). Semantic is always relevance-ranked — `sort` does not apply. */
+    /** Ranking mode for `q`: `text` (keyword hybrid FTS, the default) or `semantic` (embedding cosine similarity, #145). Semantic is always relevance-ranked; `sort` does not apply. */
     mode?: NizamDashboard.ListAssetsRequestMode;
     /** Top-K hits for `mode=semantic` (1–100); ignored in text mode. */
     k?: number;
@@ -25,16 +25,16 @@ export interface ListAssetsRequest {
     status?: NizamDashboard.ListAssetsRequestStatusItem | NizamDashboard.ListAssetsRequestStatusItem[];
     /** Filter by top-level kind. Comma-separated; matched case-insensitively. */
     kind?: NizamDashboard.ListAssetsRequestKindItem | NizamDashboard.ListAssetsRequestKindItem[];
-    /** Only assets created on or after this calendar day (`yyyy-mm-dd`), inclusive — widened server-side to the start of the day in UTC, so the whole day counts. */
+    /** Only assets created on or after this calendar day (`yyyy-mm-dd`), inclusive, widened server-side to the start of the day in UTC, so the whole day counts. */
     created_on_or_after?: string;
-    /** Only assets created on or before this calendar day (`yyyy-mm-dd`), inclusive — widened server-side to the end of the day in UTC, so the whole day counts. */
+    /** Only assets created on or before this calendar day (`yyyy-mm-dd`), inclusive, widened server-side to the end of the day in UTC, so the whole day counts. */
     created_on_or_before?: string;
     /** Sort order. Allowed fields: `created_at`, `name`, `plate_number`, `make`, `model`, `vin`, `sub_kind`, `year`, `autonomy_level`, `status`, `kind`. Append `:asc` or `:desc` to each field (direction required, e.g. `created_at:desc`), comma-separated for multi-sort; unknown fields or directions are rejected with `400 validation_failed`. */
     sort?: NizamDashboard.ListAssetsRequestSortItem | NizamDashboard.ListAssetsRequestSortItem[];
     /** Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied. */
     limit?: number;
-    /** Opaque cursor — return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`. */
+    /** Opaque cursor: return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`. */
     starting_after?: string;
-    /** Opaque cursor — return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`. */
+    /** Opaque cursor: return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`. */
     ending_before?: string;
 }

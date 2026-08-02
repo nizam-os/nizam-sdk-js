@@ -26,7 +26,7 @@ export class DevicesClient {
     }
 
     /**
-     * The caller's live push-device registrations, most-recently-registered first. Tokens are omitted — they are delivery secrets.
+     * The caller's live push-device registrations, most-recently-registered first. Tokens are omitted; they are delivery secrets.
      *
      * @param {DevicesClient.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -106,7 +106,7 @@ export class DevicesClient {
     }
 
     /**
-     * Registers the calling user's device for push delivery, or refreshes an existing registration of the same token. Idempotent on the (user, token) key: re-posting a token refreshes its row — reviving it if the user had logged out — instead of duplicating the delivery target. The token is a secret and is never echoed back.
+     * Registers the calling user's device for push delivery, or refreshes an existing registration of the same token. Idempotent on the (user, token) key: re-posting a token refreshes its row (reviving it if the user had logged out) instead of duplicating the delivery target. The token is a secret and is never echoed back.
      *
      * @param {NizamMerchant.RegisterDevice} request
      * @param {DevicesClient.RequestOptions} requestOptions - Request-specific configuration.

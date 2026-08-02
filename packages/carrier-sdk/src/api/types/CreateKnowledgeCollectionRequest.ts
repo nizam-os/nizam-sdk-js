@@ -4,7 +4,7 @@
  * Creates a collection (a folder for related documents) in the active organization.
  */
 export interface CreateKnowledgeCollectionRequest {
-    /** Display name — unique per organization, case-insensitive. */
+    /** Display name: unique per organization, case-insensitive. */
     name: string;
     /** Optional description. */
     description?: string | undefined;

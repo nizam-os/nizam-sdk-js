@@ -22,6 +22,7 @@ export namespace Membership {
         Staff: "staff",
         Viewer: "viewer",
         BillingAdmin: "billing_admin",
+        Operator: "operator",
     } as const;
     export type Role = (typeof Role)[keyof typeof Role];
     /** Object type discriminator. */

@@ -8,7 +8,7 @@ import type * as NizamOperatorRuntime from "../index.js";
 export interface TaskAttemptPhoto {
     /** Photo record id. */
     id: string;
-    /** Central file id — request bytes via the files download-url endpoint. */
+    /** Central file id: request bytes via the files download-url endpoint. */
     file_id: string;
     /** Display order within the attempt. */
     sequence: number;

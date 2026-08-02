@@ -143,7 +143,7 @@ export class FilesClient {
     }
 
     /**
-     * Validates the declaration against the kind's policy (allowed portals, content types, size ceiling, organization quota), pre-reserves the final file id, and returns presigned part URLs. PUT each part's bytes directly to its URL (repeating the part's `headers` verbatim) and keep each response's `ETag` for completion. Sessions expire after 24h; the part URLs sooner — re-issue them via the resume endpoint.
+     * Validates the declaration against the kind's policy (allowed portals, content types, size ceiling, organization quota), pre-reserves the final file id, and returns presigned part URLs. PUT each part's bytes directly to its URL (repeating the part's `headers` verbatim) and keep each response's `ETag` for completion. Sessions expire after 24h; the part URLs sooner. Re-issue them via the resume endpoint.
      *
      * @param {NizamCarrier.InitiateFileUploadRequest} request
      * @param {FilesClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -266,7 +266,7 @@ export class FilesClient {
     }
 
     /**
-     * Returns the session state — which parts are already confirmed — plus fresh presigned URLs for the parts still missing. The IndexedDB-persisted ETags from before the interruption stay valid; only re-upload the missing parts. Uploader-only: other members' sessions read as 404.
+     * Returns the session state (which parts are already confirmed) plus fresh presigned URLs for the parts still missing. The IndexedDB-persisted ETags from before the interruption stay valid; only re-upload the missing parts. Uploader-only: other members' sessions read as 404.
      *
      * @param {NizamCarrier.ResumeFileUploadRequest} request
      * @param {FilesClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -790,7 +790,7 @@ export class FilesClient {
     }
 
     /**
-     * Authorizes the caller (org membership + the kind's portal allow-list + the scan verdict) and issues a short-lived URL for the bytes — presigned storage, or a signed CDN URL for public kinds when the CDN is enabled. Sensitive kinds append an access-audit row in the same transaction; POST because issuing a grant is an audited action, not a cacheable read.
+     * Authorizes the caller (org membership + the kind's portal allow-list + the scan verdict) and issues a short-lived URL for the bytes: presigned storage, or a signed CDN URL for public kinds when the CDN is enabled. Sensitive kinds append an access-audit row in the same transaction; POST because issuing a grant is an audited action, not a cacheable read.
      *
      * @param {NizamCarrier.CreateFileDownloadUrlRequest} request
      * @param {FilesClient.RequestOptions} requestOptions - Request-specific configuration.

@@ -6,7 +6,7 @@ import type * as NizamDashboard from "../../../../index.js";
  * @example
  *     {
  *         id: "00000000-0000-0000-0000-000000000000",
- *         name: "Support \u2014 Tier 1",
+ *         name: "Support (Tier 1)",
  *         description: "Handles first-line delivery questions.",
  *         config: {
  *             model_settings: {

@@ -116,7 +116,7 @@ export class NotificationPreferencesClient {
     }
 
     /**
-     * Upserts the supplied overrides — each item fully declares the desired state of one (kind, channel). Unlisted preferences are untouched. Returns the full resulting set.
+     * Upserts the supplied overrides: each item fully declares the desired state of one (kind, channel). Unlisted preferences are untouched. Returns the full resulting set.
      *
      * @param {NizamCustomer.UpdateNotificationPreferences} request
      * @param {NotificationPreferencesClient.RequestOptions} requestOptions - Request-specific configuration.

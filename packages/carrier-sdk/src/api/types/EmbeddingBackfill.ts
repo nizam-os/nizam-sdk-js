@@ -4,7 +4,7 @@
  * Acknowledgement that an embedding backfill was enqueued.
  */
 export interface EmbeddingBackfill {
-    /** Id of the enqueued BACKFILL_EMBEDDINGS orchestrator job — poll it to observe progress as it fans out the per-subject embedding jobs. */
+    /** Id of the enqueued BACKFILL_EMBEDDINGS orchestrator job; poll it to observe progress as it fans out the per-subject embedding jobs. */
     job_id: string;
     object: EmbeddingBackfill.Object_;
 }

@@ -4,12 +4,12 @@
  * Resolved human identity of an activity actor.
  */
 export interface ActivityCauser {
-    /** Actor id — mirrors `causer_id`; null for system/scheduled rows. */
+    /** Actor id: mirrors `causer_id`; null for system/scheduled rows. */
     id?: string | undefined;
-    /** Actor type — mirrors `causer_type`; null for system/scheduled rows. */
+    /** Actor type: mirrors `causer_type`; null for system/scheduled rows. */
     type?: string | undefined;
-    /** Renderable actor label — the resolved name, or a stable "System" / "Unknown" fallback. Never null. */
+    /** Renderable actor label: the resolved name, or a stable "System" / "Unknown" fallback. Never null. */
     display_name?: string | undefined;
-    /** Secondary line — a user's email; null for operators and system. */
+    /** Secondary line: a user's email; null for operators and system. */
     subtitle?: string | undefined;
 }

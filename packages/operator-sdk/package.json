@@ -1,6 +1,6 @@
 {
   "name": "@nizam-os/operator-sdk",
-  "version": "14.0.1",
+  "version": "15.0.0",
   "description": "Nizam Operator API SDK for TypeScript / JavaScript.",
   "license": "MIT",
   "private": false,

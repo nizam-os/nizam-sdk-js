@@ -12,9 +12,22 @@ import type * as NizamDashboard from "../../../../index.js";
  *             rag: true,
  *             tools: true,
  *             attachments: true,
- *             sharing: true
+ *             sharing: true,
+ *             "export": true,
+ *             auto_title: true,
+ *             follow_ups: true
  *         },
- *         instructions: "Always confirm the delivery address before rescheduling."
+ *         instructions: "Always confirm the delivery address before rescheduling.",
+ *         safety: {
+ *             input: "block",
+ *             output: "block",
+ *             rag: "flag",
+ *             tools: "flag",
+ *             attachments: "flag",
+ *             judge: false
+ *         },
+ *         reasoning_capture: false,
+ *         eval_consent: false
  *     }
  */
 export interface UpdateAssistantSettingsRequest {
@@ -27,4 +40,9 @@ export interface UpdateAssistantSettingsRequest {
     features?: NizamDashboard.AssistantFeatureToggles;
     /** Org instructions; "" clears them, omit to leave unchanged. */
     instructions?: string;
+    safety?: NizamDashboard.AssistantSafetyPolicy;
+    /** Retain the model's reasoning summary on assistant replies. Turning this off stops future capture; it does not erase reasoning already stored. */
+    reasoning_capture?: boolean;
+    /** Consent to the organization's assistant conversations being used as evaluation fixtures. Prospective-only: granting flags conversations started from now on; withdrawing stops flagging and excludes the organization from future fixture collection. Neither direction deletes or rewrites existing conversations. */
+    eval_consent?: boolean;
 }

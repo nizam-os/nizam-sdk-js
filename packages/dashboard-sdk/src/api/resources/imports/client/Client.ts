@@ -23,7 +23,7 @@ export class ImportsClient {
     }
 
     /**
-     * Creates a PENDING import job and a presigned upload session for the source file. Upload the file's bytes directly to the returned session, then complete it — the import starts automatically once the file is scanned and ready. Returns 202 with the job handle (poll/cancel via `GET`/`POST /v1/jobs/{id}`), the reserved file id, and the upload session. Rate-limited per organization; rejected with 429 + `Retry-After` when the hourly budget or the concurrent-imports cap is hit.
+     * Creates a PENDING import job and a presigned upload session for the source file. Upload the file's bytes directly to the returned session, then complete it; the import starts automatically once the file is scanned and ready. Returns 202 with the job handle (poll/cancel via `GET`/`POST /v1/jobs/{id}`), the reserved file id, and the upload session. Rate-limited per organization; rejected with 429 + `Retry-After` when the hourly budget or the concurrent-imports cap is hit.
      *
      * @param {NizamDashboard.CreateImportRequest} request
      * @param {ImportsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -144,7 +144,7 @@ export class ImportsClient {
     }
 
     /**
-     * The validation errors accumulated for one import, in (row_number, id) ascending order — the natural reading order of the source file. Keyset-paginated (`starting_after` / `ending_before`); no sort parameter. Org-scoped (RLS).
+     * The validation errors accumulated for one import, in (row_number, id) ascending order, the natural reading order of the source file. Keyset-paginated (`starting_after` / `ending_before`); no sort parameter. Org-scoped (RLS).
      *
      * @param {NizamDashboard.ListImportErrorsRequest} request
      * @param {ImportsClient.RequestOptions} requestOptions - Request-specific configuration.

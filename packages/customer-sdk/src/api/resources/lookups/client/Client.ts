@@ -16,7 +16,7 @@ export declare namespace LookupsClient {
 }
 
 /**
- * Static reference data — countries, currencies, languages, timezones.
+ * Static reference data: business categories.
  */
 export class LookupsClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<LookupsClient.Options>;
@@ -327,6 +327,95 @@ export class LookupsClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/lookups/languages");
+    }
+
+    /**
+     * Anonymous, domain-only lookup backing the identity-first sign-in step. Answers with the provider hint to hand `/auth/login` when the domain belongs to an organization with an ACTIVE SSO connection and proven domain ownership; `sso: false` otherwise. Never accepts or reveals anything about individual accounts.
+     *
+     * @param {NizamCustomer.LookupSsoRouteRequest} request
+     * @param {LookupsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamCustomer.UnauthorizedError}
+     * @throws {@link NizamCustomer.TooManyRequestsError}
+     * @throws {@link NizamCustomer.InternalServerError}
+     *
+     * @example
+     *     await client.lookups.lookupSsoRoute({
+     *         domain: "acme.com"
+     *     })
+     */
+    public lookupSsoRoute(
+        request: NizamCustomer.LookupSsoRouteRequest,
+        requestOptions?: LookupsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamCustomer.SsoRoute> {
+        return core.HttpResponsePromise.fromPromise(this.__lookupSsoRoute(request, requestOptions));
+    }
+
+    private async __lookupSsoRoute(
+        request: NizamCustomer.LookupSsoRouteRequest,
+        requestOptions?: LookupsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamCustomer.SsoRoute>> {
+        const { domain } = request;
+        const _queryParams: Record<string, unknown> = {
+            domain,
+        };
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamCustomerEnvironment.Production,
+                "v1/lookups/sso",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url
+                .queryBuilder()
+                .addMany(_queryParams)
+                .mergeAdditional(requestOptions?.queryParams)
+                .build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamCustomer.SsoRoute, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamCustomer.UnauthorizedError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamCustomer.TooManyRequestsError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamCustomer.InternalServerError(
+                        _response.error.body as NizamCustomer.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamCustomerError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/lookups/sso");
     }
 
     /**

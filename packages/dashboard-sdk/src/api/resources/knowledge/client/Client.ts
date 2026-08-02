@@ -16,7 +16,7 @@ export declare namespace KnowledgeClient {
 }
 
 /**
- * Knowledge base — documents and collections ingested, chunked, and embedded for retrieval-augmented answering (epic #428). CRUD, lifecycle, and DSAR erasure.
+ * Knowledge base: documents and collections ingested, chunked, and embedded for retrieval-augmented answering (epic #428). CRUD, lifecycle, and DSAR erasure.
  */
 export class KnowledgeClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<KnowledgeClient.Options>;
@@ -248,7 +248,7 @@ export class KnowledgeClient {
     }
 
     /**
-     * Returns one collection. Members of the collection's organization only; anyone else gets 404 — indistinguishable from a non-existent id.
+     * Returns one collection. Members of the collection's organization only; anyone else gets 404, indistinguishable from a non-existent id.
      *
      * @param {NizamDashboard.GetKnowledgeCollectionRequest} request
      * @param {KnowledgeClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -347,7 +347,7 @@ export class KnowledgeClient {
     }
 
     /**
-     * Soft-deletes the collection and un-groups its documents (they are NOT deleted — their `collection_id` is cleared). The name becomes available for reuse.
+     * Soft-deletes the collection and un-groups its documents (they are NOT deleted; their `collection_id` is cleared). The name becomes available for reuse.
      *
      * @param {NizamDashboard.DeleteKnowledgeCollectionRequest} request
      * @param {KnowledgeClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -562,7 +562,7 @@ export class KnowledgeClient {
     }
 
     /**
-     * The org's documents ordered by `created_at` descending (or an explicit `sort` of `created_at` / `updated_at` / `title` / `collection` / `status` / `source` / `size`). Optional filters `collection_id`, `status`, `source`, and a free-text `q` (matched against the title AND the collection name) narrow the page; `status` / `source` accept comma-separated values. Pass `expand[]=collection` to inline each document's collection (`{ id, name }`) instead of the id-only `collection_id` — resolved in one batched lookup per page. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort that minted them. DOCUMENT CONTENT search (semantic / keyword over the extracted text) is the separate retrieval path, not this metadata listing.
+     * The org's documents ordered by `created_at` descending (or an explicit `sort` of `created_at` / `updated_at` / `title` / `collection` / `status` / `source` / `size`). Optional filters `collection_id`, `status`, `source`, and a free-text `q` (matched against the title AND the collection name) narrow the page; `status` / `source` accept comma-separated values. Pass `expand[]=collection` to inline each document's collection (`{ id, name }`) instead of the id-only `collection_id`, resolved in one batched lookup per page. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort that minted them. DOCUMENT CONTENT search (semantic / keyword over the extracted text) is the separate retrieval path, not this metadata listing.
      *
      * @param {NizamDashboard.ListKnowledgeDocumentsRequest} request
      * @param {KnowledgeClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -814,7 +814,7 @@ export class KnowledgeClient {
     }
 
     /**
-     * Returns one document, including its free-form metadata. Members of the document's organization only; anyone else gets 404 — indistinguishable from a non-existent id. Pass `expand[]=collection` to inline the document's collection (`{ id, name }`) instead of the id-only `collection_id`.
+     * Returns one document, including its free-form metadata. Members of the document's organization only; anyone else gets 404, indistinguishable from a non-existent id. Pass `expand[]=collection` to inline the document's collection (`{ id, name }`) instead of the id-only `collection_id`.
      *
      * @param {NizamDashboard.GetKnowledgeDocumentRequest} request
      * @param {KnowledgeClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -1139,7 +1139,7 @@ export class KnowledgeClient {
     }
 
     /**
-     * Retires the document to cold storage (`archived`) — its chunks are purged (freeing the vectors) so it drops out of retrieval, while the source is retained. Idempotent no-op if already archived; an illegal edge → 409 `knowledge_document.invalid_transition`. No body.
+     * Retires the document to cold storage (`archived`); its chunks are purged (freeing the vectors) so it drops out of retrieval, while the source is retained. Idempotent no-op if already archived; an illegal edge → 409 `knowledge_document.invalid_transition`. No body.
      *
      * @param {NizamDashboard.ArchiveKnowledgeDocumentRequest} request
      * @param {KnowledgeClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -1244,7 +1244,7 @@ export class KnowledgeClient {
     }
 
     /**
-     * Un-groups the document — clears its `collection_id`. The explicit counterpart to setting `collection_id` via PATCH: that update is set-only (a null field means "unchanged"), so clearing the grouping needs this affordance. Idempotent — an already-ungrouped document stays ungrouped. No body.
+     * Un-groups the document: clears its `collection_id`. The explicit counterpart to setting `collection_id` via PATCH: that update is set-only (a null field means "unchanged"), so clearing the grouping needs this affordance. Idempotent; an already-ungrouped document stays ungrouped. No body.
      *
      * @param {NizamDashboard.UngroupKnowledgeDocumentRequest} request
      * @param {KnowledgeClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -1343,7 +1343,7 @@ export class KnowledgeClient {
     }
 
     /**
-     * Re-files the document under the target collection — the set counterpart to the un-group verb (`DELETE /{id}/collection`), which clears the grouping. Idempotent: moving a document into the collection it already belongs to is a no-op. The target must be a collection in the caller's organization; an unknown or cross-org id → 404 `knowledge_collection.not_found`. Not a lifecycle transition — the ingestion status is untouched.
+     * Re-files the document under the target collection, the set counterpart to the un-group verb (`DELETE /{id}/collection`), which clears the grouping. Idempotent: moving a document into the collection it already belongs to is a no-op. The target must be a collection in the caller's organization; an unknown or cross-org id → 404 `knowledge_collection.not_found`. Not a lifecycle transition; the ingestion status is untouched.
      *
      * @param {NizamDashboard.MoveKnowledgeDocumentRequest} request
      * @param {KnowledgeClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -1452,7 +1452,7 @@ export class KnowledgeClient {
     }
 
     /**
-     * Irreversibly erases the document — its row, its chunks, and its source file — bypassing soft-delete. The GDPR Article 17 "right to erasure" operation; admin-only. Works on a live or an already soft-deleted document; a cross-org id is a 404. No body.
+     * Irreversibly erases the document (its row, its chunks, and its source file), bypassing soft-delete. The GDPR Article 17 "right to erasure" operation; admin-only. Works on a live or an already soft-deleted document; a cross-org id is a 404. No body.
      *
      * @param {NizamDashboard.PurgeKnowledgeDocumentRequest} request
      * @param {KnowledgeClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -1551,7 +1551,7 @@ export class KnowledgeClient {
     }
 
     /**
-     * Re-runs ingestion from the document's retained source — the recovery + un-archive path. Fans out the embedding jobs (one per active model); the document re-enters `extracting` and, on success, `indexed`, rejoining retrieval. Valid from a settled state with a bound source (`pending` / `indexed` / `failed` / `archived`); a re-index already in flight or a document with no source → 409 `knowledge_document.invalid_transition`. Asynchronous — returns the document as it stands. No body.
+     * Re-runs ingestion from the document's retained source, the recovery + un-archive path. Fans out the embedding jobs (one per active model); the document re-enters `extracting` and, on success, `indexed`, rejoining retrieval. Valid from a settled state with a bound source (`pending` / `indexed` / `failed` / `archived`); a re-index already in flight or a document with no source → 409 `knowledge_document.invalid_transition`. Asynchronous; returns the document as it stands. No body.
      *
      * @param {NizamDashboard.ReindexKnowledgeDocumentRequest} request
      * @param {KnowledgeClient.RequestOptions} requestOptions - Request-specific configuration.

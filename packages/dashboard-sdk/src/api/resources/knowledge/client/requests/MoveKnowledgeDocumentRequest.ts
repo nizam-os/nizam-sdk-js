@@ -9,6 +9,6 @@
  */
 export interface MoveKnowledgeDocumentRequest {
     id: string;
-    /** The collection to move the document into. Required — clearing the grouping is the separate un-group verb, not a null here. */
+    /** The collection to move the document into. Required; clearing the grouping is the separate un-group verb, not a null here. */
     collection_id: string;
 }

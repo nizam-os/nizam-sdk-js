@@ -5,14 +5,14 @@ export interface CreateInviteRequest {
     organization_id: string;
     /** Recipient email. */
     email: string;
-    /** Role the recipient will hold after acceptance. */
+    /** Role the recipient will hold after acceptance. `operator` is not invitable here — operators join through driver enrolment. */
     role: CreateInviteRequest.Role;
     /** TTL in days. Defaults to 7. */
     ttl_days?: number | undefined;
 }
 
 export namespace CreateInviteRequest {
-    /** Role the recipient will hold after acceptance. */
+    /** Role the recipient will hold after acceptance. `operator` is not invitable here — operators join through driver enrolment. */
     export const Role = {
         Admin: "admin",
         Dispatcher: "dispatcher",
@@ -20,6 +20,7 @@ export namespace CreateInviteRequest {
         Staff: "staff",
         Viewer: "viewer",
         BillingAdmin: "billing_admin",
+        Operator: "operator",
     } as const;
     export type Role = (typeof Role)[keyof typeof Role];
 }

@@ -145,7 +145,7 @@ export class AgentProfilesClient {
      * @example
      *     await client.agentProfiles.createAgentProfile({
      *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
-     *         name: "Support \u2014 Tier 1",
+     *         name: "Support (Tier 1)",
      *         description: "Handles first-line delivery questions.",
      *         category: "customer_support",
      *         config: {
@@ -354,7 +354,7 @@ export class AgentProfilesClient {
     }
 
     /**
-     * Soft-deletes the persona: it disappears from lists. Its immutable versions are retained. The organization's default persona cannot be deleted — set another persona as the default first.
+     * Soft-deletes the persona: it disappears from lists. Its immutable versions are retained. The organization's default persona cannot be deleted; set another persona as the default first.
      *
      * @param {NizamDashboard.DeleteAgentProfileRequest} request
      * @param {AgentProfilesClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -470,7 +470,7 @@ export class AgentProfilesClient {
      * @example
      *     await client.agentProfiles.updateAgentProfile({
      *         id: "00000000-0000-0000-0000-000000000000",
-     *         name: "Support \u2014 Tier 1",
+     *         name: "Support (Tier 1)",
      *         description: "Handles first-line delivery questions.",
      *         config: {
      *             model_settings: {
@@ -583,7 +583,7 @@ export class AgentProfilesClient {
     }
 
     /**
-     * Retires an `active` persona to `archived` — hidden from pickers. Idempotent no-op if already archived. The organization's default persona cannot be archived — set another persona as the default first.
+     * Retires an `active` persona to `archived`, hidden from pickers. Idempotent no-op if already archived. The organization's default persona cannot be archived; set another persona as the default first.
      *
      * @param {NizamDashboard.ArchiveAgentProfileRequest} request
      * @param {AgentProfilesClient.RequestOptions} requestOptions - Request-specific configuration.

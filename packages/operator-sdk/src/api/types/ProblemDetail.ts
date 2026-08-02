@@ -17,8 +17,8 @@ export interface ProblemDetail {
     instance?: string | undefined;
     /** Machine-readable identifier. Stable across releases. Snake_case; resource-prefixed for domain errors (e.g., `user.email_already_taken`). */
     code: string;
-    /** OpenTelemetry trace id from the request — match to logs for support. */
+    /** OpenTelemetry trace id from the request; match to logs for support. */
     trace_id?: string | undefined;
-    /** Per-field errors keyed to the offending input. Present on 422 bean-validation failures AND on field-level 409 conflicts (e.g. a duplicate unique value such as a VIN) — bind each entry to its `field`; do not gate handling on `status == 422`. */
+    /** Per-field errors keyed to the offending input. Present on 422 bean-validation failures AND on field-level 409 conflicts (e.g. a duplicate unique value such as a VIN). Bind each entry to its `field`; do not gate handling on `status == 422`. */
     errors?: NizamOperatorRuntime.ApiFieldError[] | undefined;
 }

@@ -36,7 +36,7 @@ export interface CreateAssetRequest {
     "Idempotency-Key"?: string;
     /** Top-level kind. */
     kind: CreateAssetRequest.Kind;
-    /** Initial lifecycle status — the asset's birth state. Optional; defaults to `active`. Subsequent changes go through the status-transition endpoint. */
+    /** Initial lifecycle status: the asset's birth state. Optional; defaults to `active`. Subsequent changes go through the status-transition endpoint. */
     status?: CreateAssetRequest.Status;
     /** Display name. */
     name?: string;
@@ -44,7 +44,7 @@ export interface CreateAssetRequest {
     sub_kind?: string;
     /** SAE J3016 autonomy level 0..5. */
     autonomy_level?: number;
-    /** Vehicle Identification Number — 17 chars of A-Z (no I, O, Q) and 0-9, uppercase. Unique per organization. */
+    /** Vehicle Identification Number: 17 chars of A-Z (no I, O, Q) and 0-9, uppercase. Unique per organization. */
     vin?: string;
     /** License plate. */
     plate_number?: string;
@@ -52,7 +52,7 @@ export interface CreateAssetRequest {
     make?: string;
     /** Model designation. */
     model?: string;
-    /** Model year — 1900 or later, and no later than next year. */
+    /** Model year: 1900 or later, and no later than next year. */
     year?: number;
 }
 
@@ -70,7 +70,7 @@ export namespace CreateAssetRequest {
         Equipment: "equipment",
     } as const;
     export type Kind = (typeof Kind)[keyof typeof Kind];
-    /** Initial lifecycle status — the asset's birth state. Optional; defaults to `active`. Subsequent changes go through the status-transition endpoint. */
+    /** Initial lifecycle status: the asset's birth state. Optional; defaults to `active`. Subsequent changes go through the status-transition endpoint. */
     export const Status = {
         Active: "active",
         Maintenance: "maintenance",

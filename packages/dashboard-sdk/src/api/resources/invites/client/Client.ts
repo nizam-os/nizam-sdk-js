@@ -26,6 +26,120 @@ export class InvitesClient {
     }
 
     /**
+     * The caller's organization's invitations, newest first. Keyset-paginated (`starting_after` / `ending_before`); no sort parameter. Filter with `status`. Org-scoped (RLS).
+     *
+     * `status` matches the EFFECTIVE status: an invitation still stored as `pending` whose `expires_at` has passed is both reported as, and filtered as, `expired`. Nothing sweeps invitations, so filtering on the stored column would surface pending invitations that no recipient could still accept.
+     *
+     * The redemption token is never included — it is returned once, on create.
+     *
+     * @param {NizamDashboard.ListInvitesRequest} request
+     * @param {InvitesClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.invites.listInvites({
+     *         q: "<string>",
+     *         starting_after: "Y3Vyc29yX25leHRfMDFKNVE=",
+     *         ending_before: "Y3Vyc29yX25leHRfMDFKNVE="
+     *     })
+     */
+    public listInvites(
+        request: NizamDashboard.ListInvitesRequest = {},
+        requestOptions?: InvitesClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.ListResponseInviteListItem> {
+        return core.HttpResponsePromise.fromPromise(this.__listInvites(request, requestOptions));
+    }
+
+    private async __listInvites(
+        request: NizamDashboard.ListInvitesRequest = {},
+        requestOptions?: InvitesClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.ListResponseInviteListItem>> {
+        const { status, q, limit, starting_after: startingAfter, ending_before: endingBefore } = request;
+        const _queryParams: Record<string, unknown> = {
+            status: Array.isArray(status) ? status.map((item) => item) : status != null ? status : undefined,
+            q,
+            limit,
+            starting_after: startingAfter,
+            ending_before: endingBefore,
+        };
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/invites",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url
+                .queryBuilder()
+                .addMany(_queryParams)
+                .mergeAdditional(requestOptions?.queryParams)
+                .build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as NizamDashboard.ListResponseInviteListItem,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/invites");
+    }
+
+    /**
      * Persists a pending invite and emails the recipient with the accept link.
      *
      * @param {NizamDashboard.CreateInviteRequest} request
@@ -268,5 +382,219 @@ export class InvitesClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/invites/accept");
+    }
+
+    /**
+     * Delivers the invitation email again to the same address, carrying the SAME token and the SAME deadline — nothing about the invitation changes, so this is safe to repeat and never extends the window the recipient has to accept. Only an outstanding invitation can be re-sent: one already accepted → 409 `invite.already_accepted`, revoked → 410 `invite.revoked`, lapsed → 410 `invite.expired` (issue a new invitation instead). 404 when it does not exist in the caller's organization. No body.
+     *
+     * Gated on `invite:create` rather than a permission of its own: re-delivering an existing invitation is no greater an authority than issuing one.
+     *
+     * @param {NizamDashboard.ResendInviteRequest} request
+     * @param {InvitesClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.GoneError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.invites.resendInvite({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public resendInvite(
+        request: NizamDashboard.ResendInviteRequest,
+        requestOptions?: InvitesClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Invite> {
+        return core.HttpResponsePromise.fromPromise(this.__resendInvite(request, requestOptions));
+    }
+
+    private async __resendInvite(
+        request: NizamDashboard.ResendInviteRequest,
+        requestOptions?: InvitesClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Invite>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/invites/${core.url.encodePathParam(id)}/resend`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Invite, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 410:
+                    throw new NizamDashboard.GoneError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/invites/{id}/resend");
+    }
+
+    /**
+     * Withdraws a still-pending invitation so its link can no longer be redeemed. Idempotent no-op if already revoked; an invitation that was already accepted → 409 `invite.already_accepted`, one whose deadline has passed → 410 `invite.expired`. 404 when it does not exist in the caller's organization. No body.
+     *
+     * @param {NizamDashboard.RevokeInviteRequest} request
+     * @param {InvitesClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.GoneError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.invites.revokeInvite({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public revokeInvite(
+        request: NizamDashboard.RevokeInviteRequest,
+        requestOptions?: InvitesClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Invite> {
+        return core.HttpResponsePromise.fromPromise(this.__revokeInvite(request, requestOptions));
+    }
+
+    private async __revokeInvite(
+        request: NizamDashboard.RevokeInviteRequest,
+        requestOptions?: InvitesClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Invite>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/invites/${core.url.encodePathParam(id)}/revoke`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Invite, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 410:
+                    throw new NizamDashboard.GoneError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/invites/{id}/revoke");
     }
 }

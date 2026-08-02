@@ -10,5 +10,8 @@ export const ListFilesRequestKindItem = {
     ProductImage: "product_image",
     DataExport: "data_export",
     KnowledgeDocument: "knowledge_document",
+    AssistantAttachment: "assistant_attachment",
+    AssistantDocument: "assistant_document",
+    AssistantArtifact: "assistant_artifact",
 } as const;
 export type ListFilesRequestKindItem = (typeof ListFilesRequestKindItem)[keyof typeof ListFilesRequestKindItem];

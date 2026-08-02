@@ -16,4 +16,6 @@ export interface CreateHumanOperatorRequest {
     license_expires_at?: string | undefined;
     /** ISO 3166-1 alpha-2 issuing country. */
     license_country?: string | undefined;
+    /** Invite this driver to the operator app (epic #615): E.164 phone number the enrolment SMS deep link is sent to, which becomes their sign-in identifier. Mutually exclusive with `user_id` — enrolment provisions the login itself. Omit to record the operator without an app invitation. */
+    invite_phone?: string | undefined;
 }

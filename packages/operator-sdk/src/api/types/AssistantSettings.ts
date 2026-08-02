@@ -15,6 +15,11 @@ export interface AssistantSettings {
     features: NizamOperatorRuntime.AssistantFeatureToggles;
     /** Org-level instructions prepended to every turn; null = none. */
     instructions?: string | undefined;
+    safety: NizamOperatorRuntime.AssistantSafetyPolicy;
+    /** Whether the model's reasoning summary is retained on assistant replies. Off by default — chain-of-thought restates the member's own input, so an organization opts in to keeping it. */
+    reasoning_capture: boolean;
+    /** Whether the organization consents to its assistant conversations being used as evaluation fixtures for model and prompt quality testing. Off by default and prospective-only: conversations started while consent is on are flagged as eligible; withdrawing consent stops flagging new conversations and excludes the organization from any future fixture collection, without deleting anything. */
+    eval_consent: boolean;
     /** Object type discriminator. */
     object: AssistantSettings.Object_;
 }

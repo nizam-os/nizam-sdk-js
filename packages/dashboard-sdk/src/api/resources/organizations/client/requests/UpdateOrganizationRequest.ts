@@ -21,7 +21,7 @@ export interface UpdateOrganizationRequest {
     name?: string;
     /** New URL-safe slug. Cross-tenant unique. Omit to leave unchanged. */
     slug?: string;
-    /** New business category — lowercase slug from /v1/lookups/business-categories. Omit to leave unchanged. */
+    /** New business category: lowercase slug from /v1/lookups/business-categories. Omit to leave unchanged. */
     business_category?: string;
     /** New contact phone in E.164 format. Omit to leave unchanged. */
     phone?: string;

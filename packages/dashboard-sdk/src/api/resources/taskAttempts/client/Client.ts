@@ -139,7 +139,7 @@ export class TaskAttemptsClient {
     }
 
     /**
-     * Declares a proof-of-delivery photo upload for the attempt and returns presigned part URLs. PUT the bytes, then complete via the generic file-uploads endpoint — completion records the photo (with the capture facts declared here) atomically and queues the malware scan; the photo becomes downloadable only after a CLEAN verdict.
+     * Declares a proof-of-delivery photo upload for the attempt and returns presigned part URLs. PUT the bytes, then complete via the generic file-uploads endpoint. Completion records the photo (with the capture facts declared here) atomically and queues the malware scan; the photo becomes downloadable only after a CLEAN verdict.
      *
      * @param {NizamDashboard.CaptureTaskAttemptPhotoRequest} request
      * @param {TaskAttemptsClient.RequestOptions} requestOptions - Request-specific configuration.

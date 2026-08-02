@@ -6,7 +6,7 @@
 export interface CaptureTaskAttemptPhotoRequest {
     /** Original filename. */
     filename: string;
-    /** Declared MIME type — POD photos accept image/jpeg, image/png, image/webp, image/heic, image/heif. */
+    /** Declared MIME type: POD photos accept image/jpeg, image/png, image/webp, image/heic, image/heif. */
     content_type: string;
     /** Exact byte size; verified against storage at completion. */
     size_bytes?: number | undefined;
@@ -18,7 +18,7 @@ export interface CaptureTaskAttemptPhotoRequest {
     photo_type?: CaptureTaskAttemptPhotoRequest.PhotoType | undefined;
     /** Operator-entered caption. */
     caption?: string | undefined;
-    /** Capture timestamp from the device (EXIF time) — distinct from the upload time, which may lag over flaky mobile connections. */
+    /** Capture timestamp from the device (EXIF time), distinct from the upload time, which may lag over flaky mobile connections. */
     taken_at?: string | undefined;
 }
 

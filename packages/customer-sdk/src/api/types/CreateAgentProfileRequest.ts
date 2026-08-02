@@ -10,13 +10,13 @@ export interface CreateAgentProfileRequest {
     name: string;
     /** Optional description. */
     description?: string | undefined;
-    /** Reserved category — selects the base prompt preset. */
+    /** Reserved category: selects the base prompt preset. */
     category: CreateAgentProfileRequest.Category;
     config?: NizamCustomer.AgentProfileConfigInput | undefined;
 }
 
 export namespace CreateAgentProfileRequest {
-    /** Reserved category — selects the base prompt preset. */
+    /** Reserved category: selects the base prompt preset. */
     export const Category = {
         CustomerSupport: "customer_support",
         SalesOutreach: "sales_outreach",

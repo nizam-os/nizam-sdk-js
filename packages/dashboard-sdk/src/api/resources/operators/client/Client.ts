@@ -16,7 +16,7 @@ export declare namespace OperatorsClient {
 }
 
 /**
- * Universal controlling-agent master — humans, autonomous software, teleoperators, hybrids. Kind-discriminated.
+ * Universal controlling-agent master: humans, autonomous software, teleoperators, hybrids. Kind-discriminated.
  */
 export class OperatorsClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<OperatorsClient.Options>;
@@ -26,7 +26,114 @@ export class OperatorsClient {
     }
 
     /**
-     * Creates a new operator (human, autonomous software, or teleoperated). The `kind` discriminator selects the variant.
+     * The organization's operators, newest first, each carrying the effective status of its latest app invitation (driver enrolment) when one exists. `q` narrows by display name; `kind` accepts comma-separated values. Pagination is bidirectional (`starting_after` / `ending_before`).
+     *
+     * @param {NizamDashboard.ListOperatorsRequest} request
+     * @param {OperatorsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.operators.listOperators({
+     *         q: "<string>",
+     *         starting_after: "Y3Vyc29yX25leHRfMDFKNVE=",
+     *         ending_before: "Y3Vyc29yX25leHRfMDFKNVE="
+     *     })
+     */
+    public listOperators(
+        request: NizamDashboard.ListOperatorsRequest = {},
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.ListResponseOperator> {
+        return core.HttpResponsePromise.fromPromise(this.__listOperators(request, requestOptions));
+    }
+
+    private async __listOperators(
+        request: NizamDashboard.ListOperatorsRequest = {},
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.ListResponseOperator>> {
+        const { kind, q, limit, starting_after: startingAfter, ending_before: endingBefore } = request;
+        const _queryParams: Record<string, unknown> = {
+            kind: Array.isArray(kind) ? kind.map((item) => item) : kind != null ? kind : undefined,
+            q,
+            limit,
+            starting_after: startingAfter,
+            ending_before: endingBefore,
+        };
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/operators",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url
+                .queryBuilder()
+                .addMany(_queryParams)
+                .mergeAdditional(requestOptions?.queryParams)
+                .build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.ListResponseOperator, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/operators");
+    }
+
+    /**
+     * Creates a new operator (human, autonomous software, or teleoperated). The `kind` discriminator selects the variant. A human operator may carry `invite_phone` to enrol them into the operator app in the same act (epic #615): the platform provisions a phone-bound sign-in identity, links it, and texts an invitation deep link — requires the `operator:invite` permission on top of `operator:create`. An autonomous operator is identified by `(vendor, product, instance_id)`, unique per organization; 409 when that instance is already registered.
      *
      * @param {NizamDashboard.CreateOperatorBody} request
      * @param {OperatorsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -54,6 +161,7 @@ export class OperatorsClient {
      *             kind: "autonomous",
      *             vendor: "Waymo",
      *             product: "Waymo Driver",
+     *             instance_id: "van-4711",
      *             version: "7.3",
      *             responsible_party: "c1d2e3f4-5a6b-7c8d-9e0f-1a2b3c4d5e6f"
      *         }
@@ -250,5 +358,844 @@ export class OperatorsClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/operators/{id}");
+    }
+
+    /**
+     * Texts the invitation again. An outstanding invitation is re-delivered bearing its original, still-valid link; an expired or revoked one is REISSUED as a fresh invitation with a new link and deadline. 409 when the operator already accepted; 404 when they were never invited.
+     *
+     * @param {NizamDashboard.ResendOperatorInviteRequest} request
+     * @param {OperatorsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.operators.resendOperatorInvite({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public resendOperatorInvite(
+        request: NizamDashboard.ResendOperatorInviteRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Operator> {
+        return core.HttpResponsePromise.fromPromise(this.__resendOperatorInvite(request, requestOptions));
+    }
+
+    private async __resendOperatorInvite(
+        request: NizamDashboard.ResendOperatorInviteRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Operator>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/operators/${core.url.encodePathParam(id)}/resend-invite`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Operator, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/operators/{id}/resend-invite",
+        );
+    }
+
+    /**
+     * Withdraws the pending invitation; its link stops working immediately. Idempotent — revoking an already-revoked invitation succeeds unchanged. 409 when the operator already accepted; 410 when it has already expired (there is nothing left to withdraw); 404 when they were never invited.
+     *
+     * @param {NizamDashboard.RevokeOperatorInviteRequest} request
+     * @param {OperatorsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.GoneError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.operators.revokeOperatorInvite({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public revokeOperatorInvite(
+        request: NizamDashboard.RevokeOperatorInviteRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Operator> {
+        return core.HttpResponsePromise.fromPromise(this.__revokeOperatorInvite(request, requestOptions));
+    }
+
+    private async __revokeOperatorInvite(
+        request: NizamDashboard.RevokeOperatorInviteRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Operator>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/operators/${core.url.encodePathParam(id)}/revoke-invite`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Operator, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 410:
+                    throw new NizamDashboard.GoneError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/operators/{id}/revoke-invite",
+        );
+    }
+
+    /**
+     * Records the build this instance is now running, after an over-the-air update. The operator row does NOT change identity: its machine credential, its assignments and its telemetry state all survive the update untouched (#640). Journals a `software_updated` activity event carrying the from → to pair, which is where the "what was running when" audit answer now lives. Re-recording the same version succeeds and journals nothing. 422 for any operator that is not autonomous; 409 for a decommissioned one.
+     *
+     * @param {NizamDashboard.RecordSoftwareVersionRequest} request
+     * @param {OperatorsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.operators.recordOperatorSoftwareVersion({
+     *         id: "00000000-0000-0000-0000-000000000000",
+     *         version: "7.4"
+     *     })
+     */
+    public recordOperatorSoftwareVersion(
+        request: NizamDashboard.RecordSoftwareVersionRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Operator> {
+        return core.HttpResponsePromise.fromPromise(this.__recordOperatorSoftwareVersion(request, requestOptions));
+    }
+
+    private async __recordOperatorSoftwareVersion(
+        request: NizamDashboard.RecordSoftwareVersionRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Operator>> {
+        const { id, ..._body } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/operators/${core.url.encodePathParam(id)}/software-version`,
+            ),
+            method: "PUT",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: _body,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Operator, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "PUT",
+            "/v1/operators/{id}/software-version",
+        );
+    }
+
+    /**
+     * The operator's issuance ledger, newest first — every certificate it was ever issued, including expired and revoked ones. Keyset-paginated (`starting_after` / `ending_before`); no sort parameter.
+     *
+     * The history is the point: a list showing only live certificates could not answer what a vehicle authenticated with last quarter, which is the first question an incident review asks.
+     *
+     * `status` is EFFECTIVE — a certificate past its `not_after` reads as `expired` whether or not anything has touched the row, because the authority on expiry is the certificate itself. Renewals overlap by design, so seeing two active certificates for one machine is normal rather than a fault.
+     *
+     * @param {NizamDashboard.ListOperatorCertificatesRequest} request
+     * @param {OperatorsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.operators.listOperatorCertificates({
+     *         operatorId: "00000000-0000-0000-0000-000000000000",
+     *         starting_after: "Y3Vyc29yX25leHRfMDFKNVE=",
+     *         ending_before: "Y3Vyc29yX25leHRfMDFKNVE="
+     *     })
+     */
+    public listOperatorCertificates(
+        request: NizamDashboard.ListOperatorCertificatesRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.ListResponseMachineCertificate> {
+        return core.HttpResponsePromise.fromPromise(this.__listOperatorCertificates(request, requestOptions));
+    }
+
+    private async __listOperatorCertificates(
+        request: NizamDashboard.ListOperatorCertificatesRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.ListResponseMachineCertificate>> {
+        const { operatorId, limit, starting_after: startingAfter, ending_before: endingBefore } = request;
+        const _queryParams: Record<string, unknown> = {
+            limit,
+            starting_after: startingAfter,
+            ending_before: endingBefore,
+        };
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/operators/${core.url.encodePathParam(operatorId)}/certificates`,
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url
+                .queryBuilder()
+                .addMany(_queryParams)
+                .mergeAdditional(requestOptions?.queryParams)
+                .build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as NizamDashboard.ListResponseMachineCertificate,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "GET",
+            "/v1/operators/{operatorId}/certificates",
+        );
+    }
+
+    /**
+     * Stops trusting one certificate, permanently — there is no un-revoke, and a machine that needs to come back enrols afresh. Idempotent: re-revoking succeeds and keeps the ORIGINAL reason and timestamp, because the first revocation is the one that describes what happened.
+     *
+     * Two controls fire, and the difference matters operationally. The certificate joins the revocation list, which relying parties pick up when they next refresh it. And when this leaves the machine with nothing usable, its sign-in identity is disabled outright, which takes effect on the very next token request — that is the control to rely on when a robot must stop NOW.
+     *
+     * `key_compromise` CASCADES to every other certificate the machine holds: a leaked key indicts the device, not one of its credentials. Every other reason touches only the certificate named, so retiring one credential never silently kills an overlapping renewal.
+     *
+     * An already-expired certificate → 409 `workload.certificate_expired`, not a quiet success: a caller revoking one usually believes it is still live, and confirming that belief at the moment it is wrong is worse than refusing. A serial belonging to a different machine → 404, the same answer as one that does not exist.
+     *
+     * @param {NizamDashboard.RevokeMachineCertificateRequest} request
+     * @param {OperatorsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     * @throws {@link NizamDashboard.ServiceUnavailableError}
+     *
+     * @example
+     *     await client.operators.revokeOperatorCertificate({
+     *         operatorId: "00000000-0000-0000-0000-000000000000",
+     *         serialNumber: "<string>",
+     *         reason: "key_compromise"
+     *     })
+     *
+     * @example
+     *     await client.operators.revokeOperatorCertificate({
+     *         operatorId: "00000000-0000-0000-0000-000000000000",
+     *         serialNumber: "<string>",
+     *         reason: "cessation_of_operation"
+     *     })
+     */
+    public revokeOperatorCertificate(
+        request: NizamDashboard.RevokeMachineCertificateRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.MachineCertificate> {
+        return core.HttpResponsePromise.fromPromise(this.__revokeOperatorCertificate(request, requestOptions));
+    }
+
+    private async __revokeOperatorCertificate(
+        request: NizamDashboard.RevokeMachineCertificateRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.MachineCertificate>> {
+        const { operatorId, serialNumber, ..._body } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/operators/${core.url.encodePathParam(operatorId)}/certificates/${core.url.encodePathParam(serialNumber)}/revoke`,
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: _body,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.MachineCertificate, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 503:
+                    throw new NizamDashboard.ServiceUnavailableError(
+                        _response.error.body as unknown,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/operators/{operatorId}/certificates/{serialNumber}/revoke",
+        );
+    }
+
+    /**
+     * Provisions the machine's own service identity, binds it to this operator, and mints the single-use voucher a device exchanges for its first certificate.
+     *
+     * **The token is returned once.** Only its hash is stored and no endpoint reveals it again, so install it on the device during commissioning. Mint a fresh voucher if it is lost — an existing one cannot be re-read.
+     *
+     * Only autonomous operators may hold a machine credential: a human driver authenticates with a passkey and a teleoperator with dashboard credentials, so issuing either a certificate would hand a person a credential that bypasses every possession check their own sign-in path enforces. Any other kind → 409 `workload.operator_not_enrollable`.
+     *
+     * Minting again for a machine that already holds a voucher is legal and issues a NEW one — a voucher is never revived, and a re-commissioned unit needs a fresh secret.
+     *
+     * @param {NizamDashboard.CreateOperatorEnrolmentRequest} request
+     * @param {OperatorsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.operators.createOperatorEnrolment({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
+     *         operatorId: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public createOperatorEnrolment(
+        request: NizamDashboard.CreateOperatorEnrolmentRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.MachineEnrolment> {
+        return core.HttpResponsePromise.fromPromise(this.__createOperatorEnrolment(request, requestOptions));
+    }
+
+    private async __createOperatorEnrolment(
+        request: NizamDashboard.CreateOperatorEnrolmentRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.MachineEnrolment>> {
+        const { operatorId, "Idempotency-Key": idempotencyKey } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/operators/${core.url.encodePathParam(operatorId)}/enrolments`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.MachineEnrolment, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/operators/{operatorId}/enrolments",
+        );
+    }
+
+    /**
+     * Stops the outstanding voucher from being redeemable. Idempotent — withdrawing an already-withdrawn voucher succeeds unchanged.
+     *
+     * Deliberately leaves any certificate already issued ALONE: withdrawing an unredeemed voucher is a statement about a credential that was never created. If the device already enrolled, this is the wrong verb and answers 409 `workload.enrolment_already_redeemed` — revoke the certificate instead. A lapsed voucher → 410 `workload.enrolment_expired` (there is nothing left to withdraw); an operator that was never commissioned → 404.
+     *
+     * @param {NizamDashboard.RevokeOperatorEnrolmentRequest} request
+     * @param {OperatorsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.GoneError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.operators.revokeOperatorEnrolment({
+     *         operatorId: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public revokeOperatorEnrolment(
+        request: NizamDashboard.RevokeOperatorEnrolmentRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.MachineEnrolment> {
+        return core.HttpResponsePromise.fromPromise(this.__revokeOperatorEnrolment(request, requestOptions));
+    }
+
+    private async __revokeOperatorEnrolment(
+        request: NizamDashboard.RevokeOperatorEnrolmentRequest,
+        requestOptions?: OperatorsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.MachineEnrolment>> {
+        const { operatorId } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/operators/${core.url.encodePathParam(operatorId)}/revoke-enrolment`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.MachineEnrolment, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 410:
+                    throw new NizamDashboard.GoneError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/operators/{operatorId}/revoke-enrolment",
+        );
     }
 }

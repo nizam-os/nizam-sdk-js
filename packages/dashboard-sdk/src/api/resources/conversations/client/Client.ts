@@ -23,6 +23,119 @@ export class ConversationsClient {
     }
 
     /**
+     * Ranked full-text search over everything the caller can read — conversation titles, the text of their messages, and the titles of artifacts produced in them — accent-insensitive and stemmed for the organization's language, so `camions` finds `camion`.
+     *
+     * Every hit is a CONVERSATION: a thread where the words appear forty times is one result, not forty. `match` says where it matched and carries the id to open (the message to scroll to, the artifact to badge), and `snippet` shows the winning text with `<mark>` around the terms that matched — the title when the thread matched by name, otherwise the passage inside it.
+     *
+     * Results are a bounded top-K, best first, and are NOT paginated — refine the query rather than paging. Only the current branch of a conversation is searched, so every snippet quotes text the thread still shows.
+     *
+     * For a title-only pass with the list's own sort, filters and pagination, use `q` on `GET /conversations` — it answers from one index probe and suits an instant type-ahead, with this endpoint as the deeper pass behind it.
+     *
+     * @param {NizamDashboard.SearchAssistantRequest} request
+     * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.conversations.searchAssistant({
+     *         q: "<string>"
+     *     })
+     */
+    public searchAssistant(
+        request: NizamDashboard.SearchAssistantRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.AssistantSearchResults> {
+        return core.HttpResponsePromise.fromPromise(this.__searchAssistant(request, requestOptions));
+    }
+
+    private async __searchAssistant(
+        request: NizamDashboard.SearchAssistantRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.AssistantSearchResults>> {
+        const { q, limit } = request;
+        const _queryParams: Record<string, unknown> = {
+            q,
+            limit,
+        };
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/assistant/search",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url
+                .queryBuilder()
+                .addMany(_queryParams)
+                .mergeAdditional(requestOptions?.queryParams)
+                .build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return {
+                data: _response.body as NizamDashboard.AssistantSearchResults,
+                rawResponse: _response.rawResponse,
+            };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/assistant/search");
+    }
+
+    /**
+     * The caller's own conversations plus any shared conversation of the organization, newest-updated first unless `sort` says otherwise. `q` narrows the list to threads whose TITLE matches, accent-insensitively and stemmed for the organization's language — it is a filter, so `sort` still decides the order and a blank `q` is simply no filter. To search what was SAID rather than what a thread is called, use `GET /assistant/search`, which spans conversations, messages and artifacts and ranks by relevance.
+     *
      * @param {NizamDashboard.ListConversationsRequest} request
      * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
@@ -34,6 +147,8 @@ export class ConversationsClient {
      *
      * @example
      *     await client.conversations.listConversations({
+     *         q: "<string>",
+     *         project_id: "00000000-0000-0000-0000-000000000000",
      *         starting_after: "Y3Vyc29yX25leHRfMDFKNVE=",
      *         ending_before: "Y3Vyc29yX25leHRfMDFKNVE="
      *     })
@@ -49,9 +164,23 @@ export class ConversationsClient {
         request: NizamDashboard.ListConversationsRequest = {},
         requestOptions?: ConversationsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.ListResponseConversation>> {
-        const { status, sort, limit, starting_after: startingAfter, ending_before: endingBefore } = request;
+        const {
+            q,
+            status,
+            project_id: projectId,
+            pinned,
+            tag,
+            sort,
+            limit,
+            starting_after: startingAfter,
+            ending_before: endingBefore,
+        } = request;
         const _queryParams: Record<string, unknown> = {
+            q,
             status: Array.isArray(status) ? status.map((item) => item) : status != null ? status : undefined,
+            project_id: projectId,
+            pinned,
+            tag,
             sort: Array.isArray(sort) ? sort.map((item) => item) : sort != null ? sort : undefined,
             limit,
             starting_after: startingAfter,
@@ -237,6 +366,458 @@ export class ConversationsClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/conversations");
+    }
+
+    /**
+     * Renders the conversation's ACTIVE PATH — the user and assistant messages on the currently-selected branch — to Markdown or JSON and returns a short-lived presigned download URL. Tool calls, reasoning, attachments and token counts are deliberately excluded; citations are kept. Requires the organization's export feature toggle.
+     *
+     * @param {NizamDashboard.ExportConversationRequest} request
+     * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.conversations.exportConversation({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
+     *         conversationId: "00000000-0000-0000-0000-000000000000",
+     *         format: "markdown"
+     *     })
+     */
+    public exportConversation(
+        request: NizamDashboard.ExportConversationRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.ExportedTranscript> {
+        return core.HttpResponsePromise.fromPromise(this.__exportConversation(request, requestOptions));
+    }
+
+    private async __exportConversation(
+        request: NizamDashboard.ExportConversationRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.ExportedTranscript>> {
+        const { conversationId, "Idempotency-Key": idempotencyKey, ..._body } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/conversations/${core.url.encodePathParam(conversationId)}/export`,
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: _body,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.ExportedTranscript, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/conversations/{conversationId}/export",
+        );
+    }
+
+    /**
+     * Every link on the conversation, newest first (owner-only). Tokens are never included — they are unrecoverable by design.
+     *
+     * @param {NizamDashboard.ListConversationSharesRequest} request
+     * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.conversations.listConversationShares({
+     *         conversationId: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public listConversationShares(
+        request: NizamDashboard.ListConversationSharesRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.ConversationShareList> {
+        return core.HttpResponsePromise.fromPromise(this.__listConversationShares(request, requestOptions));
+    }
+
+    private async __listConversationShares(
+        request: NizamDashboard.ListConversationSharesRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.ConversationShareList>> {
+        const { conversationId } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/conversations/${core.url.encodePathParam(conversationId)}/shares`,
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.ConversationShareList, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "GET",
+            "/v1/conversations/{conversationId}/shares",
+        );
+    }
+
+    /**
+     * Mints a revocable, read-only link to the conversation (owner-only). The response carries the link token ONCE — only its hash is stored, so it cannot be retrieved afterwards. `audience` defaults to `workspace`; `public` is an explicit opt-in that makes the conversation readable by anyone holding the link.
+     *
+     * @param {NizamDashboard.CreateConversationShareRequest} request
+     * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.conversations.createConversationShare({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
+     *         conversationId: "00000000-0000-0000-0000-000000000000",
+     *         audience: "workspace",
+     *         expires_at: "2026-08-08T12:34:56Z"
+     *     })
+     */
+    public createConversationShare(
+        request: NizamDashboard.CreateConversationShareRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.ConversationShare> {
+        return core.HttpResponsePromise.fromPromise(this.__createConversationShare(request, requestOptions));
+    }
+
+    private async __createConversationShare(
+        request: NizamDashboard.CreateConversationShareRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.ConversationShare>> {
+        const { conversationId, "Idempotency-Key": idempotencyKey, ..._body } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/conversations/${core.url.encodePathParam(conversationId)}/shares`,
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: _body,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.ConversationShare, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/conversations/{conversationId}/shares",
+        );
+    }
+
+    /**
+     * Kills the link immediately — the next request through it sees nothing. Irreversible: a revoked link is never restored, because whoever collected it in the meantime would regain access. Idempotent. No body.
+     *
+     * @param {NizamDashboard.RevokeConversationShareRequest} request
+     * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.conversations.revokeConversationShare({
+     *         conversationId: "00000000-0000-0000-0000-000000000000",
+     *         shareId: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public revokeConversationShare(
+        request: NizamDashboard.RevokeConversationShareRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.ConversationShare> {
+        return core.HttpResponsePromise.fromPromise(this.__revokeConversationShare(request, requestOptions));
+    }
+
+    private async __revokeConversationShare(
+        request: NizamDashboard.RevokeConversationShareRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.ConversationShare>> {
+        const { conversationId, shareId } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/conversations/${core.url.encodePathParam(conversationId)}/shares/${core.url.encodePathParam(shareId)}/revoke`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.ConversationShare, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/conversations/{conversationId}/shares/{shareId}/revoke",
+        );
     }
 
     /**
@@ -438,7 +1019,9 @@ export class ConversationsClient {
      *     await client.conversations.updateConversation({
      *         id: "00000000-0000-0000-0000-000000000000",
      *         title: "Q3 logistics review",
-     *         visibility: "workspace"
+     *         visibility: "workspace",
+     *         pinned: false,
+     *         tags: ["logistics", "q3"]
      *     })
      */
     public updateConversation(
@@ -731,6 +1314,210 @@ export class ConversationsClient {
     }
 
     /**
+     * Removes the conversation from whatever project it is filed into (owner-only). Idempotent. No body.
+     *
+     * @param {NizamDashboard.ClearConversationProjectRequest} request
+     * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.conversations.clearConversationProject({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public clearConversationProject(
+        request: NizamDashboard.ClearConversationProjectRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Conversation> {
+        return core.HttpResponsePromise.fromPromise(this.__clearConversationProject(request, requestOptions));
+    }
+
+    private async __clearConversationProject(
+        request: NizamDashboard.ClearConversationProjectRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Conversation>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/conversations/${core.url.encodePathParam(id)}/clear-project`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Conversation, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/conversations/{id}/clear-project",
+        );
+    }
+
+    /**
+     * Moves the conversation back to active — the reverse of archive. Idempotent no-op if already active. No body.
+     *
+     * @param {NizamDashboard.RestoreConversationRequest} request
+     * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.conversations.restoreConversation({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public restoreConversation(
+        request: NizamDashboard.RestoreConversationRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Conversation> {
+        return core.HttpResponsePromise.fromPromise(this.__restoreConversation(request, requestOptions));
+    }
+
+    private async __restoreConversation(
+        request: NizamDashboard.RestoreConversationRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Conversation>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/conversations/${core.url.encodePathParam(id)}/restore`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Conversation, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/conversations/{id}/restore",
+        );
+    }
+
+    /**
      * Sets the agent profile the conversation converses as (owner-only). The persona must be an active profile of the caller's organization, permitted by the organization's assistant settings (the organization's default persona is always selectable); turns follow the persona's active version. Re-selection replaces.
      *
      * @param {NizamDashboard.SelectConversationProfileRequest} request
@@ -836,6 +1623,115 @@ export class ConversationsClient {
             _response.rawResponse,
             "POST",
             "/v1/conversations/{id}/select-profile",
+        );
+    }
+
+    /**
+     * Files the conversation into one of the caller's projects (owner-only). The project must be owned by the caller — filing into someone else's folder resolves as a missing project. Re-filing replaces.
+     *
+     * @param {NizamDashboard.SelectConversationProjectRequest} request
+     * @param {ConversationsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.conversations.selectConversationProject({
+     *         id: "00000000-0000-0000-0000-000000000000",
+     *         project_id: "9c1e2f30-4a5b-6c7d-8e9f-0a1b2c3d4e5f"
+     *     })
+     */
+    public selectConversationProject(
+        request: NizamDashboard.SelectConversationProjectRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.Conversation> {
+        return core.HttpResponsePromise.fromPromise(this.__selectConversationProject(request, requestOptions));
+    }
+
+    private async __selectConversationProject(
+        request: NizamDashboard.SelectConversationProjectRequest,
+        requestOptions?: ConversationsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.Conversation>> {
+        const { id, ..._body } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/conversations/${core.url.encodePathParam(id)}/select-project`,
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: _body,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.Conversation, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/conversations/{id}/select-project",
         );
     }
 }

@@ -16,7 +16,7 @@ export declare namespace RealtimeClient {
 }
 
 /**
- * Realtime (STOMP/WebSocket) session bootstrap — mint a ticket to open a connection.
+ * Realtime (STOMP/WebSocket) session bootstrap: mint a ticket to open a connection.
  */
 export class RealtimeClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<RealtimeClient.Options>;
@@ -26,7 +26,7 @@ export class RealtimeClient {
     }
 
     /**
-     * Returns a short-lived ticket to present as `Authorization: Bearer <ticket>` on the STOMP CONNECT frame to `/ws`. Browser clients need this because their Keycloak access token lives in an HTTP-only cookie that JavaScript cannot read; native/mobile clients holding a Keycloak access token may present it directly on CONNECT and skip this call. Mint a fresh ticket per connection attempt — it expires within seconds.
+     * Returns a short-lived ticket to present as `Authorization: Bearer <ticket>` on the STOMP CONNECT frame to `/ws`. Browser clients need this because their Keycloak access token lives in an HTTP-only cookie that JavaScript cannot read; native/mobile clients holding a Keycloak access token may present it directly on CONNECT and skip this call. Mint a fresh ticket per connection attempt; it expires within seconds.
      *
      * @param {RealtimeClient.RequestOptions} requestOptions - Request-specific configuration.
      *

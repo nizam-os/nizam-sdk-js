@@ -3,10 +3,10 @@
 import type * as NizamCarrier from "../index.js";
 
 /**
- * A conversation's active message path — the active messages root→leaf, each with branch navigation.
+ * A conversation's active message path: the active messages root→leaf, each with branch navigation.
  */
 export interface MessageThread {
-    /** The active path — messages from the root to the leaf, in order. */
+    /** The active path: messages from the root to the leaf, in order. */
     messages: NizamCarrier.Message[];
     object: MessageThread.Object_;
 }

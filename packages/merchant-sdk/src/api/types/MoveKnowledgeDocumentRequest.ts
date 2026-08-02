@@ -4,6 +4,6 @@
  * The collection to file a document under. To un-group a document instead, use DELETE /v1/knowledge/documents/{id}/collection.
  */
 export interface MoveKnowledgeDocumentRequest {
-    /** The collection to move the document into. Required — clearing the grouping is the separate un-group verb, not a null here. */
+    /** The collection to move the document into. Required; clearing the grouping is the separate un-group verb, not a null here. */
     collection_id: string;
 }

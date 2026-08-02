@@ -1,2 +1,10 @@
 export type { CreateOperatorBody } from "./CreateOperatorBody.js";
+export type { CreateOperatorEnrolmentRequest } from "./CreateOperatorEnrolmentRequest.js";
 export type { GetOperatorRequest } from "./GetOperatorRequest.js";
+export type { ListOperatorCertificatesRequest } from "./ListOperatorCertificatesRequest.js";
+export type { ListOperatorsRequest } from "./ListOperatorsRequest.js";
+export type { RecordSoftwareVersionRequest } from "./RecordSoftwareVersionRequest.js";
+export type { ResendOperatorInviteRequest } from "./ResendOperatorInviteRequest.js";
+export { RevokeMachineCertificateRequest } from "./RevokeMachineCertificateRequest.js";
+export type { RevokeOperatorEnrolmentRequest } from "./RevokeOperatorEnrolmentRequest.js";
+export type { RevokeOperatorInviteRequest } from "./RevokeOperatorInviteRequest.js";

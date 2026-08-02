@@ -15,4 +15,9 @@ export interface UpdateAssistantSettingsRequest {
     features?: NizamCarrier.AssistantFeatureToggles | undefined;
     /** Org instructions; "" clears them, omit to leave unchanged. */
     instructions?: string | undefined;
+    safety?: NizamCarrier.AssistantSafetyPolicy | undefined;
+    /** Retain the model's reasoning summary on assistant replies. Turning this off stops future capture; it does not erase reasoning already stored. */
+    reasoning_capture?: boolean | undefined;
+    /** Consent to the organization's assistant conversations being used as evaluation fixtures. Prospective-only: granting flags conversations started from now on; withdrawing stops flagging and excludes the organization from future fixture collection. Neither direction deletes or rewrites existing conversations. */
+    eval_consent?: boolean | undefined;
 }

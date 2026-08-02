@@ -10,7 +10,7 @@ export interface UpdateAssetRequest {
     sub_kind?: string | undefined;
     /** New SAE J3016 autonomy level 0..5. Omit to leave unchanged. */
     autonomy_level?: number | undefined;
-    /** New VIN — 17 chars of A-Z (no I, O, Q) and 0-9, uppercase. Unique per organization. Omit to leave unchanged. */
+    /** New VIN: 17 chars of A-Z (no I, O, Q) and 0-9, uppercase. Unique per organization. Omit to leave unchanged. */
     vin?: string | undefined;
     /** New license plate. Omit to leave unchanged. */
     plate_number?: string | undefined;
@@ -18,6 +18,6 @@ export interface UpdateAssetRequest {
     make?: string | undefined;
     /** New model designation. Omit to leave unchanged. */
     model?: string | undefined;
-    /** New model year — 1900 or later, no later than next year. Omit to leave unchanged. */
+    /** New model year: 1900 or later, no later than next year. Omit to leave unchanged. */
     year?: number | undefined;
 }

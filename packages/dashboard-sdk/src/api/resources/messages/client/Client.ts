@@ -23,7 +23,7 @@ export class MessagesClient {
     }
 
     /**
-     * Returns the active path — the chain of active messages from the root to the leaf, in order — each annotated with its branch siblings for navigation. Requires read access to the conversation.
+     * Returns the active path: the chain of active messages from the root to the leaf, in order, each annotated with its branch siblings for navigation. Requires read access to the conversation.
      *
      * @param {NizamDashboard.ListMessagesRequest} request
      * @param {MessagesClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -122,7 +122,7 @@ export class MessagesClient {
     }
 
     /**
-     * Re-selects the branch through the addressed message — deactivates its currently-active sibling and activates it (idempotent if already active) — and returns the resulting active path. No body.
+     * Re-selects the branch through the addressed message: deactivates its currently-active sibling and activates it (idempotent if already active), and returns the resulting active path. No body.
      *
      * @param {NizamDashboard.SwitchMessageBranchRequest} request
      * @param {MessagesClient.RequestOptions} requestOptions - Request-specific configuration.

@@ -10,6 +10,12 @@ export interface AssistantFeatureToggles {
     tools?: boolean | undefined;
     /** Whether a member may attach files to a turn. */
     attachments?: boolean | undefined;
-    /** Whether conversations may be shared beyond their owner. */
+    /** Whether a conversation may be exposed to anyone other than its owner — both visibility beyond private and revocable share links. */
     sharing?: boolean | undefined;
+    /** Whether a member may download their own conversation as a transcript. Independent of sharing: this governs the owner taking their own work out, not exposing it to others. */
+    export?: boolean | undefined;
+    /** Whether the assistant may name an untitled conversation from its first turn. Off means threads keep whatever title the member gives them, and nothing else. */
+    auto_title?: boolean | undefined;
+    /** Whether each completed turn ends with up to three suggested next prompts. They are transient — never stored — and cost no extra credit; switching this off buys latency, not a smaller bill. */
+    follow_ups?: boolean | undefined;
 }

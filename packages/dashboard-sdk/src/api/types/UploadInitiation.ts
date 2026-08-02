@@ -6,9 +6,9 @@ import type * as NizamDashboard from "../index.js";
  * A freshly initiated upload: the session handle, the pre-reserved file id and the presigned part URLs. Resume/complete/cancel go through the generic file-uploads endpoints.
  */
 export interface UploadInitiation {
-    /** Upload session id — the handle for resume/complete/cancel. */
+    /** Upload session id: the handle for resume/complete/cancel. */
     upload_session_id: string;
-    /** Pre-reserved file id — the id the completed file WILL carry. */
+    /** Pre-reserved file id: the id the completed file WILL carry. */
     file_id: string;
     /** Fixed size of every part except the last. */
     part_size_bytes: number;

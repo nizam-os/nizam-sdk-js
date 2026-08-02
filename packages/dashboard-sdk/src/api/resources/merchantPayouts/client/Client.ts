@@ -1005,7 +1005,7 @@ export class MerchantPayoutsClient {
     }
 
     /**
-     * Records the payout as disbursed (`sent`) with optional rail references. The processor-Connect rail is record-only — `processor_transfer_id` is stored with no transfer call. An illegal edge → 409 `merchant_payout.invalid_transition`.
+     * Records the payout as disbursed (`sent`) with optional rail references. The processor-Connect rail is record-only: `processor_transfer_id` is stored with no transfer call. An illegal edge → 409 `merchant_payout.invalid_transition`.
      *
      * @param {NizamDashboard.MarkSentMerchantPayoutRequest} request
      * @param {MerchantPayoutsClient.RequestOptions} requestOptions - Request-specific configuration.

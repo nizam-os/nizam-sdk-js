@@ -3,7 +3,7 @@
 export interface ExportAssetsRequest {
     /** Output format. */
     format: ExportAssetsRequest.Format;
-    /** Columns to export, in display order. `id` is a UUID — the safe, stable re-import/audit key; `kind`/`status` carry their stored code, not the tenant's display label. */
+    /** Columns to export, in display order. `id` is a UUID, the safe, stable re-import/audit key; `kind`/`status` carry their stored code, not the tenant's display label. */
     fields: ExportAssetsRequest.Fields.Item[];
     /** Asset ids to export (the current selection). Capped at 10000. */
     ids: string[];

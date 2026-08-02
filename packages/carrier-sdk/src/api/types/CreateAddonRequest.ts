@@ -6,7 +6,7 @@ import type * as NizamCarrier from "../index.js";
  * Author a new add-on in the catalog.
  */
 export interface CreateAddonRequest {
-    /** Stable add-on code (natural key) — a lowercase url-safe slug. */
+    /** Stable add-on code (natural key): a lowercase url-safe slug. */
     code: string;
     /** Display name. */
     name: string;

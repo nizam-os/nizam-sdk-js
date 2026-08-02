@@ -4,14 +4,14 @@
  * Create an autonomous (software-agent) operator.
  */
 export interface CreateAutonomousOperatorRequest {
-    /** Software vendor. */
+    /** Software vendor. Part of this operator's identity. */
     vendor: string;
-    /** Software product. */
+    /** Software product. Part of this operator's identity. */
     product: string;
-    /** Software version. */
+    /** The unit this stack runs on — a vehicle serial, a VIN, whatever the fleet uses. Required, and the third part of the identity: (vendor, product, instance_id) is unique per organization, and the machine credential is issued to the operator row it identifies. Two vehicles running the same build without it would be indistinguishable and would have to share one credential. */
+    instance_id: string;
+    /** The build it is running now. STATE, not identity — an over-the-air update is recorded with `PUT /v1/operators/{id}/software-version` and keeps the same operator, credential, assignments and telemetry. */
     version: string;
-    /** Instance id within the version. */
-    instance_id?: string | undefined;
     /** Legal entity accountable for this operator's actions (a user id). */
     responsible_party: string;
 }

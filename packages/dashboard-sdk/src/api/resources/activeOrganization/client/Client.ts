@@ -16,7 +16,7 @@ export declare namespace ActiveOrganizationClient {
 }
 
 /**
- * Get and set the caller's preferred active organization — server-side cross-session memory of the picker choice (#65).
+ * Get and set the caller's preferred active organization, server-side cross-session memory of the picker choice (#65).
  */
 export class ActiveOrganizationClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<ActiveOrganizationClient.Options>;
@@ -30,7 +30,7 @@ export class ActiveOrganizationClient {
      * preference, and the full memberships list. SPA bootstrap uses this to decide post-login
      * routing without making three separate calls.
      *
-     * The returned `active_organization_id` mirrors the principal's already-resolved scope —
+     * The returned `active_organization_id` mirrors the principal's already-resolved scope,
      * the value the active-org enricher pinned on this request, after consulting the
      * X-Nizam-Organization header (if any), the stored preference, and the active memberships.
      *
@@ -115,8 +115,8 @@ export class ActiveOrganizationClient {
 
     /**
      * Persists the caller's "remembered active org" preference. The slug must name an
-     * organization the caller is currently an active member of — otherwise the call fails
-     * with `403 tenant.not_a_member` (same code the X-Nizam-Organization header path uses),
+     * organization the caller is currently an active member of; otherwise the call fails
+     * with `403 organization.not_a_member` (same code the X-Nizam-Organization header path uses),
      * never silently writes the preference for an inaccessible org.
      *
      * On success, returns the new bundled state in one round-trip. The cached

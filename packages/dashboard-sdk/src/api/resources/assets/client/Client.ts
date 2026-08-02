@@ -16,7 +16,7 @@ export declare namespace AssetsClient {
 }
 
 /**
- * Universal physical-hardware master — vehicles, drones, robots, trailers, containers, equipment. Kind-discriminated.
+ * Universal physical-hardware master: vehicles, drones, robots, trailers, containers, equipment. Kind-discriminated.
  */
 export class AssetsClient {
     protected readonly _options: NormalizedClientOptionsWithAuth<AssetsClient.Options>;
@@ -26,7 +26,7 @@ export class AssetsClient {
     }
 
     /**
-     * Without `q`: the org's assets ordered by `created_at` descending (or an explicit `sort`). With `q`: ranked search across name, VIN, code, plate, serial, call sign, make, model and sub-kind — accent-insensitive and language-agnostic (epic #97). Matching is hybrid: whole words and word-prefixes (type-ahead — `pick` finds `Picker Bot 3`) plus substrings and typos (`ick`, or a misspelled `sprintr`, still match). `q` results are ordered by relevance unless `sort` is given, in which case the search narrows the rows and `sort` orders them. Sort by a single column — the allowed fields and direction grammar are enumerated on the `sort` parameter; `status` and `kind` sort by their domain order (status lifecycle, kind grouping), not the stored code or the tenant-relabeled display string. As filters, `status` / `kind` accept comma-separated values and narrow every mode. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort that minted them — switching sorts restarts from the first page. `highlight=true` adds a `<mark>`-wrapped match snippet (relevance mode only).
+     * Without `q`: the org's assets ordered by `created_at` descending (or an explicit `sort`). With `q`: ranked search across name, VIN, code, plate, serial, call sign, make, model and sub-kind, accent-insensitive and language-agnostic (epic #97). Matching is hybrid: whole words and word-prefixes (type-ahead: `pick` finds `Picker Bot 3`) plus substrings and typos (`ick`, or a misspelled `sprintr`, still match). `q` results are ordered by relevance unless `sort` is given, in which case the search narrows the rows and `sort` orders them. Sort by a single column. The allowed fields and direction grammar are enumerated on the `sort` parameter; `status` and `kind` sort by their domain order (status lifecycle, kind grouping), not the stored code or the tenant-relabeled display string. As filters, `status` / `kind` accept comma-separated values and narrow every mode. Pagination is bidirectional (`starting_after` / `ending_before`); cursors are bound to the sort that minted them; switching sorts restarts from the first page. `highlight=true` adds a `<mark>`-wrapped match snippet (relevance mode only).
      *
      * @param {NizamDashboard.ListAssetsRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -293,7 +293,7 @@ export class AssetsClient {
     }
 
     /**
-     * Returns the lifecycle statuses EVERY asset in the selection may legally move to next — the intersection of each asset's legal-transition set (the same matrix the per-asset `allowed_transitions` field and the transition verbs enforce). The status picker calls this so a bulk change offers only moves legal for the WHOLE selection, instead of offering every status and relying on per-row 409s. Ids that don't resolve to a live asset in your organization are ignored; a selection that shares no common next status (e.g. it includes a terminal sold/lost asset) returns an empty list. It is a read — re-asserting it is free.
+     * Returns the lifecycle statuses EVERY asset in the selection may legally move to next, the intersection of each asset's legal-transition set (the same matrix the per-asset `allowed_transitions` field and the transition verbs enforce). The status picker calls this so a bulk change offers only moves legal for the WHOLE selection, instead of offering every status and relying on per-row 409s. Ids that don't resolve to a live asset in your organization are ignored; a selection that shares no common next status (e.g. it includes a terminal sold/lost asset) returns an empty list. It is a read; re-asserting it is free.
      *
      * @param {NizamDashboard.AllowedTransitionsRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -400,7 +400,7 @@ export class AssetsClient {
     }
 
     /**
-     * Generates a CSV / XLSX / JSON file of the selected assets with the chosen columns and returns a short-lived download URL the browser follows to download it. Columns are emitted in the requested order; `kind` and `status` carry their stored code (re-importable), not the tenant's display label. The id count is capped — this exports an explicit selection. POST because generating + storing the file and logging the egress is an audited action, not a cacheable read.
+     * Generates a CSV / XLSX / JSON file of the selected assets with the chosen columns and returns a short-lived download URL the browser follows to download it. Columns are emitted in the requested order; `kind` and `status` carry their stored code (re-importable), not the tenant's display label. The id count is capped; this exports an explicit selection. POST because generating + storing the file and logging the egress is an audited action, not a cacheable read.
      *
      * @param {NizamDashboard.ExportAssetsRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -582,7 +582,7 @@ export class AssetsClient {
     }
 
     /**
-     * Returns one asset. Visible to members of the asset's organization and to L4-granted cross-tenant readers; anyone else gets 404 — indistinguishable from a non-existent id (prevents tenant probing).
+     * Returns one asset. Visible to members of the asset's organization and to L4-granted cross-tenant readers; anyone else gets 404, indistinguishable from a non-existent id (prevents tenant probing).
      *
      * @param {NizamDashboard.GetAssetRequest} request
      * @param {AssetsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -676,7 +676,7 @@ export class AssetsClient {
     }
 
     /**
-     * Soft-deletes the asset: it disappears from listings immediately and frees its VIN for re-registration. Assignments and historical records are left untouched. There is no synchronous bulk-delete endpoint — delete a selection by fanning out per-id requests (each is naturally idempotent).
+     * Soft-deletes the asset: it disappears from listings immediately and frees its VIN for re-registration. Assignments and historical records are left untouched. There is no synchronous bulk-delete endpoint: delete a selection by fanning out per-id requests (each is naturally idempotent).
      *
      * > **Requires** `manage` on `asset` (SpiceDB permission expression).
      *
@@ -772,7 +772,7 @@ export class AssetsClient {
     }
 
     /**
-     * Set-only partial update of an asset's mutable fields — display name, sub-kind, autonomy level, and the vehicle identity (VIN, plate, make, model, year). Omitted or null fields are left unchanged. An asset's `kind` is immutable and lifecycle `status` moves through dedicated transitions, so neither is editable here.
+     * Set-only partial update of an asset's mutable fields: display name, sub-kind, autonomy level, and the vehicle identity (VIN, plate, make, model, year). Omitted or null fields are left unchanged. An asset's `kind` is immutable and lifecycle `status` moves through dedicated transitions, so neither is editable here.
      *
      * > **Requires** `manage` on `asset` (SpiceDB permission expression).
      *
@@ -894,7 +894,7 @@ export class AssetsClient {
     }
 
     /**
-     * Returns the asset to `active` service. Idempotent no-op if already active; an illegal edge (e.g. from a terminal sold/lost asset) → 409 `asset.invalid_transition`. No body — fan out per id for a bulk change.
+     * Returns the asset to `active` service. Idempotent no-op if already active; an illegal edge (e.g. from a terminal sold/lost asset) → 409 `asset.invalid_transition`. No body. Fan out per id for a bulk change.
      *
      * > **Requires** `manage` on `asset` (SpiceDB permission expression).
      *
@@ -1205,7 +1205,7 @@ export class AssetsClient {
     }
 
     /**
-     * Marks the asset `lost` — a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already lost; an illegal edge → 409 `asset.invalid_transition`. No body.
+     * Marks the asset `lost`, a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already lost; an illegal edge → 409 `asset.invalid_transition`. No body.
      *
      * > **Requires** `manage` on `asset` (SpiceDB permission expression).
      *
@@ -1307,7 +1307,7 @@ export class AssetsClient {
     }
 
     /**
-     * Retires the asset (`retired`) — decommissioned but still owned; it may later be reactivated, sold, or reported lost. Idempotent no-op if already retired; an illegal edge → 409 `asset.invalid_transition`. No body.
+     * Retires the asset (`retired`), decommissioned but still owned; it may later be reactivated, sold, or reported lost. Idempotent no-op if already retired; an illegal edge → 409 `asset.invalid_transition`. No body.
      *
      * > **Requires** `manage` on `asset` (SpiceDB permission expression).
      *
@@ -1409,7 +1409,7 @@ export class AssetsClient {
     }
 
     /**
-     * Marks the asset `sold` — a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already sold; an illegal edge → 409 `asset.invalid_transition`. No body.
+     * Marks the asset `sold`, a terminal state; the asset has left the fleet and accepts no further transitions. Idempotent no-op if already sold; an illegal edge → 409 `asset.invalid_transition`. No body.
      *
      * > **Requires** `manage` on `asset` (SpiceDB permission expression).
      *

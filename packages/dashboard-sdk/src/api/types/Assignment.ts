@@ -8,8 +8,12 @@ export interface Assignment {
     id: string;
     /** Asset id. */
     asset_id: string;
+    /** The asset's display name; absent when it has none. */
+    asset_name?: string | undefined;
     /** Operator id. */
     operator_id: string;
+    /** The operator's display name; absent when it has none. */
+    operator_name?: string | undefined;
     /** Role discriminator for concurrent assignments on the same asset. */
     role: Assignment.Role;
     /** Start of validity. */

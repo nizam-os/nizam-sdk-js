@@ -6,7 +6,7 @@ import type * as NizamCarrier from "../index.js";
  * Author a new draft subscription plan.
  */
 export interface CreatePlanRequest {
-    /** Stable plan code (natural key) — a lowercase url-safe slug. */
+    /** Stable plan code (natural key): a lowercase url-safe slug. */
     code: string;
     /** Display name. */
     name: string;

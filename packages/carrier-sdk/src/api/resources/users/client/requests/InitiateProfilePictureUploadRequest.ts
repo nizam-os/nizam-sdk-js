@@ -12,7 +12,7 @@
 export interface InitiateProfilePictureUploadRequest {
     /** Original filename. */
     filename: string;
-    /** Declared MIME type — profile pictures accept image/jpeg, image/png, image/webp; re-verified server-side at completion. */
+    /** Declared MIME type: profile pictures accept image/jpeg, image/png, image/webp; re-verified server-side at completion. */
     content_type: string;
     /** Exact byte size; verified against storage at completion. */
     size_bytes?: number;

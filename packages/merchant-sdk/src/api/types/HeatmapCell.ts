@@ -4,7 +4,7 @@
  * Aggregated position count for one H3 hex cell.
  */
 export interface HeatmapCell {
-    /** H3 cell index, lowercase hex (string — H3 indexes exceed the JS safe-integer range). */
+    /** H3 cell index, lowercase hex (string: H3 indexes exceed the JS safe-integer range). */
     h3_cell: string;
     /** H3 resolution of the cell (9 or 11). */
     h3_res: number;

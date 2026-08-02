@@ -8,7 +8,7 @@ export interface FileUploadPart {
     part_number?: number | undefined;
     /** Presigned URL to PUT the part's bytes to. */
     url?: string | undefined;
-    /** Headers that were signed into the URL — the PUT must repeat them verbatim. */
+    /** Headers that were signed into the URL; the PUT must repeat them verbatim. */
     headers?: Record<string, string> | undefined;
     /** When this URL stops working (re-issue via resume). */
     url_expires_at?: string | undefined;

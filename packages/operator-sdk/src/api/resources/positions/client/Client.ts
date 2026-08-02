@@ -23,7 +23,7 @@ export class PositionsClient {
     }
 
     /**
-     * Exchanges the caller's access token for a short-lived MQTT credential (aud=mqtt) scoped to the caller's own operator. Connect to the broker with username = the operator id and password = the returned token, then publish position pings to the returned topic. The credential expires after `expires_in` seconds — re-mint before then (budget: 30/hour).
+     * Exchanges the caller's access token for a short-lived MQTT credential (aud=mqtt) scoped to the caller's own operator. Connect to the broker with username = the operator id and password = the returned token, then publish position pings to the returned topic. The credential expires after `expires_in` seconds; re-mint before then (budget: 30/hour).
      *
      * @param {PositionsClient.RequestOptions} requestOptions - Request-specific configuration.
      *

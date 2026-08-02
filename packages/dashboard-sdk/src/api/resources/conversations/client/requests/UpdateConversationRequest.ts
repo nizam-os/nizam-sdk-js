@@ -5,7 +5,9 @@
  *     {
  *         id: "00000000-0000-0000-0000-000000000000",
  *         title: "Q3 logistics review",
- *         visibility: "workspace"
+ *         visibility: "workspace",
+ *         pinned: false,
+ *         tags: ["logistics", "q3"]
  *     }
  */
 export interface UpdateConversationRequest {
@@ -14,6 +16,10 @@ export interface UpdateConversationRequest {
     title?: string;
     /** New visibility; omit to leave unchanged. */
     visibility?: UpdateConversationRequest.Visibility;
+    /** Pin (true) or unpin (false) the conversation; omit to leave unchanged. */
+    pinned?: boolean;
+    /** Replacement label set — tags are edited wholesale, not one at a time. Lower-cased and de-duplicated; omit to leave unchanged. */
+    tags?: string[];
 }
 
 export namespace UpdateConversationRequest {

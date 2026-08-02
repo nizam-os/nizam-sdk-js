@@ -6,6 +6,6 @@
 export interface TaskAttemptPhotoThumbnail {
     /** Bounding-box size the variant was rendered into (px). */
     max_dimension?: number | undefined;
-    /** The variant's file id — request bytes via the files download-url endpoint. */
+    /** The variant's file id: request bytes via the files download-url endpoint. */
     file_id?: string | undefined;
 }

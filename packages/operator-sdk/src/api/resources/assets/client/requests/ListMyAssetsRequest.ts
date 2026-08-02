@@ -10,8 +10,8 @@
 export interface ListMyAssetsRequest {
     /** Page size. Default 20, maximum 100. Out-of-range values are silently clamped; the response body's `limit` field reflects what was applied. */
     limit?: number;
-    /** Opaque cursor — return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`. */
+    /** Opaque cursor: return the page starting strictly after this entity in the sort order. Mutually exclusive with `ending_before`. */
     starting_after?: string;
-    /** Opaque cursor — return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`. */
+    /** Opaque cursor: return the page ending strictly before this entity in the sort order. Mutually exclusive with `starting_after`. */
     ending_before?: string;
 }
