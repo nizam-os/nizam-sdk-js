@@ -30,6 +30,10 @@ export interface Operator {
     invite_status?: Operator.InviteStatus | undefined;
     /** When the operator's latest app invitation expires. Null for operators that were never invited. */
     invite_expires_at?: string | undefined;
+    /** The linked account's membership standing (active / suspended). Null when the operator has no linked user or no live membership. The operator roster owns the account view: operators do not appear on the team-members roster. */
+    account_status?: Operator.AccountStatus | undefined;
+    /** When the linked account last signed in. Null when it never has, or when there is no linked account. */
+    last_login_at?: string | undefined;
     /** When the operator was created. */
     created_at: string;
     /** Object type discriminator. */
@@ -62,6 +66,12 @@ export namespace Operator {
         Revoked: "revoked",
     } as const;
     export type InviteStatus = (typeof InviteStatus)[keyof typeof InviteStatus];
+    /** The linked account's membership standing (active / suspended). Null when the operator has no linked user or no live membership. The operator roster owns the account view: operators do not appear on the team-members roster. */
+    export const AccountStatus = {
+        Active: "active",
+        Suspended: "suspended",
+    } as const;
+    export type AccountStatus = (typeof AccountStatus)[keyof typeof AccountStatus];
     /** Object type discriminator. */
     export const Object_ = {
         Operator: "operator",

@@ -14,6 +14,7 @@ export interface PricingPlan {
     description?: string | undefined;
     price: NizamDashboard.Money;
     setup_fee: NizamDashboard.Money;
+    machine_price: NizamDashboard.Money;
     /** Pricing shape. */
     billing_model: PricingPlan.BillingModel;
     /** Billing cadence. */

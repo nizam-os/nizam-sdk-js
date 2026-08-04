@@ -25,8 +25,10 @@ export interface PlatformSubscription {
     price_override?: NizamCustomer.Money | undefined;
     /** ISO-4217 settlement currency. */
     currency: string;
-    /** Licensed seat quantity: the active-member count for a per-seat plan, 1 otherwise. */
+    /** Licensed seat quantity: the active human member count for a per-seat plan, 1 otherwise. */
     quantity: number;
+    /** Licensed machine quantity: the commissioned machine operator count for a per-seat plan, 0 otherwise. Machines bill separately and never count as seats. */
+    machine_quantity: number;
     /** Lifecycle statuses this subscription may legally transition to next. */
     allowed_transitions: PlatformSubscription.AllowedTransitions.Item[];
     /** Creation time. */

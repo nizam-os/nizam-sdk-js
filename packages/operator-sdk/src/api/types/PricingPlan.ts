@@ -14,6 +14,7 @@ export interface PricingPlan {
     description?: string | undefined;
     price: NizamOperatorRuntime.Money;
     setup_fee: NizamOperatorRuntime.Money;
+    machine_price: NizamOperatorRuntime.Money;
     /** Pricing shape. */
     billing_model: PricingPlan.BillingModel;
     /** Billing cadence. */

@@ -7890,6 +7890,11 @@
                                                 "minor_units": 1050,
                                                 "decimal": "10.5"
                                             },
+                                            "machine_price": {
+                                                "currency": "USD",
+                                                "minor_units": 1050,
+                                                "decimal": "10.5"
+                                            },
                                             "billing_model": "flat",
                                             "billing_period": "monthly",
                                             "trial_days": 14,
@@ -9675,6 +9680,21 @@
                         "description": "When the operator's latest app invitation expires. Null for operators that were never invited.",
                         "example": "2026-08-01T12:00:00Z"
                     },
+                    "account_status": {
+                        "type": "string",
+                        "description": "The linked account's membership standing (active / suspended). Null when the operator has no linked user or no live membership. The operator roster owns the account view: operators do not appear on the team-members roster.",
+                        "enum": [
+                            "active",
+                            "suspended"
+                        ],
+                        "example": "active"
+                    },
+                    "last_login_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the linked account last signed in. Null when it never has, or when there is no linked account.",
+                        "example": "2026-08-01T07:12:00Z"
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -10145,8 +10165,14 @@
                     "quantity": {
                         "type": "integer",
                         "format": "int64",
-                        "description": "Licensed seat quantity: the active-member count for a per-seat plan, 1 otherwise.",
+                        "description": "Licensed seat quantity: the active human member count for a per-seat plan, 1 otherwise.",
                         "example": 5
+                    },
+                    "machine_quantity": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Licensed machine quantity: the commissioned machine operator count for a per-seat plan, 0 otherwise. Machines bill separately and never count as seats.",
+                        "example": 500
                     },
                     "allowed_transitions": {
                         "type": "array",
@@ -10199,6 +10225,7 @@
                     "created_at",
                     "currency",
                     "id",
+                    "machine_quantity",
                     "object",
                     "plan_id",
                     "quantity",
@@ -10400,6 +10427,9 @@
                     "setup_fee": {
                         "$ref": "#/components/schemas/Money"
                     },
+                    "machine_price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
                     "billing_model": {
                         "type": "string",
                         "description": "Pricing shape.",
@@ -10461,6 +10491,11 @@
                         "description": "Processor (Stripe) Price id, once provisioned.",
                         "example": "price_123"
                     },
+                    "processor_machine_price_id": {
+                        "type": "string",
+                        "description": "Processor (Stripe) Price id of the machine component, once provisioned (null when machines are not billed).",
+                        "example": "price_456"
+                    },
                     "allowed_transitions": {
                         "type": "array",
                         "description": "Lifecycle statuses this plan may legally transition to next.",
@@ -10510,6 +10545,7 @@
                     "created_at",
                     "features",
                     "id",
+                    "machine_price",
                     "name",
                     "object",
                     "position",
@@ -10561,6 +10597,12 @@
                         "format": "int64",
                         "description": "One-time setup fee in minor units (default 0).",
                         "example": 0
+                    },
+                    "machine_price_minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Recurring price per commissioned machine operator in minor units, applied by per-seat plans (default 0: machines are not billed).",
+                        "example": 900
                     },
                     "billing_model": {
                         "type": "string",
@@ -17232,6 +17274,12 @@
                         "description": "One-time setup fee in minor units.",
                         "example": 0
                     },
+                    "machine_price_minor_units": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Recurring price per commissioned machine operator in minor units, applied by per-seat plans (0: machines are not billed).",
+                        "example": 900
+                    },
                     "billing_model": {
                         "type": "string",
                         "description": "Pricing shape.",
@@ -18629,6 +18677,9 @@
                     "setup_fee": {
                         "$ref": "#/components/schemas/Money"
                     },
+                    "machine_price": {
+                        "$ref": "#/components/schemas/Money"
+                    },
                     "billing_model": {
                         "type": "string",
                         "description": "Pricing shape.",
@@ -18677,6 +18728,7 @@
                     "billing_period",
                     "code",
                     "features",
+                    "machine_price",
                     "name",
                     "object",
                     "price",

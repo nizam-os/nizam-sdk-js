@@ -18,6 +18,7 @@ export interface SubscriptionPlan {
     status: SubscriptionPlan.Status;
     price: NizamOperatorRuntime.Money;
     setup_fee: NizamOperatorRuntime.Money;
+    machine_price: NizamOperatorRuntime.Money;
     /** Pricing shape. */
     billing_model: SubscriptionPlan.BillingModel;
     /** Billing cadence. */
@@ -35,6 +36,8 @@ export interface SubscriptionPlan {
     processor_product_id?: string | undefined;
     /** Processor (Stripe) Price id, once provisioned. */
     processor_price_id?: string | undefined;
+    /** Processor (Stripe) Price id of the machine component, once provisioned (null when machines are not billed). */
+    processor_machine_price_id?: string | undefined;
     /** Lifecycle statuses this plan may legally transition to next. */
     allowed_transitions: SubscriptionPlan.AllowedTransitions.Item[];
     /** Creation time. */

@@ -16,6 +16,8 @@ export interface UpdatePlanRequest {
     currency?: string | undefined;
     /** One-time setup fee in minor units. */
     setup_fee_minor_units?: number | undefined;
+    /** Recurring price per commissioned machine operator in minor units, applied by per-seat plans (0: machines are not billed). */
+    machine_price_minor_units?: number | undefined;
     /** Pricing shape. */
     billing_model?: UpdatePlanRequest.BillingModel | undefined;
     /** Billing cadence. */
