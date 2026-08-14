@@ -8,11 +8,12 @@ import { AssetsClient } from "./api/resources/assets/client/Client.js";
 import { AssignmentsClient } from "./api/resources/assignments/client/Client.js";
 import { AssistantProjectsClient } from "./api/resources/assistantProjects/client/Client.js";
 import { AssistantSettingsClient } from "./api/resources/assistantSettings/client/Client.js";
-import { BillingPortalClient } from "./api/resources/billingPortal/client/Client.js";
 import { CodCollectionsClient } from "./api/resources/codCollections/client/Client.js";
 import { ConversationsClient } from "./api/resources/conversations/client/Client.js";
 import { CreditNotesClient } from "./api/resources/creditNotes/client/Client.js";
+import { CreditsClient } from "./api/resources/credits/client/Client.js";
 import { DevicesClient } from "./api/resources/devices/client/Client.js";
+import { EntitlementsClient } from "./api/resources/entitlements/client/Client.js";
 import { FeedbackClient } from "./api/resources/feedback/client/Client.js";
 import { FilesClient } from "./api/resources/files/client/Client.js";
 import { ImportsClient } from "./api/resources/imports/client/Client.js";
@@ -33,6 +34,7 @@ import { OperatorsClient } from "./api/resources/operators/client/Client.js";
 import { OrgAddOnsClient } from "./api/resources/orgAddOns/client/Client.js";
 import { OrganizationDomainsClient } from "./api/resources/organizationDomains/client/Client.js";
 import { OrganizationsClient } from "./api/resources/organizations/client/Client.js";
+import { PaymentMethodClient } from "./api/resources/paymentMethod/client/Client.js";
 import { PaymentsClient } from "./api/resources/payments/client/Client.js";
 import { PositionsClient } from "./api/resources/positions/client/Client.js";
 import { PricingClient } from "./api/resources/pricing/client/Client.js";
@@ -65,13 +67,15 @@ export class NizamDashboardClient {
     protected _assistantProjects: AssistantProjectsClient | undefined;
     protected _conversations: ConversationsClient | undefined;
     protected _assistantSettings: AssistantSettingsClient | undefined;
-    protected _billingPortal: BillingPortalClient | undefined;
+    protected _paymentMethod: PaymentMethodClient | undefined;
     protected _codCollections: CodCollectionsClient | undefined;
     protected _feedback: FeedbackClient | undefined;
     protected _messages: MessagesClient | undefined;
     protected _toolCalls: ToolCallsClient | undefined;
     protected _turns: TurnsClient | undefined;
     protected _creditNotes: CreditNotesClient | undefined;
+    protected _credits: CreditsClient | undefined;
+    protected _entitlements: EntitlementsClient | undefined;
     protected _files: FilesClient | undefined;
     protected _positions: PositionsClient | undefined;
     protected _imports: ImportsClient | undefined;
@@ -139,8 +143,8 @@ export class NizamDashboardClient {
         return (this._assistantSettings ??= new AssistantSettingsClient(this._options));
     }
 
-    public get billingPortal(): BillingPortalClient {
-        return (this._billingPortal ??= new BillingPortalClient(this._options));
+    public get paymentMethod(): PaymentMethodClient {
+        return (this._paymentMethod ??= new PaymentMethodClient(this._options));
     }
 
     public get codCollections(): CodCollectionsClient {
@@ -165,6 +169,14 @@ export class NizamDashboardClient {
 
     public get creditNotes(): CreditNotesClient {
         return (this._creditNotes ??= new CreditNotesClient(this._options));
+    }
+
+    public get credits(): CreditsClient {
+        return (this._credits ??= new CreditsClient(this._options));
+    }
+
+    public get entitlements(): EntitlementsClient {
+        return (this._entitlements ??= new EntitlementsClient(this._options));
     }
 
     public get files(): FilesClient {

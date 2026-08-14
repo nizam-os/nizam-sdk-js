@@ -5,9 +5,9 @@
  */
 export interface Money {
     /** ISO-4217 currency code. */
-    currency?: string | undefined;
+    currency: string;
     /** Amount in the currency's minor units (cents for USD, yen for JPY, fils for KWD). */
-    minor_units?: number | undefined;
+    minor_units: number;
     /** Amount as a major-unit decimal string at the currency's scale. */
-    decimal?: string | undefined;
+    decimal: string;
 }

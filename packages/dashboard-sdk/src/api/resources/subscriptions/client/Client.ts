@@ -23,123 +23,6 @@ export class SubscriptionsClient {
     }
 
     /**
-     * Subscribes the organization to a plan and returns a hosted checkout URL to complete payment. Enforces one live subscription per organization. When the plan has a trial the subscription starts `trialing`, otherwise `incomplete` until the first charge.
-     *
-     * @param {NizamDashboard.SubscribeRequest} request
-     * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
-     *
-     * @throws {@link NizamDashboard.BadRequestError}
-     * @throws {@link NizamDashboard.UnauthorizedError}
-     * @throws {@link NizamDashboard.ForbiddenError}
-     * @throws {@link NizamDashboard.ConflictError}
-     * @throws {@link NizamDashboard.UnprocessableEntityError}
-     * @throws {@link NizamDashboard.TooManyRequestsError}
-     * @throws {@link NizamDashboard.InternalServerError}
-     * @throws {@link NizamDashboard.BadGatewayError}
-     *
-     * @example
-     *     await client.subscriptions.subscribe({
-     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
-     *         plan_code: "pro"
-     *     })
-     */
-    public subscribe(
-        request: NizamDashboard.SubscribeRequest,
-        requestOptions?: SubscriptionsClient.RequestOptions,
-    ): core.HttpResponsePromise<NizamDashboard.SubscriptionCheckout> {
-        return core.HttpResponsePromise.fromPromise(this.__subscribe(request, requestOptions));
-    }
-
-    private async __subscribe(
-        request: NizamDashboard.SubscribeRequest,
-        requestOptions?: SubscriptionsClient.RequestOptions,
-    ): Promise<core.WithRawResponse<NizamDashboard.SubscriptionCheckout>> {
-        const { "Idempotency-Key": idempotencyKey, ..._body } = request;
-        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
-        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
-            _authRequest.headers,
-            this._options?.headers,
-            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
-            requestOptions?.headers,
-        );
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.NizamDashboardEnvironment.Production,
-                "v1/subscriptions",
-            ),
-            method: "POST",
-            headers: _headers,
-            contentType: "application/json",
-            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
-            requestType: "json",
-            body: _body,
-            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
-            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
-            fetchFn: this._options?.fetch,
-            logging: this._options.logging,
-        });
-        if (_response.ok) {
-            return { data: _response.body as NizamDashboard.SubscriptionCheckout, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            switch (_response.error.statusCode) {
-                case 400:
-                    throw new NizamDashboard.BadRequestError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 401:
-                    throw new NizamDashboard.UnauthorizedError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 403:
-                    throw new NizamDashboard.ForbiddenError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 409:
-                    throw new NizamDashboard.ConflictError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 422:
-                    throw new NizamDashboard.UnprocessableEntityError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 429:
-                    throw new NizamDashboard.TooManyRequestsError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 500:
-                    throw new NizamDashboard.InternalServerError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                case 502:
-                    throw new NizamDashboard.BadGatewayError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
-                default:
-                    throw new errors.NizamDashboardError({
-                        statusCode: _response.error.statusCode,
-                        body: _response.error.body,
-                        rawResponse: _response.rawResponse,
-                    });
-            }
-        }
-
-        return handleNonStatusCodeError(_response.error, _response.rawResponse, "POST", "/v1/subscriptions");
-    }
-
-    /**
      * The organization's current live subscription (at most one). 404 when the org has none.
      *
      * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -225,6 +108,621 @@ export class SubscriptionsClient {
         }
 
         return handleNonStatusCodeError(_response.error, _response.rawResponse, "GET", "/v1/subscriptions/current");
+    }
+
+    /**
+     * Returns the per-period ceiling on metered overage spend. A null `monthly_cap` means uncapped: usage past a plan's included allowance is billed rather than refused. A cap of zero is the opposite posture — refuse rather than bill — and is distinct from uncapped.
+     *
+     * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.subscriptions.getOverageLimit()
+     */
+    public getOverageLimit(
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.OverageLimit> {
+        return core.HttpResponsePromise.fromPromise(this.__getOverageLimit(requestOptions));
+    }
+
+    private async __getOverageLimit(
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.OverageLimit>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/subscriptions/overage-limit",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.OverageLimit, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "GET",
+            "/v1/subscriptions/overage-limit",
+        );
+    }
+
+    /**
+     * Caps metered overage at the given amount per billing period. Once the period's accrued overage would pass the cap, further metered usage is refused with `quota.spend_cap_reached` instead of billed — the only thing that hard-stops order creation, and a limit the organization set itself. Idempotent: setting the same cap twice is a no-op, and raising it admits the very next call with no wait for a period boundary.
+     *
+     * @param {NizamDashboard.SetOverageLimitRequest} request
+     * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.subscriptions.setOverageLimit({
+     *         monthly_cap_minor_units: 50000
+     *     })
+     */
+    public setOverageLimit(
+        request: NizamDashboard.SetOverageLimitRequest,
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.OverageLimit> {
+        return core.HttpResponsePromise.fromPromise(this.__setOverageLimit(request, requestOptions));
+    }
+
+    private async __setOverageLimit(
+        request: NizamDashboard.SetOverageLimitRequest,
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.OverageLimit>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/subscriptions/overage-limit",
+            ),
+            method: "PUT",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: request,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.OverageLimit, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "PUT",
+            "/v1/subscriptions/overage-limit",
+        );
+    }
+
+    /**
+     * Lifts the cap: metered overage accrues without limit again, and nothing but the plan itself constrains order creation. Takes effect immediately.
+     *
+     * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.subscriptions.clearOverageLimit()
+     */
+    public clearOverageLimit(
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.OverageLimit> {
+        return core.HttpResponsePromise.fromPromise(this.__clearOverageLimit(requestOptions));
+    }
+
+    private async __clearOverageLimit(
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.OverageLimit>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/subscriptions/overage-limit",
+            ),
+            method: "DELETE",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.OverageLimit, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "DELETE",
+            "/v1/subscriptions/overage-limit",
+        );
+    }
+
+    /**
+     * What `POST /v1/subscriptions/select-plan` would charge this organization TODAY for `plan_code`, and when the change would take effect. A forecast only — nothing is created and nothing is charged. `due_today` is zero when nothing is collected: the plan is already in force or already booked, the selection starts a free trial, or the move is a downgrade (which never re-prices the period already paid for — `effective_at` then carries the date it lands on). Otherwise it is the processor's own forecast of the invoice the confirmation mints: the prorated difference for an upgrade, the first month for a new subscription, tax and account credit included.
+     *
+     * @param {NizamDashboard.PreviewSubscriptionPlanChangeRequest} request
+     * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.subscriptions.previewSubscriptionPlanChange({
+     *         plan_code: "enterprise"
+     *     })
+     */
+    public previewSubscriptionPlanChange(
+        request: NizamDashboard.PreviewSubscriptionPlanChangeRequest,
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.PlanChangePreview> {
+        return core.HttpResponsePromise.fromPromise(this.__previewSubscriptionPlanChange(request, requestOptions));
+    }
+
+    private async __previewSubscriptionPlanChange(
+        request: NizamDashboard.PreviewSubscriptionPlanChangeRequest,
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.PlanChangePreview>> {
+        const { plan_code: planCode } = request;
+        const _queryParams: Record<string, unknown> = {
+            plan_code: planCode,
+        };
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/subscriptions/plan-change-preview",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url
+                .queryBuilder()
+                .addMany(_queryParams)
+                .mergeAdditional(requestOptions?.queryParams)
+                .build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.PlanChangePreview, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "GET",
+            "/v1/subscriptions/plan-change-preview",
+        );
+    }
+
+    /**
+     * The plan-selection orchestrator: moves the organization onto the requested plan whatever its current state, with a verified card always coming first. On a processor-provisioned subscription it changes plan and the prorated difference is invoiced and charged immediately on the saved payment method — a declined charge rejects the whole change with 402 `platform_subscription.payment_failed`. Otherwise (no subscription yet, a trial, or a legacy card-less agreement): with no saved card the outcome is `card_required` — confirm the returned setup session in the embedded payment component (it saves a card, charging nothing) and call select-plan again with `checkout_session_id`; an unconfirmed or foreign session — or one minted for a selection that no longer applies, such as a trial offer that has since lapsed — is rejected with 409 `payment_method.setup_incomplete`. Once a card is on file: a never-subscribed organization selecting a plan with `trial_days` starts its 14-day trial (nothing is charged, and nothing ever charges automatically — when the trial ends you subscribe explicitly); anyone else gets the subscription created with its first invoice charged to the saved card in the same call (402 `platform_subscription.payment_failed` when declined, and nothing changes). Selecting the current plan on a provisioned subscription is an idempotent no-op; selecting the trialed plan DURING the trial subscribes now and ends the trial.
+     *
+     * @param {NizamDashboard.SelectPlanRequest} request
+     * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.BadRequestError}
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.PaymentRequiredError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.UnprocessableEntityError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     * @throws {@link NizamDashboard.BadGatewayError}
+     *
+     * @example
+     *     await client.subscriptions.selectSubscriptionPlan({
+     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
+     *         plan_code: "pro",
+     *         checkout_session_id: "cs_test_a1b2c3"
+     *     })
+     */
+    public selectSubscriptionPlan(
+        request: NizamDashboard.SelectPlanRequest,
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.SelectPlanOutcome> {
+        return core.HttpResponsePromise.fromPromise(this.__selectSubscriptionPlan(request, requestOptions));
+    }
+
+    private async __selectSubscriptionPlan(
+        request: NizamDashboard.SelectPlanRequest,
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.SelectPlanOutcome>> {
+        const { "Idempotency-Key": idempotencyKey, ..._body } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/subscriptions/select-plan",
+            ),
+            method: "POST",
+            headers: _headers,
+            contentType: "application/json",
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            requestType: "json",
+            body: _body,
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.SelectPlanOutcome, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 400:
+                    throw new NizamDashboard.BadRequestError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 402:
+                    throw new NizamDashboard.PaymentRequiredError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 422:
+                    throw new NizamDashboard.UnprocessableEntityError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 502:
+                    throw new NizamDashboard.BadGatewayError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/subscriptions/select-plan",
+        );
+    }
+
+    /**
+     * Whether this organization can still start a free trial. One trial per organization, ever — any prior agreement, live or ended, consumes it. Cross with each plan's `trial_days`: a selection starts a trial only when the organization is eligible AND the plan offers one.
+     *
+     * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.subscriptions.getTrialEligibility()
+     */
+    public getTrialEligibility(
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.TrialEligibility> {
+        return core.HttpResponsePromise.fromPromise(this.__getTrialEligibility(requestOptions));
+    }
+
+    private async __getTrialEligibility(
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.TrialEligibility>> {
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                "v1/subscriptions/trial-eligibility",
+            ),
+            method: "GET",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.TrialEligibility, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "GET",
+            "/v1/subscriptions/trial-eligibility",
+        );
     }
 
     /**
@@ -320,12 +818,11 @@ export class SubscriptionsClient {
     }
 
     /**
-     * Cancels the subscription immediately (records `canceled_at`; cancels at the processor). Terminal; an illegal edge → 409 `platform_subscription.invalid_transition`.
+     * Cancels the subscription — always the period-end courtesy: a paid agreement schedules the cancellation at the processor and keeps access until the paid period runs out (`cancel_at_period_end_at` records when); a card-less trial subscription ends immediately (there is no paid period to run out). An illegal edge → 409 `platform_subscription.invalid_transition`.
      *
      * @param {NizamDashboard.CancelSubscriptionRequest} request
      * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
@@ -335,7 +832,6 @@ export class SubscriptionsClient {
      *
      * @example
      *     await client.subscriptions.cancelSubscription({
-     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         id: "00000000-0000-0000-0000-000000000000"
      *     })
      */
@@ -350,12 +846,11 @@ export class SubscriptionsClient {
         request: NizamDashboard.CancelSubscriptionRequest,
         requestOptions?: SubscriptionsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.PlatformSubscription>> {
-        const { id, "Idempotency-Key": idempotencyKey } = request;
+        const { id } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -380,11 +875,6 @@ export class SubscriptionsClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
-                case 400:
-                    throw new NizamDashboard.BadRequestError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -433,13 +923,14 @@ export class SubscriptionsClient {
     }
 
     /**
-     * Upgrades or downgrades the subscription to a different plan; the processor handles proration. Only a live subscription may change plans.
+     * Upgrades or downgrades the subscription to a different plan; the prorated difference is invoiced and charged immediately on the saved payment method, and a declined charge rejects the whole change with 402 `platform_subscription.payment_failed`. Only a live subscription may change plans. A card-less local subscription (a trial) cannot move to a paid plan here — that returns 409 `platform_subscription.checkout_required`; use `POST /v1/subscriptions/select-plan`, which runs the card-first flow instead.
      *
      * @param {NizamDashboard.ChangePlanRequest} request
      * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.PaymentRequiredError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
      * @throws {@link NizamDashboard.ConflictError}
@@ -509,6 +1000,11 @@ export class SubscriptionsClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 402:
+                    throw new NizamDashboard.PaymentRequiredError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 403:
                     throw new NizamDashboard.ForbiddenError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -567,7 +1063,6 @@ export class SubscriptionsClient {
      * @param {NizamDashboard.PauseSubscriptionRequest} request
      * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
@@ -577,7 +1072,6 @@ export class SubscriptionsClient {
      *
      * @example
      *     await client.subscriptions.pauseSubscription({
-     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         id: "00000000-0000-0000-0000-000000000000"
      *     })
      */
@@ -592,12 +1086,11 @@ export class SubscriptionsClient {
         request: NizamDashboard.PauseSubscriptionRequest,
         requestOptions?: SubscriptionsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.PlatformSubscription>> {
-        const { id, "Idempotency-Key": idempotencyKey } = request;
+        const { id } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -622,11 +1115,6 @@ export class SubscriptionsClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
-                case 400:
-                    throw new NizamDashboard.BadRequestError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -675,7 +1163,6 @@ export class SubscriptionsClient {
      * @param {NizamDashboard.ResumeSubscriptionRequest} request
      * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
      *
-     * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
@@ -685,7 +1172,6 @@ export class SubscriptionsClient {
      *
      * @example
      *     await client.subscriptions.resumeSubscription({
-     *         "Idempotency-Key": "9f1e6d2a-7c3b-4e5f-8a91-0b2c3d4e5f60",
      *         id: "00000000-0000-0000-0000-000000000000"
      *     })
      */
@@ -700,12 +1186,11 @@ export class SubscriptionsClient {
         request: NizamDashboard.ResumeSubscriptionRequest,
         requestOptions?: SubscriptionsClient.RequestOptions,
     ): Promise<core.WithRawResponse<NizamDashboard.PlatformSubscription>> {
-        const { id, "Idempotency-Key": idempotencyKey } = request;
+        const { id } = request;
         const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             _authRequest.headers,
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ "Idempotency-Key": idempotencyKey }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -730,11 +1215,6 @@ export class SubscriptionsClient {
 
         if (_response.error.reason === "status-code") {
             switch (_response.error.statusCode) {
-                case 400:
-                    throw new NizamDashboard.BadRequestError(
-                        _response.error.body as NizamDashboard.ProblemDetail,
-                        _response.rawResponse,
-                    );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -779,6 +1259,111 @@ export class SubscriptionsClient {
             _response.rawResponse,
             "POST",
             "/v1/subscriptions/{id}/resume",
+        );
+    }
+
+    /**
+     * Clears a scheduled end-of-period cancellation so the subscription renews normally. Idempotent no-op when nothing is scheduled; a terminal subscription → 409 `platform_subscription.invalid_transition` (re-subscribe instead).
+     *
+     * @param {NizamDashboard.UncancelSubscriptionRequest} request
+     * @param {SubscriptionsClient.RequestOptions} requestOptions - Request-specific configuration.
+     *
+     * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.ForbiddenError}
+     * @throws {@link NizamDashboard.NotFoundError}
+     * @throws {@link NizamDashboard.ConflictError}
+     * @throws {@link NizamDashboard.TooManyRequestsError}
+     * @throws {@link NizamDashboard.InternalServerError}
+     *
+     * @example
+     *     await client.subscriptions.uncancelSubscription({
+     *         id: "00000000-0000-0000-0000-000000000000"
+     *     })
+     */
+    public uncancelSubscription(
+        request: NizamDashboard.UncancelSubscriptionRequest,
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): core.HttpResponsePromise<NizamDashboard.PlatformSubscription> {
+        return core.HttpResponsePromise.fromPromise(this.__uncancelSubscription(request, requestOptions));
+    }
+
+    private async __uncancelSubscription(
+        request: NizamDashboard.UncancelSubscriptionRequest,
+        requestOptions?: SubscriptionsClient.RequestOptions,
+    ): Promise<core.WithRawResponse<NizamDashboard.PlatformSubscription>> {
+        const { id } = request;
+        const _authRequest: core.AuthRequest = await this._options.authProvider.getAuthRequest();
+        const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
+            _authRequest.headers,
+            this._options?.headers,
+            requestOptions?.headers,
+        );
+        const _response = await core.fetcher({
+            url: core.url.join(
+                (await core.Supplier.get(this._options.baseUrl)) ??
+                    (await core.Supplier.get(this._options.environment)) ??
+                    environments.NizamDashboardEnvironment.Production,
+                `v1/subscriptions/${core.url.encodePathParam(id)}/uncancel`,
+            ),
+            method: "POST",
+            headers: _headers,
+            queryString: core.url.queryBuilder().mergeAdditional(requestOptions?.queryParams).build(),
+            timeoutMs: (requestOptions?.timeoutInSeconds ?? this._options?.timeoutInSeconds ?? 60) * 1000,
+            maxRetries: requestOptions?.maxRetries ?? this._options?.maxRetries,
+            abortSignal: requestOptions?.abortSignal,
+            fetchFn: this._options?.fetch,
+            logging: this._options.logging,
+        });
+        if (_response.ok) {
+            return { data: _response.body as NizamDashboard.PlatformSubscription, rawResponse: _response.rawResponse };
+        }
+
+        if (_response.error.reason === "status-code") {
+            switch (_response.error.statusCode) {
+                case 401:
+                    throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 403:
+                    throw new NizamDashboard.ForbiddenError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 404:
+                    throw new NizamDashboard.NotFoundError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 409:
+                    throw new NizamDashboard.ConflictError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 429:
+                    throw new NizamDashboard.TooManyRequestsError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 500:
+                    throw new NizamDashboard.InternalServerError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                default:
+                    throw new errors.NizamDashboardError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+            }
+        }
+
+        return handleNonStatusCodeError(
+            _response.error,
+            _response.rawResponse,
+            "POST",
+            "/v1/subscriptions/{id}/uncancel",
         );
     }
 }

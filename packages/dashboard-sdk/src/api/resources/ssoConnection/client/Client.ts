@@ -125,6 +125,7 @@ export class SsoConnectionClient {
      *
      * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.PaymentRequiredError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.ConflictError}
      * @throws {@link NizamDashboard.UnprocessableEntityError}
@@ -188,6 +189,11 @@ export class SsoConnectionClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 402:
+                    throw new NizamDashboard.PaymentRequiredError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 403:
                     throw new NizamDashboard.ForbiddenError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -232,6 +238,7 @@ export class SsoConnectionClient {
      *
      * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.PaymentRequiredError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
      * @throws {@link NizamDashboard.ConflictError}
@@ -288,6 +295,11 @@ export class SsoConnectionClient {
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
+                case 402:
+                    throw new NizamDashboard.PaymentRequiredError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
                 case 403:
                     throw new NizamDashboard.ForbiddenError(
                         _response.error.body as NizamDashboard.ProblemDetail,
@@ -333,6 +345,7 @@ export class SsoConnectionClient {
      *
      * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.PaymentRequiredError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
      * @throws {@link NizamDashboard.ConflictError}
@@ -398,6 +411,11 @@ export class SsoConnectionClient {
                     );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 402:
+                    throw new NizamDashboard.PaymentRequiredError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
@@ -561,6 +579,7 @@ export class SsoConnectionClient {
      *
      * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.PaymentRequiredError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
      * @throws {@link NizamDashboard.ConflictError}
@@ -623,6 +642,11 @@ export class SsoConnectionClient {
                     );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 402:
+                    throw new NizamDashboard.PaymentRequiredError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );

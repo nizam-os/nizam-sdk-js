@@ -45,14 +45,14 @@ export class InvoicesClient {
     public listInvoices(
         request: NizamDashboard.ListInvoicesRequest = {},
         requestOptions?: InvoicesClient.RequestOptions,
-    ): core.HttpResponsePromise<NizamDashboard.Invoice> {
+    ): core.HttpResponsePromise<NizamDashboard.ListResponseInvoice> {
         return core.HttpResponsePromise.fromPromise(this.__listInvoices(request, requestOptions));
     }
 
     private async __listInvoices(
         request: NizamDashboard.ListInvoicesRequest = {},
         requestOptions?: InvoicesClient.RequestOptions,
-    ): Promise<core.WithRawResponse<NizamDashboard.Invoice>> {
+    ): Promise<core.WithRawResponse<NizamDashboard.ListResponseInvoice>> {
         const { limit, starting_after: startingAfter, ending_before: endingBefore } = request;
         const _queryParams: Record<string, unknown> = {
             limit,
@@ -86,7 +86,7 @@ export class InvoicesClient {
             logging: this._options.logging,
         });
         if (_response.ok) {
-            return { data: _response.body as NizamDashboard.Invoice, rawResponse: _response.rawResponse };
+            return { data: _response.body as NizamDashboard.ListResponseInvoice, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {

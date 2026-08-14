@@ -140,6 +140,7 @@ export class OperatorsClient {
      *
      * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.PaymentRequiredError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.ConflictError}
      * @throws {@link NizamDashboard.UnprocessableEntityError}
@@ -228,6 +229,11 @@ export class OperatorsClient {
                     );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 402:
+                    throw new NizamDashboard.PaymentRequiredError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );
@@ -975,6 +981,7 @@ export class OperatorsClient {
      *
      * @throws {@link NizamDashboard.BadRequestError}
      * @throws {@link NizamDashboard.UnauthorizedError}
+     * @throws {@link NizamDashboard.PaymentRequiredError}
      * @throws {@link NizamDashboard.ForbiddenError}
      * @throws {@link NizamDashboard.NotFoundError}
      * @throws {@link NizamDashboard.ConflictError}
@@ -1035,6 +1042,11 @@ export class OperatorsClient {
                     );
                 case 401:
                     throw new NizamDashboard.UnauthorizedError(
+                        _response.error.body as NizamDashboard.ProblemDetail,
+                        _response.rawResponse,
+                    );
+                case 402:
+                    throw new NizamDashboard.PaymentRequiredError(
                         _response.error.body as NizamDashboard.ProblemDetail,
                         _response.rawResponse,
                     );

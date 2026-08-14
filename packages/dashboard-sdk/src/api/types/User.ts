@@ -90,6 +90,7 @@ export namespace User {
             ConversationRead: "conversation:read",
             ConversationShare: "conversation:share",
             ConversationUpdate: "conversation:update",
+            CreditGrantManage: "credit_grant:manage",
             CreditNoteRead: "credit_note:read",
             FeedbackSubmit: "feedback:submit",
             InboundWebhookRead: "inbound-webhook:read",

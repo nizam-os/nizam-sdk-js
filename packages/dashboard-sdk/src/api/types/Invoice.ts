@@ -34,6 +34,8 @@ export interface Invoice {
     period_end?: string | undefined;
     /** When the invoice record was created. */
     created_at: string;
+    /** The processor-hosted page to view or download this invoice, when one exists — the one processor-hosted surface the billing UI links out to. */
+    hosted_invoice_url?: string | undefined;
     /** The invoice's line items (detail read only). */
     items?: NizamDashboard.InvoiceItem[] | undefined;
     object: Invoice.Object_;

@@ -45,14 +45,14 @@ export class PaymentsClient {
     public listPayments(
         request: NizamDashboard.ListPaymentsRequest = {},
         requestOptions?: PaymentsClient.RequestOptions,
-    ): core.HttpResponsePromise<NizamDashboard.Payment> {
+    ): core.HttpResponsePromise<NizamDashboard.ListResponsePayment> {
         return core.HttpResponsePromise.fromPromise(this.__listPayments(request, requestOptions));
     }
 
     private async __listPayments(
         request: NizamDashboard.ListPaymentsRequest = {},
         requestOptions?: PaymentsClient.RequestOptions,
-    ): Promise<core.WithRawResponse<NizamDashboard.Payment>> {
+    ): Promise<core.WithRawResponse<NizamDashboard.ListResponsePayment>> {
         const { limit, starting_after: startingAfter, ending_before: endingBefore } = request;
         const _queryParams: Record<string, unknown> = {
             limit,
@@ -86,7 +86,7 @@ export class PaymentsClient {
             logging: this._options.logging,
         });
         if (_response.ok) {
-            return { data: _response.body as NizamDashboard.Payment, rawResponse: _response.rawResponse };
+            return { data: _response.body as NizamDashboard.ListResponsePayment, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {

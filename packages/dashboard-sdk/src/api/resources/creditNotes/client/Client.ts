@@ -127,14 +127,14 @@ export class CreditNotesClient {
     public listCreditNotes(
         request: NizamDashboard.ListCreditNotesRequest = {},
         requestOptions?: CreditNotesClient.RequestOptions,
-    ): core.HttpResponsePromise<NizamDashboard.CreditNote> {
+    ): core.HttpResponsePromise<NizamDashboard.ListResponseCreditNote> {
         return core.HttpResponsePromise.fromPromise(this.__listCreditNotes(request, requestOptions));
     }
 
     private async __listCreditNotes(
         request: NizamDashboard.ListCreditNotesRequest = {},
         requestOptions?: CreditNotesClient.RequestOptions,
-    ): Promise<core.WithRawResponse<NizamDashboard.CreditNote>> {
+    ): Promise<core.WithRawResponse<NizamDashboard.ListResponseCreditNote>> {
         const { limit, starting_after: startingAfter, ending_before: endingBefore } = request;
         const _queryParams: Record<string, unknown> = {
             limit,
@@ -168,7 +168,10 @@ export class CreditNotesClient {
             logging: this._options.logging,
         });
         if (_response.ok) {
-            return { data: _response.body as NizamDashboard.CreditNote, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as NizamDashboard.ListResponseCreditNote,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {

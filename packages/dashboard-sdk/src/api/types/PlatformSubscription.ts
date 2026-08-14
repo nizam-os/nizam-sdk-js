@@ -10,6 +10,10 @@ export interface PlatformSubscription {
     id: string;
     /** The subscribed plan's id. */
     plan_id: string;
+    /** The subscribed plan's stable code (null only when the plan row was deleted). */
+    plan_code?: string | undefined;
+    /** The subscribed plan's display name (null only when the plan row was deleted). */
+    plan_name?: string | undefined;
     /** Billing lifecycle status. */
     status: PlatformSubscription.Status;
     /** Trial end, when in a trial. */
@@ -22,6 +26,12 @@ export interface PlatformSubscription {
     canceled_at?: string | undefined;
     /** When a scheduled end-of-period cancellation takes effect. */
     cancel_at_period_end_at?: string | undefined;
+    /** The plan a scheduled downgrade switches to at the end of the current period (its stable code), or null when no change is scheduled. Downgrades never re-price the period already paid for; re-selecting the current plan cancels the scheduled change. */
+    pending_plan_code?: string | undefined;
+    /** The scheduled downgrade target's display name, or null. */
+    pending_plan_name?: string | undefined;
+    /** When the scheduled plan change takes effect (the current period end). */
+    pending_plan_change_at?: string | undefined;
     price_override?: NizamDashboard.Money | undefined;
     /** ISO-4217 settlement currency. */
     currency: string;
@@ -56,7 +66,7 @@ export namespace PlatformSubscription {
     export type AllowedTransitions = AllowedTransitions.Item[];
 
     export namespace AllowedTransitions {
-        /** Lifecycle statuses this subscription may legally transition to next. */
+        /** A reachable lifecycle status. */
         export const Item = {
             Incomplete: "incomplete",
             IncompleteExpired: "incomplete_expired",

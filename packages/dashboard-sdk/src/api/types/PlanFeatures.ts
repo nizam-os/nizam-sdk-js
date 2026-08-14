@@ -5,7 +5,7 @@
  */
 export interface PlanFeatures {
     /** Capability flags keyed by feature id. An absent flag means off. */
-    flags?: Record<string, boolean> | undefined;
+    flags: Record<string, boolean>;
     /** Quota ceilings keyed by meter key or feature id. An absent quota means unlimited; a present 0 means hard-blocked. */
-    quotas?: Record<string, number> | undefined;
+    quotas: Record<string, number>;
 }

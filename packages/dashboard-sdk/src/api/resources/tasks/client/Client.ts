@@ -123,6 +123,8 @@ export class TasksClient {
     /**
      * Creates a task owned by the active organization. The creator becomes the task's `owner` (per-instance), able to read/update/delete it regardless of role. An optional `executor_organization_id` delegates it cross-org.
      *
+     * Counts against the plan's included task allowance. Exceeding the allowance does NOT block: the extra tasks are billed at the published overage rate at the end of the period. The one exception is an overage spend cap the organization set for itself — reaching it refuses further tasks with 429 `quota.spend_cap_reached` until the cap is raised, which takes effect immediately.
+     *
      * @param {NizamDashboard.CreateTaskRequest} request
      * @param {TasksClient.RequestOptions} requestOptions - Request-specific configuration.
      *

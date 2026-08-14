@@ -15,11 +15,12 @@ export interface PricingPlan {
     price: NizamDashboard.Money;
     setup_fee: NizamDashboard.Money;
     machine_price: NizamDashboard.Money;
+    task_overage_price: NizamDashboard.Money;
     /** Pricing shape. */
     billing_model: PricingPlan.BillingModel;
     /** Billing cadence. */
     billing_period: PricingPlan.BillingPeriod;
-    /** Free-trial length in days, when the plan offers one. */
+    /** Free-trial length in days, when the plan offers one. A never-subscribed organization selecting the plan starts this trial — card on file first, and nothing is ever charged automatically (ADR-0008). */
     trial_days?: number | undefined;
     features: NizamDashboard.PlanFeatures;
     object: PricingPlan.Object_;
